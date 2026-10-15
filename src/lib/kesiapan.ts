@@ -1,4 +1,5 @@
 import { REKAP } from "./static";
+import type { TemuanKewajaran } from "./kewajaran";
 import { cekSikap, isTopRisk, nilaiParam } from "./format";
 import { perluPengendalian, type RamRow } from "./ram";
 import { cariKriteria, ebitdaRkap, saranDampak } from "./kualitas-register";
@@ -23,6 +24,8 @@ export interface InputKesiapan {
   sampul: Sampul; ras: Ras[]; register: RiskRegister[]; params: ParameterSheet[]; ram: RamRow[]; drivers: RiskDriver[]; cat: CatAksi[]; kriteria: KriteriaDampak[];
   /** false bila kolom parameter_ram belum ada (migrasi 0002 belum dijalankan). */
   adaKeterkaitan: boolean;
+  /** Hasil uji kewajaran per kode lembar (lihat kewajaran.ts); kosong bila template belum dimuat. */
+  kewajaran?: Record<string, TemuanKewajaran[]>;
 }
 
 /** Jalankan seluruh pemeriksaan kesiapan challenge session. */
@@ -50,6 +53,16 @@ export function periksa(d: InputKesiapan): Pemeriksaan[] {
       judul: `${r.kode} ${r.parameter}: ${r.status}`, detail: `Hasil: ${nilaiParam(r.hasil, r.satuan)}. Lengkapi sel kuning bagian C atau isi konfirmasi eksposur di bagian D.`,
       href: `/parameter/${r.kode}`, ref: refP(r.kode, r.parameter),
     })));
+
+  add("kewajaran", "Lembar Parameter", "Isian lembar parameter lolos uji kewajaran",
+    Object.entries(d.kewajaran ?? {}).flatMap(([code, list]) => {
+      const r = d.ram.find((x) => !x.tambahan && x.kode === code);
+      if (!r?.diterapkan) return [];
+      return list.filter((k) => k.severity !== "info").map((k): Temuan => ({
+        id: `wajar-${code}-${k.id}`, severity: k.severity, area: "Lembar Parameter",
+        judul: `${code} ${r.parameter}: ${k.judul}`, detail: k.detail, href: `/parameter/${code}`, ref: refP(r.kode, r.parameter),
+      }));
+    }));
 
   add("rekap-diterapkan", "Rekap", "Kolom Diterapkan parameter klaster & unik terisi",
     REKAP.filter((r) => r.grup !== "Parameter Standar" && !d.params.find((p) => p.code === r.kode)?.diterapkan).map((r) => ({

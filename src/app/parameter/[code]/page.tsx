@@ -1,7 +1,7 @@
 "use client";
 import { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Grid2x2, Landmark, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Brain, Grid2x2, Landmark, RotateCcw, Sparkles } from "lucide-react";
 import clsx from "clsx";
 import { Card, ErrorBox, Loading, SheetPage, StatusBadge, useSaver } from "@/components/ui";
 import { SheetGrid, buildLayout } from "@/components/SheetGrid";
@@ -15,6 +15,10 @@ import { supabaseConfigured } from "@/lib/supabase";
 import { useReadonly } from "@/lib/mode";
 import type { CellValue, ParameterSheet, RkapKeuangan, SheetTemplate } from "@/lib/types";
 import { konfirmasi } from "@/components/Konfirmasi";
+import { PanelKewajaran } from "@/components/Kewajaran";
+import { jejakHitungan, periksaLembar } from "@/lib/kewajaran";
+import { AnalisaAiModal } from "@/components/AnalisaAi";
+import { buildAnalisaRequest, sidikIsian } from "@/lib/analisa-ai";
 
 export default function ParameterPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = use(params);
@@ -26,6 +30,8 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
   const [version, setVersion] = useState(0);
   const [headers, setHeaders] = useState(true);
   const [aiOpen, setAiOpen] = useState(false);
+  const [analisaOpen, setAnalisaOpen] = useState(false);
+  const [entitas, setEntitas] = useState("PT KINRA");
   const aiCfg = SHEET_AI[code];
   const wbRef = useRef<Workbook | null>(null);
   const inputsRef = useRef<Record<string, CellValue>>({});
@@ -45,6 +51,7 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
       try {
         const [t, sampul, p] = await Promise.all([loadTemplate(code), supabaseConfigured ? api.sampul() : null, supabaseConfigured ? api.param(code) : null]);
         if (!alive) return;
+        if (sampul?.nama_entitas) setEntitas(sampul.nama_entitas);
         inputsRef.current = { ...(p?.inputs ?? {}) };
         wbRef.current?.destroy();
         wbRef.current = new Workbook([t], { [code]: inputsRef.current }, sampul?.nama_entitas ?? "PT KINRA");
@@ -64,6 +71,15 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
   const wb = wbRef.current;
   const sum = useMemo(() => (wb && version ? wb.summary(code) : null), [wb, version, code]);
   const arah = tpl?.cells["E13"]?.v as string | undefined;
+  const kewajaran = useMemo(() => {
+    if (!wb || !tpl || !meta || !version) return null;
+    const get = (a: string) => wb.get(code, a);
+    const batas = [meta.ref_limit, meta.ref_appetite, meta.ref_tolerance, meta.ref_status].filter(Boolean) as string[];
+    return {
+      temuan: periksaLembar(tpl, get, meta),
+      jejak: meta.ref_hasil ? jejakHitungan(tpl, get, meta.ref_hasil, batas) : null,
+    };
+  }, [wb, tpl, meta, version, code]);
 
   const persist = useCallback(() => {
     clearTimeout(timer.current);
@@ -164,6 +180,8 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
             );
           })}
 
+          {kewajaran && <PanelKewajaran temuan={kewajaran.temuan} jejak={kewajaran.jejak} />}
+
           <div className="mb-3 flex flex-wrap items-center gap-2">
             {layout.sections.map((s) => (
               <button key={s.row} onClick={() => document.getElementById(`r${s.row}`)?.scrollIntoView({ behavior: "smooth", block: "start" })}
@@ -177,6 +195,10 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
                   <Sparkles className="h-3.5 w-3.5" />Isi dengan AI
                 </button>
               )}
+              <button onClick={() => setAnalisaOpen(true)} title="Minta AI menilai kelogisan isian lembar ini"
+                className="flex items-center gap-1.5 rounded-lg border border-brand-500 bg-brand-50 px-2.5 py-1 text-[12px] font-semibold text-brand-800 hover:bg-brand-100">
+                <Brain className="h-3.5 w-3.5" />Analisa AI
+              </button>
               <button onClick={() => setHeaders((h) => !h)} className={clsx("flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[12px]", headers ? "border-brand-500 bg-brand-50 text-brand-800" : "border-line bg-white")}>
                 <Grid2x2 className="h-3.5 w-3.5" />Header baris/kolom
               </button>
@@ -189,6 +211,10 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
           <div className="scroll-thin max-h-[calc(100vh-150px)] overflow-auto rounded-xl border border-line bg-white shadow-sm">
             <SheetGrid t={tpl} layout={layout} wb={wb} version={version} onEdit={onEdit} showHeaders={headers} readonly={ro} />
           </div>
+          {analisaOpen && (
+            <AnalisaAiModal code={code} judul={meta.parameter} sidik={sidikIsian(inputsRef.current)} onClose={() => setAnalisaOpen(false)}
+              buildRequest={() => buildAnalisaRequest({ t: tpl, get: (a) => wb.get(code, a), meta, entitas, arah: arah ?? "", jejak: kewajaran?.jejak ?? null, temuan: kewajaran?.temuan ?? [] })} />
+          )}
           {aiOpen && aiCfg && (
             <SheetAiModal cfg={aiCfg} get={(a) => wb.get(code, a)} onClose={() => setAiOpen(false)}
               onApply={(cells) => { for (const [a, v] of Object.entries(cells)) onEdit(a, v); }} />

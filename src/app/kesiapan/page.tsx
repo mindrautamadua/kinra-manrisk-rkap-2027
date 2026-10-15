@@ -7,6 +7,8 @@ import { Button, Card, ErrorBox, Loading, SheetPage, useLoad } from "@/component
 import { ChallengeModal, type RefItem } from "@/components/ChallengeForm";
 import { api } from "@/lib/data";
 import { buildRam } from "@/lib/ram";
+import { REKAP, Workbook, loadAllTemplates } from "@/lib/engine";
+import { periksaLembar } from "@/lib/kewajaran";
 import { periksa, SEV_ORDER, type Severity, type Temuan } from "@/lib/kesiapan";
 import { buildReviewInput, hrefArea, refTemuan, type HasilReview, type TemuanAI } from "@/lib/review-ai";
 
@@ -18,13 +20,17 @@ const SEV: Record<Severity, { label: string; icon: React.ElementType; chip: stri
 
 export default function KesiapanPage() {
   const q = useLoad(async () => {
-    const [sampul, ras, register, params, pengendalian, tambahan, drivers, cat, kriteria] = await Promise.all([
+    const [sampul, ras, register, params, pengendalian, tambahan, drivers, cat, kriteria, templates] = await Promise.all([
       api.sampul(), api.ras(), api.register(), api.params(), api.pengendalian(), api.ramTambahan(), api.drivers(), api.cat(), api.kriteria(),
+      loadAllTemplates(),
     ]);
     const ram = buildRam(params, ras, pengendalian, tambahan);
+    const wb = new Workbook(templates, Object.fromEntries(params.map((p) => [p.code, p.inputs])), sampul.nama_entitas);
+    const kewajaran = Object.fromEntries(templates.map((t) => [t.code, periksaLembar(t, (a) => wb.get(t.code, a), REKAP.find((r) => r.kode === t.code))]));
+    wb.destroy();
     const adaKeterkaitan = register.length === 0 || register.some((r) => "parameter_ram" in r);
     return {
-      checks: periksa({ sampul, ras, register, params, ram, drivers, cat, kriteria, adaKeterkaitan }),
+      checks: periksa({ sampul, ras, register, params, ram, drivers, cat, kriteria, adaKeterkaitan, kewajaran }),
       reviewInput: buildReviewInput(sampul.nama_entitas || "PT KINRA", ras, register, ram),
     };
   });
