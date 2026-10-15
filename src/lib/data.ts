@@ -2,7 +2,7 @@
 import { sb, must } from "./supabase";
 import type {
   ChallengeLog, ModePresentasi, Snapshot, SnapshotData,
-  CatAksi, KategoriRisiko, KriteriaDampak, ParameterSheet, RamPengendalian, RamTambahan, Ras, RasTambahan, RiskDriver,
+  CatAksi, KategoriRisiko, ProgramStrategis, KriteriaDampak, ParameterSheet, RamPengendalian, RamTambahan, Ras, RasTambahan, RiskDriver,
   RiskRegister, Sampul, Taksonomi,
 } from "./types";
 
@@ -34,6 +34,7 @@ export const api = {
   pengendalian: async () => must(await sb().from("ram_pengendalian").select("*")) as RamPengendalian[],
   ramTambahan: async () => must(await sb().from("ram_tambahan").select("*").order("kategori")) as RamTambahan[],
   cat: async () => must(await sb().from("cat_aksi").select("*").order("urutan")) as CatAksi[],
+  program: async () => must(await sb().from("program_strategis").select("*").order("urutan")) as ProgramStrategis[],
   async taksonomi(): Promise<Taksonomi[]> {
     const out: Taksonomi[] = [];
     for (let from = 0; ; from += 1000) {

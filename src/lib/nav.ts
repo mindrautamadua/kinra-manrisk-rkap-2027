@@ -11,6 +11,7 @@ export const SHEETS = [
   { href: "/ram", label: "RAM" },
   { href: "/cat", label: "CAT" },
   { href: "/rekap", label: "Rekap" },
+  { href: "/program-strategis", label: "Program Strategis" },
   { href: "/executive-summary", label: "Executive Summary" },
   ...REKAP.map((r) => ({ href: `/parameter/${r.kode}`, label: r.kode })),
 ];

@@ -4,9 +4,9 @@ import clsx from "clsx";
 import { Printer } from "lucide-react";
 import { Button, ErrorBox, Loading, SheetPage, useLoad } from "@/components/ui";
 import { api } from "@/lib/data";
-import { cekSikap, isTopRisk, nilaiParam, statusStyle } from "@/lib/format";
+import { cekSikap, isTopRisk, nilaiParam, rupiah, statusStyle } from "@/lib/format";
 import { buildRam, KATEGORI_URUT, type RamRow } from "@/lib/ram";
-import { SIKAP, type KategoriRisiko, type Ras, type RiskRegister } from "@/lib/types";
+import { PILAR_GRCS, SIKAP, type KategoriRisiko, type ProgramStrategis, type Ras, type RiskRegister } from "@/lib/types";
 
 /** Ukuran logis satu slide (16:9), sama seperti PPT Executive Summary. */
 const W = 1280;
@@ -62,7 +62,9 @@ export default function ExecutiveSummaryPage() {
     const [sampul, ras, kategori, register, params, pengendalian, tambahan] = await Promise.all([
       api.sampul(), api.ras(), api.kategori(), api.register(), api.params(), api.pengendalian(), api.ramTambahan(),
     ]);
-    return { sampul, ras, kategori, register, ram: buildRam(params, ras, pengendalian, tambahan) };
+    // Tabel program_strategis (migrasi 0004) mungkin belum dibuat: deck tetap tampil dengan slide 7.4 kosong.
+    const program = await api.program().catch(() => [] as ProgramStrategis[]);
+    return { sampul, ras, kategori, register, program, ram: buildRam(params, ras, pengendalian, tambahan) };
   });
   const d = q.data;
 
@@ -71,13 +73,13 @@ export default function ExecutiveSummaryPage() {
       actions={<Button onClick={() => window.print()}><Printer className="h-4 w-4" />Cetak / PDF</Button>}>
       <style>{`@media print { @page { size: ${W}px ${H}px; margin: 0; } }`}</style>
       {q.loading ? <Loading variant="deck" /> : q.error ? <ErrorBox error={q.error} /> : d && (
-        <Deck entitas={d.sampul.nama_entitas || "PT KINRA"} ras={d.ras} kategori={d.kategori} register={d.register} ram={d.ram} />
+        <Deck entitas={d.sampul.nama_entitas || "PT KINRA"} ras={d.ras} kategori={d.kategori} register={d.register} ram={d.ram} program={d.program} />
       )}
     </SheetPage>
   );
 }
 
-function Deck({ entitas, ras, kategori, register, ram }: { entitas: string; ras: Ras[]; kategori: KategoriRisiko[]; register: RiskRegister[]; ram: RamRow[] }) {
+function Deck({ entitas, ras, kategori, register, ram, program }: { entitas: string; ras: Ras[]; kategori: KategoriRisiko[]; register: RiskRegister[]; ram: RamRow[]; program: ProgramStrategis[] }) {
   const kat = (nama: string) => kategori.find((k) => k.nama === nama);
 
   // 7.1 RAS detail: bobot baris mengikuti panjang teks terpanjang (≈ satu baris tabel per 480 karakter).
@@ -92,6 +94,12 @@ function Deck({ entitas, ras, kategori, register, ram }: { entitas: string; ras:
   const utama = register.filter((r) => r.risk_event && isTopRisk(r.kategori_dampak));
   const topGroups = KATEGORI_URUT.map((k) => ({ key: k, items: utama.filter((r) => r.kategori === k) }));
   const topPages = kemas(topGroups, (r) => 1 + Math.min(3, Math.floor((r.rencana_mitigasi?.length ?? 0) / 140)), 10, 1);
+
+  // 7.4 Program strategis: satu slide per program, urut pilar GRCS; pilar tanpa program tetap punya slide kosong.
+  const progSlides = PILAR_GRCS.flatMap((pilar): { pilar: string; p: ProgramStrategis | null }[] => {
+    const list = program.filter((p) => p.pilar === pilar);
+    return list.length ? list.map((p) => ({ pilar, p })) : [{ pilar, p: null }];
+  });
 
   const judul = (pages: { key: string }[][], i: number) =>
     `(${i + 1}/${pages.length}) ${gabung(pages[i].map((g) => g.key))}`;
@@ -117,6 +125,11 @@ function Deck({ entitas, ras, kategori, register, ram }: { entitas: string; ras:
     ...topPages.map((p, i) => (
       <Slide key={`top${i}`} title={`7.3 Top Risk (${entitas})`} sub={judul(topPages, i)} entitas={entitas}>
         <TopRisk groups={p} kat={kat} />
+      </Slide>
+    )),
+    ...progSlides.map(({ pilar, p }, i) => (
+      <Slide key={`prog${i}`} title={`7.4 Program atau Inisiatif Strategis GRCS (${pilar})`} sub={p?.nama || "Belum ada program atau inisiatif strategis"} entitas={entitas}>
+        <ProgramKartu p={p} />
       </Slide>
     )),
   ];
@@ -437,6 +450,71 @@ function TopRisk({ groups, kat }: { groups: { key: string; items: RiskRegister[]
             )}
           </Fragment>
         ))}
+      </tbody>
+    </table>
+  );
+}
+
+// ---------- 7.4 Program Strategis ----------
+/** Teks multi-baris → poin-poin; satu baris tetap paragraf. */
+function Poin({ text }: { text?: string | null }) {
+  const lines = (text ?? "").split(/\n+/).map((x) => x.replace(/^\s*[-•*\d.)]+\s*/, "").trim()).filter(Boolean);
+  if (!lines.length) return null;
+  if (lines.length === 1) return <div>{lines[0]}</div>;
+  return <ul className="list-disc space-y-0.5 pl-4">{lines.map((l, i) => <li key={i}>{l}</li>)}</ul>;
+}
+
+function ProgramKartu({ p }: { p: ProgramStrategis | null }) {
+  if (!p) {
+    return (
+      <div className="flex h-full items-center justify-center rounded-lg border-2 border-dashed border-[#D9C4C4] text-[15px] text-[#9A9A9A] italic">
+        Belum ada program atau inisiatif strategis untuk pilar ini. Isi di menu Program Strategis GRCS.
+      </div>
+    );
+  }
+  const isi = [p.inisiatif_rjpp, p.objective_scorecard, p.program_kerja, p.deskripsi, p.tujuan_kualitatif, p.tujuan_kuantitatif, p.target, p.risiko_implementasi, p.mitigasi];
+  const panjang = isi.reduce((a, t) => a + (t?.length ?? 0), 0);
+  const fs = panjang > 1800 ? 11 : panjang > 1200 ? 12 : 13.5;
+  const hd = "bg-[#600000] px-3 py-1.5 text-[13px] font-bold text-white";
+  const cl = "border border-[#CFCFCF] px-3 py-2 align-top";
+  const k = (t?: string | null) => <Poin text={t} />;
+  const kosong = (...t: (string | number | null | undefined)[]) => t.every((x) => x == null || x === "");
+  return (
+    <table className="h-full w-full table-fixed border-collapse leading-snug" style={{ fontSize: fs }}>
+      <colgroup><col style={{ width: "34%" }} /><col style={{ width: "30%" }} /><col style={{ width: "18%" }} /><col style={{ width: "18%" }} /></colgroup>
+      <tbody>
+        <tr><th className={hd + " text-left"}>Inisiatif Strategi RJPP</th><th className={hd + " text-left"}>Objective Scorecard</th><th colSpan={2} className={hd + " text-left"}>Program Kerja</th></tr>
+        <tr className="h-[1%]">
+          <td className={cl}>{kosong(p.inisiatif_rjpp) ? <Kosong /> : k(p.inisiatif_rjpp)}</td>
+          <td className={cl}>{kosong(p.objective_scorecard) ? <Kosong /> : k(p.objective_scorecard)}</td>
+          <td colSpan={2} className={cl}>{kosong(p.program_kerja) ? <Kosong /> : k(p.program_kerja)}</td>
+        </tr>
+        <tr><th className={hd + " text-left"}>Pemimpin Program</th><th className={hd + " text-left"}>Pemilik Program</th><th className={hd + " text-left"}>Bulan Mulai</th><th className={hd + " text-left"}>Bulan Selesai</th></tr>
+        <tr className="h-[1%]">
+          {[p.pemimpin, p.pemilik, p.bulan_mulai, p.bulan_selesai].map((v, i) => <td key={i} className={cl}>{v || <Kosong />}</td>)}
+        </tr>
+        <tr><th className={hd + " text-left"}>Deskripsi Program</th><th className={hd + " text-left"}>Tujuan &amp; Hasil Kerja</th><th colSpan={2} className={hd + " text-left"}>Target Program</th></tr>
+        <tr>
+          <td className={cl}>{kosong(p.deskripsi) ? <Kosong /> : k(p.deskripsi)}</td>
+          <td className={cl}>
+            {kosong(p.tujuan_kualitatif, p.tujuan_kuantitatif) ? <Kosong /> : (
+              <div className="space-y-1.5">
+                {!kosong(p.tujuan_kualitatif) && <div><div className="font-bold">Kualitatif :</div><Poin text={p.tujuan_kualitatif} /></div>}
+                {!kosong(p.tujuan_kuantitatif) && <div><div className="font-bold">Kuantitatif :</div><Poin text={p.tujuan_kuantitatif} /></div>}
+              </div>
+            )}
+          </td>
+          <td colSpan={2} className={cl}>{kosong(p.target) ? <Kosong /> : k(p.target)}</td>
+        </tr>
+        <tr><th className={hd + " text-left"}>Rencana Anggaran Belanja</th><th className={hd + " text-left"}>Risiko Implementasi</th><th colSpan={2} className={hd + " text-left"}>Mitigasi Risiko</th></tr>
+        <tr className="h-[22%]">
+          <td className={cl}>
+            <div>OPEX : <b className="tabnum">{p.opex ? rupiah(p.opex) : "-"}</b></div>
+            <div>CAPEX : <b className="tabnum">{p.capex ? rupiah(p.capex) : "-"}</b></div>
+          </td>
+          <td className={cl}>{kosong(p.risiko_implementasi) ? <Kosong /> : k(p.risiko_implementasi)}</td>
+          <td colSpan={2} className={cl}>{kosong(p.mitigasi) ? <Kosong /> : k(p.mitigasi)}</td>
+        </tr>
       </tbody>
     </table>
   );

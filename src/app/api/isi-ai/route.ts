@@ -33,6 +33,20 @@ const KHUSUS: Record<JenisIsi, string> = {
 - kebijakan: kebijakan/limit/prosedur yang ditetapkan untuk mengendalikan parameter.
 - program: program kerja konkret 2027 dengan target terukur dan waktu; kaitkan dengan root cause atau mitigasi risiko terkait bila ada.
 - Jangan mengisi angka anggaran.`,
+  program: `Lembar: 7.4 Program atau Inisiatif Strategis GRCS (satu kartu program pada Executive Summary RKAP 2027).
+- Pilar GRCS: Governance (tata kelola, GCG, struktur dan kebijakan organ perusahaan), Risk Management (penerapan ERM, model dan budaya risiko), Compliance (kepatuhan regulasi, anti-fraud/anti-suap, sistem manajemen kepatuhan), Sustainability (ESG, lingkungan, sosial, pelaporan keberlanjutan). Program harus sesuai pilar pada konteks.
+- Prioritaskan program yang menjawab risiko utama, parameter RAM berstatus non-hijau, atau rencana pengendalian RAM pada konteks; jangan menduplikasi program lain yang sudah ada.
+- nama: judul program singkat dan spesifik (mis. "Pengembangan Pemodelan Risiko Berbasis Statistik").
+- inisiatif_rjpp: inisiatif strategi RJPP yang dinaungi program; nama resmi yang tidak diketahui ditulis "[...]".
+- objective_scorecard: sasaran/objective pada scorecard yang didukung, berupa kondisi yang hendak dicapai (mis. "Ketersediaan Model Risiko atas Taksonomi Risiko DAM").
+- program_kerja: nama program kerja 2027 yang konkret.
+- pemimpin: unit/divisi pelaksana di entitas. pemilik: pemilik program (entitas atau Induk/fungsi pemilik).
+- bulan_mulai dan bulan_selesai: format "Januari 2027"; dalam tahun 2027 kecuali uraian pengguna menyebut lain.
+- deskripsi: 1-2 kalimat apa yang dilakukan dan untuk apa.
+- tujuan_kualitatif dan tujuan_kuantitatif: 2-3 poin, SATU POIN PER BARIS (pisahkan dengan baris baru, tanpa penomoran). Kuantitatif wajib memuat angka/persentase terukur.
+- target: keluaran akhir yang terukur pada akhir program (deliverable).
+- risiko_implementasi: 2-3 hambatan pelaksanaan program, satu per baris. mitigasi: tindakan yang menjawab tiap risiko implementasi secara berurutan, satu per baris.
+- Jangan mengisi angka anggaran OPEX/CAPEX; sebutkan di catatan bahwa anggaran diisi manual.`,
 };
 
 const MAX_KONTEKS = 40_000;

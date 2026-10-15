@@ -1,6 +1,6 @@
 /** Bantuan pengisian kertas kerja dengan AI: tipe bersama untuk komponen AiFill dan /api/isi-ai. */
 
-export type JenisIsi = "cat" | "risiko" | "ras" | "ram";
+export type JenisIsi = "cat" | "risiko" | "ras" | "ram" | "program";
 
 /** Kolom yang diminta untuk diisi. `options` membatasi jawaban ke daftar pilihan (dropdown). */
 export interface FieldSpec { key: string; label: string; options?: readonly string[] }

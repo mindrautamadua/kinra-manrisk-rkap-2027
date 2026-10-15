@@ -6,7 +6,7 @@ import clsx from "clsx";
 import {
   LayoutDashboard, Presentation, FileText, BookOpen, Target, Gauge, Network, ListChecks, Flame, Grid3x3, Briefcase, Sigma,
   Library, Database, ChevronDown, Menu, X, PanelLeftClose, PanelLeftOpen, Table2,
-  ClipboardCheck, MessagesSquare, GitCompareArrows, Workflow, Lock, LockOpen, MessageSquarePlus, LifeBuoy, HelpCircle, LogOut,
+  ClipboardCheck, MessagesSquare, GitCompareArrows, Workflow, Lock, LockOpen, MessageSquarePlus, LifeBuoy, HelpCircle, LogOut, Rocket,
 } from "lucide-react";
 import { useMode } from "@/lib/mode";
 import { ChallengeModal, refFromPath } from "./ChallengeForm";
@@ -24,6 +24,7 @@ const MAIN = [
   { href: "/ram", label: "Risk Acceptance Matrix", icon: Grid3x3 },
   { href: "/cat", label: "Corporate Action Threshold", icon: Briefcase },
   { href: "/rekap", label: "Rekap Parameter", icon: Sigma },
+  { href: "/program-strategis", label: "Program Strategis GRCS", icon: Rocket },
   { href: "/executive-summary", label: "Executive Summary", icon: Presentation },
 ];
 

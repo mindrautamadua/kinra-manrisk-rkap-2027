@@ -44,6 +44,13 @@ export interface CatAksi {
   rencana_waktu: string | null; parameter: string | null; formula: string | null; hasil: number | null; rasionalisasi_parameter: string | null;
   limit_v: number | null; appetite_v: number | null; tolerance_v: number | null; rasionalisasi_threshold: string | null;
 }
+export const PILAR_GRCS = ["Governance", "Risk Management", "Compliance", "Sustainability"] as const;
+export interface ProgramStrategis {
+  id: string; urutan: number; pilar: string; nama: string | null; inisiatif_rjpp: string | null; objective_scorecard: string | null;
+  program_kerja: string | null; pemimpin: string | null; pemilik: string | null; bulan_mulai: string | null; bulan_selesai: string | null;
+  deskripsi: string | null; tujuan_kualitatif: string | null; tujuan_kuantitatif: string | null; target: string | null;
+  opex: number | null; capex: number | null; risiko_implementasi: string | null; mitigasi: string | null;
+}
 export interface Sampul { nama_entitas: string; posisi_data: string | null; tanggal_penyusunan: string | null; versi: string; catatan: string | null }
 
 export type CellValue = string | number | boolean | null;

@@ -11,7 +11,7 @@ export const runtime = "nodejs";
  */
 const TABLES = new Set([
   "app_settings", "kategori_risiko", "taksonomi", "kriteria_dampak", "risk_driver", "ras", "ras_tambahan",
-  "risk_register", "parameter_sheet", "ram_pengendalian", "ram_tambahan", "cat_aksi", "challenge_log", "snapshot",
+  "risk_register", "parameter_sheet", "ram_pengendalian", "ram_tambahan", "cat_aksi", "challenge_log", "snapshot", "program_strategis",
 ]);
 const FWD_REQ = ["accept", "content-type", "prefer", "range", "range-unit", "accept-profile", "content-profile"];
 const FWD_RES = ["content-type", "content-range", "preference-applied", "range-unit"];
