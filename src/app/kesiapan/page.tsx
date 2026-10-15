@@ -73,7 +73,7 @@ export default function KesiapanPage() {
           </div>
 
           {(ai.loading || ai.error || ai.hasil) && (
-            <ReviewPanel ai={ai} sev={sev} onCatat={(t) => setCatat(refTemuan(t))} />
+            <ReviewPanel ai={ai} onCatat={(t) => setCatat(refTemuan(t))} />
           )}
 
           <div className="space-y-6">
@@ -141,15 +141,32 @@ function useReviewAI() {
   return { hasil, loading, error, run, clear };
 }
 
-function ReviewPanel({ ai, sev, onCatat }: { ai: ReturnType<typeof useReviewAI>; sev: Severity | ""; onCatat: (t: TemuanAI) => void }) {
+// Temuan AI dihitung dan difilter terpisah dari kartu pemeriksaan otomatis (tidak masuk skor kesiapan).
+const sevAi = (t: TemuanAI): Severity => (SEV[t.severity] ? t.severity : "info");
+
+function ReviewPanel({ ai, onCatat }: { ai: ReturnType<typeof useReviewAI>; onCatat: (t: TemuanAI) => void }) {
   const h = ai.hasil;
-  const list = (h?.temuan ?? []).filter((t) => !sev || t.severity === sev);
+  const [sev, setSev] = useState<Severity | "">("");
+  const list = (h?.temuan ?? []).filter((t) => !sev || sevAi(t) === sev);
   return (
     <Card className="mb-6 overflow-hidden">
       <div className="flex flex-wrap items-center gap-3 border-b border-line bg-gradient-to-r from-brand-50 to-paper/40 px-5 py-3">
         <Sparkles className="h-4 w-4 text-brand-600" />
         <h2 className="text-[14px] font-bold">Review Kualitas (AI)</h2>
         {h && <span className="text-[12px] text-slate-500">{h.temuan.length} temuan · {h.model} · {new Date(h.waktu).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}</span>}
+        {h && !ai.loading && (
+          <div className="flex items-center gap-1.5">
+            {SEV_ORDER.map((s) => {
+              const n = h.temuan.filter((t) => sevAi(t) === s).length;
+              return (
+                <button key={s} onClick={() => setSev(sev === s ? "" : s)} title={sev === s ? "Lepas filter" : `Tampilkan temuan ${SEV[s].label} saja`}
+                  className={clsx("rounded-full px-2 py-0.5 text-[11px] font-bold ring-1 ring-inset transition", SEV[s].chip, sev === s ? "ring-2 ring-brand-600" : "opacity-80 hover:opacity-100")}>
+                  {SEV[s].label} {n}
+                </button>
+              );
+            })}
+          </div>
+        )}
         {!ai.loading && (h || ai.error) && (
           <button onClick={ai.clear} title="Tutup hasil review" className="ml-auto rounded-md p-1 text-slate-400 hover:bg-white hover:text-ink"><X className="h-4 w-4" /></button>
         )}
