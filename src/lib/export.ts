@@ -1,5 +1,5 @@
 "use client";
-import type { ParameterSheet, RiskRegister } from "./types";
+import type { ChallengeLog, ParameterSheet, RiskRegister } from "./types";
 import type { RamRow } from "./ram";
 import { REKAP } from "./static";
 import { isTopRisk } from "./format";
@@ -73,3 +73,11 @@ export const exportRam = (rows: RamRow[]) =>
     return { ...r, limit: r.limit, inisiatif: (src as Record<string, unknown>).inisiatif, kebijakan: (src as Record<string, unknown>).kebijakan,
       program: (src as Record<string, unknown>).program, anggaran: (src as Record<string, unknown>).anggaran };
   }));
+
+export const exportChallenge = (rows: ChallengeLog[]) =>
+  download(`Notulen Challenge Session RKAP 2027 - PT KINRA.xlsx`, "Log Challenge", "Notulen Challenge Session RKAP 2027 - PT KINRA", [
+    { header: "No", key: "no", width: 5 }, { header: "Waktu", key: "waktu", width: 17 }, { header: "Terkait", key: "ref_label", width: 34 },
+    { header: "Masukan Challenger", key: "masukan", width: 60 }, { header: "Challenger", key: "challenger", width: 18 }, { header: "Prioritas", key: "prioritas", width: 10 },
+    { header: "Tanggapan / Komitmen", key: "tanggapan", width: 48 }, { header: "PIC", key: "pic", width: 18 }, { header: "Tenggat", key: "tenggat", width: 12 },
+    { header: "Status", key: "status", width: 13 },
+  ], [...rows].reverse().map((r, i) => ({ ...r, no: i + 1, waktu: new Date(r.created_at).toLocaleString("id-ID") })));

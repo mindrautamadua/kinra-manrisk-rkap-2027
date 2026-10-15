@@ -4,7 +4,7 @@ Aplikasi Next.js + Supabase yang mengikuti model **Kertas Kerja Bantu Perencanaa
 
 ## Menjalankan
 
-1. Jalankan `supabase/migrations/0001_init.sql` di Supabase Dashboard › SQL Editor.
+1. Jalankan `supabase/migrations/0001_init.sql` lalu `0002_challenge_session.sql` di Supabase Dashboard › SQL Editor.
 2. Isi `.env.local`:
    ```
    NEXT_PUBLIC_SUPABASE_URL=https://llwikeclckwhsamenjmx.supabase.co
@@ -23,6 +23,16 @@ Aplikasi Next.js + Supabase yang mengikuti model **Kertas Kerja Bantu Perencanaa
 | Risiko Utama | `/risiko-utama` — otomatis dari kategori dampak Moderat ke atas |
 | RAM, Rekap, CAT | `/ram`, `/rekap`, `/cat` |
 | 1a … U10 | `/parameter/[kode]` — lembar Excel asli (sel, merge, warna, rumus) dihitung ulang langsung oleh HyperFormula |
+
+## Fitur challenge session
+
+| Halaman | Fungsi |
+| --- | --- |
+| `/kesiapan` | Pemeriksaan otomatis: parameter K/O/M tanpa pengendalian, risiko duplikat, kolom wajib kosong, kategori dampak tidak wajar, RAS, keterkaitan, dll. |
+| `/challenge` | Log masukan challenger (PIC, tenggat, status) + ekspor notulen. Tombol **Catat Masukan** tersedia di setiap halaman dan otomatis merujuk halaman yang sedang dibuka. |
+| `/keterkaitan` | Matriks Risk Register × parameter RAM; kolom *Parameter RAM Terkait* juga ada di Risk Register. |
+| `/snapshot` | Bekukan versi data dan bandingkan dengan kondisi terkini. |
+| Tombol **Mode Presentasi** (header) | Mengunci semua isian di semua layar; Log Challenge & snapshot tetap bisa dipakai. |
 
 ## Data
 
