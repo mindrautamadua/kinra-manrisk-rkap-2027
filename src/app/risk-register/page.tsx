@@ -1,6 +1,6 @@
 "use client";
-import { useMemo, useState } from "react";
-import { Download, Library, Plus, Search, Trash2 } from "lucide-react";
+import { Fragment, useMemo, useState } from "react";
+import { AlertTriangle, Check, Download, Library, Plus, Search, Trash2 } from "lucide-react";
 import clsx from "clsx";
 import {
   Button, DampakBadge, EditCell, ErrorBox, Loading, Section, SelectCell, SheetPage, Stat, TableWrap, useLoad, useSaver,
@@ -15,6 +15,7 @@ import { api } from "@/lib/data";
 import { isTopRisk, persen, rupiah } from "@/lib/format";
 import { note } from "@/lib/static";
 import { exportRegister } from "@/lib/export";
+import { cariKriteria, cekKualitas, ebitdaRkap, labelLevel, saranDampak, type Isu, type SaranDampak } from "@/lib/kualitas-register";
 import { KATEGORI_DAMPAK, KATEGORI_MITIGASI, type RiskRegister } from "@/lib/types";
 
 export default function RiskRegisterPage() {
@@ -22,7 +23,7 @@ export default function RiskRegisterPage() {
     const [register, kategori, drivers, kriteria, tax, params, tambahan] = await Promise.all([
       api.register(), api.kategori(), api.drivers(), api.kriteria(), api.taksonomi(), api.params(), api.ramTambahan(),
     ]);
-    return { register, kategori, drivers, kriteria, t3: groupT3(tax), popts: paramOptions(params, tambahan) };
+    return { register, kategori, drivers, kriteria, t3: groupT3(tax), popts: paramOptions(params, tambahan), ebitda: ebitdaRkap(params) };
   });
   const saver = useSaver();
   const ro = useReadonly();
@@ -30,11 +31,24 @@ export default function RiskRegisterPage() {
   const [ai, setAi] = useState<RiskRegister | null>(null);
   const [filter, setFilter] = useState("");
   const [search, setSearch] = useState("");
+  const [hanyaIsu, setHanyaIsu] = useState(false);
+  const [buka, setBuka] = useState<string | null>(null);
   const d = q.data;
 
+  /** Saran kategori dampak & isu kualitas per baris, dihitung ulang setiap data berubah. */
+  const mutu = useMemo(() => {
+    const m = new Map<string, { saran: SaranDampak | null; isu: Isu[] }>();
+    for (const r of d?.register ?? []) {
+      const saran = saranDampak(r, cariKriteria(d!.kriteria, r), d!.ebitda);
+      m.set(r.id, { saran, isu: cekKualitas(r, saran) });
+    }
+    return m;
+  }, [d]);
+  const jumlahIsu = [...mutu.values()].filter((x) => x.isu.length).length;
+
   const rows = useMemo(() => (d?.register ?? []).filter((r) =>
-    (!filter || r.kategori === filter) &&
-    (!search || [r.risk_event, r.deskripsi, r.root_cause, r.rencana_mitigasi].some((x) => (x ?? "").toLowerCase().includes(search.toLowerCase())))), [d, filter, search]);
+    (!filter || r.kategori === filter) && (!hanyaIsu || !!mutu.get(r.id)?.isu.length) &&
+    (!search || [r.risk_event, r.deskripsi, r.root_cause, r.rencana_mitigasi].some((x) => (x ?? "").toLowerCase().includes(search.toLowerCase())))), [d, filter, search, hanyaIsu, mutu]);
 
   const patch = (id: string, p: Partial<RiskRegister>) => {
     q.setData({ ...d!, register: d!.register.map((r) => (r.id === id ? { ...r, ...p } : r)) });
@@ -103,6 +117,10 @@ export default function RiskRegisterPage() {
           </div>
           <Section letter="A" title="Risk Register" right={
             <div className="flex flex-wrap gap-2">
+              <button onClick={() => setHanyaIsu((x) => !x)} disabled={!jumlahIsu && !hanyaIsu}
+                className={clsx("flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[12.5px] disabled:opacity-50", hanyaIsu ? "border-amber-400 bg-amber-50 text-amber-900" : "border-line bg-white")}>
+                <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />Perlu perbaikan ({jumlahIsu})
+              </button>
               <div className="relative">
                 <Search className="absolute top-2 left-2.5 h-4 w-4 text-slate-400" />
                 <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari…" className="w-52 rounded-lg border border-line bg-white py-1.5 pr-3 pl-8 text-[13px] outline-none focus:border-brand-500" />
@@ -134,9 +152,21 @@ export default function RiskRegisterPage() {
                     const krit = d.kriteria.filter((x) => x.kategori === r.kategori).map((x) => `${x.kode}. ${x.kriteria}`);
                     const driverUnknown = r.risk_driver && !drivers.includes(r.risk_driver);
                     const el = r.probabilitas != null && r.nilai_dampak != null ? Number(r.probabilitas) * Number(r.nilai_dampak) : null;
+                    const { saran, isu } = mutu.get(r.id) ?? { saran: null, isu: [] };
+                    const kriteria = cariKriteria(d.kriteria, r);
+                    const dampakSalah = !!saran && !!r.kategori_dampak && r.kategori_dampak !== saran.level;
                     return (
-                      <tr key={r.id}>
-                        <td className="sticky left-0 z-[1] text-center font-semibold">{i + 1}</td>
+                      <Fragment key={r.id}>
+                      <tr>
+                        <td className="sticky left-0 z-[1] text-center font-semibold">
+                          {i + 1}
+                          {isu.length > 0 && (
+                            <button onClick={() => setBuka(buka === r.id ? null : r.id)} title={isu.map((x) => `${x.kolom}: ${x.pesan}`).join("\n")}
+                              className={clsx("mx-auto mt-1 flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10.5px] font-bold", buka === r.id ? "bg-amber-500 text-white" : "bg-amber-100 text-amber-800 hover:bg-amber-200")}>
+                              <AlertTriangle className="h-3 w-3" />{isu.length}
+                            </button>
+                          )}
+                        </td>
                         <td className="input"><SelectCell value={r.kategori} options={d.kategori.map((k) => k.nama)} onSave={(v) => patch(r.id, { kategori: v, risk_driver: null, kriteria_dampak: null })} /></td>
                         <td className={clsx("input", driverUnknown && "!bg-rose-100")}>
                           <SelectCell value={r.risk_driver} options={driverUnknown ? [r.risk_driver!, ...drivers] : drivers} placeholder={r.kategori ? "Pilih driver…" : "Pilih kategori dulu"} onSave={(v) => patch(r.id, { risk_driver: v })} />
@@ -154,9 +184,22 @@ export default function RiskRegisterPage() {
                         <td className="input"><EditCell value={r.deskripsi_dampak} onSave={(v) => patch(r.id, { deskripsi_dampak: v as string })} /></td>
                         <td className="input"><EditCell kind="number" value={r.nilai_dampak} display={(v) => rupiah(v as number).replace("Rp ", "")} onSave={(v) => patch(r.id, { nilai_dampak: v as number })} /></td>
                         <td className="input"><SelectCell value={r.kriteria_dampak} options={krit} placeholder={r.kategori ? "Pilih kriteria…" : "Pilih kategori dulu"} onSave={(v) => patch(r.id, { kriteria_dampak: v })} /></td>
-                        <td className="input">
-                          <SelectCell value={r.kategori_dampak} options={KATEGORI_DAMPAK} onSave={(v) => patch(r.id, { kategori_dampak: v })} />
+                        <td className={clsx("input", dampakSalah && "!bg-rose-100")}>
+                          <SelectCell value={r.kategori_dampak} options={kriteria ? labelLevel(kriteria) : KATEGORI_DAMPAK} onSave={(v) => patch(r.id, { kategori_dampak: v })} />
                           {r.kategori_dampak && <div className="mt-1"><DampakBadge k={r.kategori_dampak} /></div>}
+                          {saran && (
+                            <div className="mt-1.5 text-[11px] leading-snug" title={saran.sumber}>
+                              {r.kategori_dampak === saran.level ? (
+                                <span className="inline-flex items-center gap-1 text-emerald-700"><Check className="h-3 w-3" />Sesuai kriteria ({saran.ukuran})</span>
+                              ) : (
+                                <>
+                                  <span className={dampakSalah ? "font-semibold text-rose-700" : "text-slate-600"}>Sesuai kriteria: {saran.level}</span>
+                                  <span className="text-slate-500"> ({saran.ukuran})</span>
+                                  <button data-edit onClick={() => patch(r.id, { kategori_dampak: saran.level })} className="ml-1 font-semibold text-brand-700 hover:underline">pakai</button>
+                                </>
+                              )}
+                            </div>
+                          )}
                         </td>
                         <td className={clsx("calc text-center font-bold", isTopRisk(r.kategori_dampak) ? "text-orange-700" : "text-slate-500")}>{r.kategori_dampak ? (isTopRisk(r.kategori_dampak) ? "Ya" : "Tidak") : ""}</td>
                         <td className="input"><EditCell kind="number" value={r.expected_loss} placeholder={el != null ? `≈ ${rupiah(el).replace("Rp ", "")}` : "Opsional"} display={(v) => rupiah(v as number).replace("Rp ", "")} onSave={(v) => patch(r.id, { expected_loss: v as number })} /></td>
@@ -168,6 +211,19 @@ export default function RiskRegisterPage() {
                         </td>
                         <td><div className="flex flex-col items-center gap-2"><AiRowButton onClick={() => bukaAi(r)} /><button data-edit onClick={() => del(r)} className="text-slate-400 hover:text-rose-600" title="Hapus"><Trash2 className="h-4 w-4" /></button></div></td>
                       </tr>
+                      {buka === r.id && isu.length > 0 && (
+                        <tr>
+                          <td colSpan={18} className="!bg-amber-50/70 !py-2">
+                            <div className="sticky left-12 max-w-[900px] space-y-1 pl-2 text-[12px]">
+                              {isu.map((x, j) => (
+                                <div key={j} className="flex gap-2"><span className="w-36 shrink-0 font-semibold text-amber-900">{x.kolom}</span><span className="text-slate-700">{x.pesan}</span></div>
+                              ))}
+                              {saran && <div className="pt-1 text-[11px] text-slate-500">Dasar saran kategori dampak: {saran.sumber}.</div>}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                      </Fragment>
                     );
                   })}
                   {rows.length === 0 && <tr><td colSpan={18} className="py-10 text-center text-slate-400">Belum ada risiko. Klik “Tambah Risiko”.</td></tr>}

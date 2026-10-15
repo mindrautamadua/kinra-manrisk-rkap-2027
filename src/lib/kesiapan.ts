@@ -1,7 +1,8 @@
 import { REKAP } from "./static";
 import { cekSikap, isTopRisk, nilaiParam } from "./format";
 import { perluPengendalian, type RamRow } from "./ram";
-import type { CatAksi, ParameterSheet, Ras, RiskDriver, RiskRegister, Sampul } from "./types";
+import { cariKriteria, ebitdaRkap, saranDampak } from "./kualitas-register";
+import type { CatAksi, KriteriaDampak, ParameterSheet, Ras, RiskDriver, RiskRegister, Sampul } from "./types";
 
 export type Severity = "kritis" | "perhatian" | "info";
 export interface Temuan { id: string; severity: Severity; area: string; judul: string; detail?: string; href: string; ref?: { type: string; id: string; label: string } }
@@ -19,7 +20,7 @@ const nama = (r: RiskRegister, i: number) => `#${i + 1} ${r.risk_event ?? "(tanp
 const URUT_DAMPAK = ["Sangat Rendah", "Rendah", "Moderat", "Tinggi", "Sangat Tinggi"];
 
 export interface InputKesiapan {
-  sampul: Sampul; ras: Ras[]; register: RiskRegister[]; params: ParameterSheet[]; ram: RamRow[]; drivers: RiskDriver[]; cat: CatAksi[];
+  sampul: Sampul; ras: Ras[]; register: RiskRegister[]; params: ParameterSheet[]; ram: RamRow[]; drivers: RiskDriver[]; cat: CatAksi[]; kriteria: KriteriaDampak[];
   /** false bila kolom parameter_ram belum ada (migrasi 0002 belum dijalankan). */
   adaKeterkaitan: boolean;
 }
@@ -93,13 +94,22 @@ export function periksa(d: InputKesiapan): Pemeriksaan[] {
   }));
   add("reg-kembar", "Risk Register", "Tidak ada risiko duplikat / hasil salin-tempel", kembar);
 
-  add("reg-dampak", "Risk Register", "Kategori dampak wajar terhadap nilai dampak",
-    reg.map((r, i) => ({ r, i })).filter(({ r }) => r.nilai_dampak != null && r.kategori_dampak &&
-      ((URUT_DAMPAK.indexOf(r.kategori_dampak) >= 3 && Number(r.nilai_dampak) < 100_000_000) ||
-       (URUT_DAMPAK.indexOf(r.kategori_dampak) <= 1 && Number(r.nilai_dampak) >= 10_000_000_000))).map(({ r, i }) => ({
+  // Bila kriteria acuan dapat diukur (EBITDA atau besaran di Deskripsi Dampak), kategori dampak dibandingkan dengan kriteria;
+  // selain itu dipakai uji kewajaran kasar terhadap nilai rupiah.
+  const ebitda = ebitdaRkap(d.params);
+  add("reg-dampak", "Risk Register", "Kategori dampak sesuai Kriteria Dampak Acuan",
+    reg.map((r, i) => ({ r, i, saran: saranDampak(r, cariKriteria(d.kriteria, r), ebitda) })).filter(({ r, saran }) => r.kategori_dampak && (saran
+      ? saran.level !== r.kategori_dampak
+      : r.nilai_dampak != null && ((URUT_DAMPAK.indexOf(r.kategori_dampak) >= 3 && Number(r.nilai_dampak) < 100_000_000) ||
+        (URUT_DAMPAK.indexOf(r.kategori_dampak) <= 1 && Number(r.nilai_dampak) >= 10_000_000_000)))).map(({ r, i, saran }) => ({
       id: `dmp-${r.id}`, severity: "perhatian", area: "Risk Register",
-      judul: `${nama(r, i)}: ${r.kategori_dampak} dengan nilai dampak Rp${Number(r.nilai_dampak).toLocaleString("id-ID")}`,
-      detail: `Periksa kembali terhadap kriteria "${r.kriteria_dampak ?? "-"}" (nilai dalam rupiah penuh).`, href: "/risk-register", ref: refR(r, i),
+      judul: saran
+        ? `${nama(r, i)}: ${r.kategori_dampak}, menurut kriteria acuan ${saran.level}`
+        : `${nama(r, i)}: ${r.kategori_dampak} dengan nilai dampak Rp${Number(r.nilai_dampak).toLocaleString("id-ID")}`,
+      detail: saran
+        ? `${saran.ukuran} pada kriteria "${r.kriteria_dampak}" (${saran.sumber}).`
+        : `Periksa kembali terhadap kriteria "${r.kriteria_dampak ?? "-"}" (nilai dalam rupiah penuh).`,
+      href: "/risk-register", ref: refR(r, i),
     })));
 
   add("reg-el", "Risk Register", "Expected Loss diisi bila probabilitas & nilai dampak tersedia",

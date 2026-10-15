@@ -18,13 +18,13 @@ const SEV: Record<Severity, { label: string; icon: React.ElementType; chip: stri
 
 export default function KesiapanPage() {
   const q = useLoad(async () => {
-    const [sampul, ras, register, params, pengendalian, tambahan, drivers, cat] = await Promise.all([
-      api.sampul(), api.ras(), api.register(), api.params(), api.pengendalian(), api.ramTambahan(), api.drivers(), api.cat(),
+    const [sampul, ras, register, params, pengendalian, tambahan, drivers, cat, kriteria] = await Promise.all([
+      api.sampul(), api.ras(), api.register(), api.params(), api.pengendalian(), api.ramTambahan(), api.drivers(), api.cat(), api.kriteria(),
     ]);
     const ram = buildRam(params, ras, pengendalian, tambahan);
     const adaKeterkaitan = register.length === 0 || register.some((r) => "parameter_ram" in r);
     return {
-      checks: periksa({ sampul, ras, register, params, ram, drivers, cat, adaKeterkaitan }),
+      checks: periksa({ sampul, ras, register, params, ram, drivers, cat, kriteria, adaKeterkaitan }),
       reviewInput: buildReviewInput(sampul.nama_entitas || "PT KINRA", ras, register, ram),
     };
   });
