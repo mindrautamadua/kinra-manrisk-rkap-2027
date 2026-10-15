@@ -53,7 +53,7 @@ export default function RiskDriverPage() {
               })}
             </div>
           </Section>
-          <Section letter="B" title="Risk Driver Tambahan Entitas" right={<Button variant="outline" onClick={add}><Plus className="h-4 w-4" />Tambah</Button>}>
+          <Section letter="B" title="Risk Driver Tambahan Entitas" right={<Button edit variant="outline" onClick={add}><Plus className="h-4 w-4" />Tambah</Button>}>
             <TableWrap>
               <table className="kk-table">
                 <thead><tr><th className="w-14">No</th><th className="w-72">Kategori Risiko</th><th>Risk Driver Tambahan Entitas</th><th className="w-10" /></tr></thead>
@@ -64,7 +64,7 @@ export default function RiskDriverPage() {
                       <td className="text-center">{i + 1}</td>
                       <td className="input"><SelectCell value={r.kategori} options={d.kategori.map((k) => k.nama)} onSave={(v) => { if (v) patch(r.id, { kategori: v }); }} /></td>
                       <td className="input"><EditCell value={r.driver} onSave={(v) => { if (v) patch(r.id, { driver: String(v) }); }} /></td>
-                      <td><button onClick={() => del(r.id)} className="text-slate-400 hover:text-rose-600"><Trash2 className="h-4 w-4" /></button></td>
+                      <td><button data-edit onClick={() => del(r.id)} className="text-slate-400 hover:text-rose-600"><Trash2 className="h-4 w-4" /></button></td>
                     </tr>
                   ))}
                   {extra.length === 0 && <tr><td colSpan={4} className="py-6 text-center text-slate-400">Belum ada risk driver tambahan.</td></tr>}

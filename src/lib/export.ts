@@ -49,7 +49,8 @@ export const exportRegister = (rows: RiskRegister[]) =>
     { header: "Kategori Dampak Risiko", key: "kategori_dampak", width: 16 }, { header: "Tagging Top Risk", key: "tagging", width: 10 },
     { header: "Expected Loss (Rp)", key: "expected_loss", width: 20, fmt: "#,##0" }, { header: "Existing Control", key: "existing_control", width: 36 },
     { header: "Rencana Mitigasi", key: "rencana_mitigasi", width: 36 }, { header: "Kategori Mitigasi", key: "kategori_mitigasi", width: 14 },
-  ], rows.map((r, i) => ({ ...r, no: i + 1, tagging: r.kategori_dampak ? (isTopRisk(r.kategori_dampak) ? "Ya" : "Tidak") : "" })));
+    { header: "Parameter RAM Terkait", key: "param", width: 18 },
+  ], rows.map((r, i) => ({ ...r, no: i + 1, param: (r.parameter_ram ?? []).join(", "), tagging: r.kategori_dampak ? (isTopRisk(r.kategori_dampak) ? "Ya" : "Tidak") : "" })));
 
 export const exportRekap = (params: ParameterSheet[]) =>
   download("Rekap Parameter RAM RKAP 2027 - PT KINRA.xlsx", "Rekap", "Rekap Parameter RAM RKAP 2027 - PT KINRA", [

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AlertTriangle, Check, ChevronDown, Info, Loader2 } from "lucide-react";
 import { supabaseConfigured } from "@/lib/supabase";
 import { DAMPAK_STYLE, SIKAP_STYLE, statusStyle } from "@/lib/format";
+import { useReadonly } from "@/lib/mode";
 
 // ---------- data loading ----------
 export function useLoad<T>(fn: () => Promise<T>, deps: unknown[] = []) {
@@ -311,12 +312,25 @@ function SkeletonDeck() {
   );
 }
 
+/** Error karena tabel/kolom dari migrasi 0002 belum ada di database. */
+export const butuhMigrasi2 = (e?: string | null) => !!e && /challenge_log|snapshot|parameter_ram|schema cache/i.test(e);
+
 export function ErrorBox({ error }: { error: string }) {
+  if (butuhMigrasi2(error)) return <Migrasi2 />;
   return (
     <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
       <div className="font-semibold">Gagal memuat data</div>
       <div className="mt-1 text-[13px]">{error}</div>
       <div className="mt-2 text-[12px]">Pastikan migrasi SQL sudah dijalankan dan data sudah diinisialisasi di <Link className="font-semibold underline" href="/setup">Inisialisasi Data</Link>.</div>
+    </div>
+  );
+}
+
+export function Migrasi2() {
+  return (
+    <div className="rounded-xl border border-amber-300 bg-amber-50 px-5 py-4 text-sm text-amber-950">
+      <div className="font-bold">Fitur challenge session butuh migrasi database</div>
+      <p className="mt-1 text-[13px]">Jalankan isi file <code className="rounded bg-white px-1">supabase/migrations/0002_challenge_session.sql</code> di Supabase Dashboard › SQL Editor, lalu muat ulang halaman ini.</p>
     </div>
   );
 }
@@ -330,11 +344,12 @@ export function NotConfigured() {
   );
 }
 
-export function Button({ children, onClick, variant = "primary", disabled, className, type = "button" }: {
-  children: React.ReactNode; onClick?: () => void; variant?: "primary" | "ghost" | "danger" | "outline"; disabled?: boolean; className?: string; type?: "button" | "submit";
+/** `edit`: tombol yang mengubah data, disembunyikan saat mode presentasi aktif. */
+export function Button({ children, onClick, variant = "primary", disabled, className, type = "button", edit, title }: {
+  children: React.ReactNode; onClick?: () => void; variant?: "primary" | "ghost" | "danger" | "outline"; disabled?: boolean; className?: string; type?: "button" | "submit"; edit?: boolean; title?: string;
 }) {
   return (
-    <button type={type} disabled={disabled} onClick={onClick} className={clsx(
+    <button type={type} disabled={disabled} onClick={onClick} data-edit={edit || undefined} title={title} className={clsx(
       "inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-semibold transition disabled:opacity-50",
       variant === "primary" && "bg-brand-700 text-white shadow-sm hover:bg-brand-800",
       variant === "outline" && "border border-line bg-white text-ink hover:border-brand-500 hover:text-brand-700",
@@ -377,6 +392,7 @@ type EditProps = {
 
 /** Teks/angka yang langsung tersimpan saat fokus keluar (blur), seperti sel kuning di Excel. */
 export function EditCell({ value, onSave, kind = "text", placeholder = "Isi…", className, display }: EditProps) {
+  const ro = useReadonly();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const ref = useRef<HTMLTextAreaElement>(null);
@@ -413,6 +429,13 @@ export function EditCell({ value, onSave, kind = "text", placeholder = "Isi…",
     );
   }
   const empty = value == null || value === "";
+  if (ro) {
+    return (
+      <div className={clsx("min-h-[22px] px-0.5 whitespace-pre-line", kind !== "text" && "text-right tabnum", className)}>
+        {empty ? <span className="text-slate-300">–</span> : display ? display(value) : String(value)}
+      </div>
+    );
+  }
   return (
     <div role="button" tabIndex={0} onClick={() => { setDraft(toDraft(value)); setEditing(true); }}
       onKeyDown={(e) => { if (e.key === "Enter") { setDraft(toDraft(value)); setEditing(true); } }}
@@ -426,6 +449,11 @@ export function SelectCell({ value, options, onSave, placeholder = "Pilih…", c
   value: string | null | undefined; options: readonly (string | { value: string; label: string })[];
   onSave: (v: string | null) => void; placeholder?: string; className?: string;
 }) {
+  const ro = useReadonly();
+  if (ro) {
+    const label = options.map((o) => (typeof o === "string" ? { value: o, label: o } : o)).find((o) => o.value === value)?.label ?? value;
+    return <div className={clsx("py-0.5 text-[12.5px]", className)}>{label || <span className="text-slate-300">–</span>}</div>;
+  }
   return (
     <select value={value ?? ""} onChange={(e) => onSave(e.target.value || null)}
       className={clsx("w-full cursor-pointer rounded-md border border-transparent bg-transparent py-0.5 text-[12.5px] hover:border-brand-500/40 focus:border-brand-500 focus:outline-none", !value && "text-slate-400 italic", className)}>

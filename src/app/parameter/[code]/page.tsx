@@ -9,6 +9,7 @@ import { REKAP, Workbook, isInputCell, loadTemplate } from "@/lib/engine";
 import { api } from "@/lib/data";
 import { nilaiParam } from "@/lib/format";
 import { supabaseConfigured } from "@/lib/supabase";
+import { useReadonly } from "@/lib/mode";
 import type { CellValue, ParameterSheet, SheetTemplate } from "@/lib/types";
 
 export default function ParameterPage({ params }: { params: Promise<{ code: string }> }) {
@@ -24,6 +25,7 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
   const inputsRef = useRef<Record<string, CellValue>>({});
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const saver = useSaver();
+  const ro = useReadonly();
 
   useEffect(() => {
     let alive = true;
@@ -116,8 +118,9 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
               {meta.grup !== "Parameter Standar" && row && (
                 <div className="flex items-center gap-2 text-[12px]">
                   <span className="font-semibold text-slate-600">Diterapkan</span>
+                  {ro && <span className="font-bold">{row.diterapkan ?? "–"}</span>}
                   {["Ya", "Tidak"].map((o) => (
-                    <button key={o} onClick={() => setDiterapkan(o)} className={clsx("rounded-md px-2.5 py-0.5 font-semibold", row.diterapkan === o ? "bg-brand-700 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200")}>{o}</button>
+                    <button key={o} data-edit onClick={() => setDiterapkan(o)} className={clsx("rounded-md px-2.5 py-0.5 font-semibold", row.diterapkan === o ? "bg-brand-700 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200")}>{o}</button>
                   ))}
                 </div>
               )}
@@ -135,14 +138,14 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
               <button onClick={() => setHeaders((h) => !h)} className={clsx("flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[12px]", headers ? "border-brand-500 bg-brand-50 text-brand-800" : "border-line bg-white")}>
                 <Grid2x2 className="h-3.5 w-3.5" />Header baris/kolom
               </button>
-              <button onClick={resetInputs} className="flex items-center gap-1.5 rounded-lg border border-line bg-white px-2.5 py-1 text-[12px] text-rose-600 hover:border-rose-400">
+              <button data-edit onClick={resetInputs} className="flex items-center gap-1.5 rounded-lg border border-line bg-white px-2.5 py-1 text-[12px] text-rose-600 hover:border-rose-400">
                 <RotateCcw className="h-3.5 w-3.5" />Kosongkan isian
               </button>
             </div>
           </div>
 
           <div className="scroll-thin max-h-[calc(100vh-150px)] overflow-auto rounded-xl border border-line bg-white shadow-sm">
-            <SheetGrid t={tpl} layout={layout} wb={wb} version={version} onEdit={onEdit} showHeaders={headers} />
+            <SheetGrid t={tpl} layout={layout} wb={wb} version={version} onEdit={onEdit} showHeaders={headers} readonly={ro} />
           </div>
           <p className="mt-2 text-[11.5px] text-slate-500">Klik sel kuning untuk mengisi. Angka boleh memakai format Indonesia (1.250,5) atau persen (12,5%). Sel biru dihitung otomatis dengan rumus yang sama dengan kertas kerja Excel.</p>
         </>

@@ -6,7 +6,10 @@ import clsx from "clsx";
 import {
   LayoutDashboard, Presentation, FileText, BookOpen, Target, Gauge, Network, ListChecks, Flame, Grid3x3, Briefcase, Sigma,
   Library, Database, ChevronDown, Menu, X, PanelLeftClose, PanelLeftOpen, Table2,
+  ClipboardCheck, MessagesSquare, GitCompareArrows, Workflow, Lock, LockOpen, MessageSquarePlus,
 } from "lucide-react";
+import { useMode } from "@/lib/mode";
+import { ChallengeModal, refFromPath } from "./ChallengeForm";
 import { REKAP } from "@/lib/static";
 import { SHEETS } from "@/lib/nav";
 
@@ -24,6 +27,13 @@ const MAIN = [
   { href: "/executive-summary", label: "Executive Summary", icon: Presentation },
 ];
 
+const CHALLENGE = [
+  { href: "/kesiapan", label: "Cek Kesiapan", icon: ClipboardCheck },
+  { href: "/challenge", label: "Log Challenge", icon: MessagesSquare },
+  { href: "/keterkaitan", label: "Keterkaitan Risiko–RAM", icon: Workflow },
+  { href: "/snapshot", label: "Snapshot Versi", icon: GitCompareArrows },
+];
+
 const GROUPS = Array.from(new Set(REKAP.map((r) => r.grup)));
 
 export function Shell({ children }: { children: React.ReactNode }) {
@@ -31,6 +41,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [paramOpen, setParamOpen] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
+  const [catat, setCatat] = useState(false);
+  const mode = useMode();
   const tabsRef = useRef<HTMLDivElement>(null);
 
   // Status sidebar (lebar/ciut) diingat per browser; Ctrl/Cmd + B untuk toggle.
@@ -68,6 +80,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <div className={clsx("scroll-thin flex-1 overflow-x-hidden overflow-y-auto pb-6", mini ? "space-y-3 px-2" : "space-y-6 px-3")}>
         <div>
           <NavItem href="/" label="Dashboard" icon={LayoutDashboard} active={path === "/"} mini={mini} />
+        </div>
+        <div>
+          <SectionLabel mini={mini}>Challenge Session</SectionLabel>
+          {CHALLENGE.map((m) => <NavItem key={m.href} {...m} active={active(m.href)} mini={mini} />)}
         </div>
         <div>
           <SectionLabel mini={mini}>Kertas Kerja</SectionLabel>
@@ -142,13 +158,32 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <span className="font-semibold text-ink">Kertas Kerja Perencanaan Manajemen Risiko</span>
             <span className="mx-2 text-slate-300">/</span>RKAP 2027<span className="mx-2 text-slate-300">/</span>PT KINRA
           </div>
-          <div className="ml-auto hidden items-center gap-3 text-[11px] text-slate-500 md:flex">
+          <div className="ml-auto hidden items-center gap-3 text-[11px] text-slate-500 xl:flex">
             <Legend color="bg-cell-input ring-amber-300" label="Diisi entitas" />
             <Legend color="bg-cell-calc ring-sky-300" label="Terhitung otomatis" />
             <Legend color="bg-cell-label ring-slate-300" label="Contoh" />
           </div>
+          <button onClick={mode.toggle} disabled={mode.busy}
+            title={mode.readonly ? "Mode presentasi aktif: semua data terkunci. Klik untuk membuka kunci." : "Kunci semua isian di semua layar selama presentasi"}
+            className={clsx("ml-auto flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold transition xl:ml-2",
+              mode.readonly ? "bg-rose-600 text-white shadow-sm hover:bg-rose-700" : "border border-line bg-white text-slate-600 hover:border-brand-500 hover:text-brand-700")}>
+            {mode.readonly ? <Lock className="h-3.5 w-3.5" /> : <LockOpen className="h-3.5 w-3.5" />}
+            <span className="hidden sm:inline">Mode Presentasi</span>
+            <span className={clsx("rounded px-1 text-[10px] font-bold", mode.readonly ? "bg-white/20" : "bg-slate-100 text-slate-500")}>{mode.readonly ? "ON" : "OFF"}</span>
+          </button>
         </header>
+        {mode.readonly && (
+          <div className="flex items-center gap-2 bg-rose-600 px-4 py-1.5 text-[12px] font-medium text-white md:px-8 print:hidden">
+            <Lock className="h-3.5 w-3.5" />Mode presentasi aktif — seluruh data kertas kerja terkunci di semua layar. Masukan challenger tetap dapat dicatat.
+          </div>
+        )}
         <main className="px-4 pt-6 pb-24 md:px-8 print:!p-0">{children}</main>
+        {/* Catat masukan challenger dari halaman mana pun */}
+        <button onClick={() => setCatat(true)} title="Catat masukan challenger untuk halaman ini"
+          className="fixed right-5 bottom-14 z-30 flex items-center gap-2 rounded-full bg-gold px-4 py-3 text-[13px] font-bold text-brand-900 shadow-lg ring-1 ring-black/10 transition hover:-translate-y-0.5 hover:shadow-xl print:hidden">
+          <MessageSquarePlus className="h-4.5 w-4.5" /><span className="hidden md:inline">Catat Masukan</span>
+        </button>
+        {catat && <ChallengeModal initial={refFromPath(path)} onClose={() => setCatat(false)} onSaved={() => window.dispatchEvent(new Event("challenge-log-updated"))} />}
         {/* Tab lembar ala Excel */}
         <div className={clsx("fixed right-0 bottom-0 left-0 z-20 border-t border-line bg-[#e9e8e1] transition-[left] duration-200 print:hidden", collapsed ? "lg:left-[76px]" : "lg:left-[264px]")}>
           <div ref={tabsRef} className="scroll-thin flex overflow-x-auto px-2">

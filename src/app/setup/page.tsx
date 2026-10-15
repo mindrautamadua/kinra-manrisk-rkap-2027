@@ -36,7 +36,7 @@ export default function SetupPage() {
             <li>Klik <b>Isi Data Awal</b>. Data diambil dari Kertas Kerja Bantu Excel &amp; Taksonomi Risiko PTPN Group. Hanya tabel yang masih kosong yang diisi, jadi aman diulang.</li>
           </ol>
           <div className="mt-5 flex gap-2">
-            <Button onClick={run} disabled={busy}><Play className="h-4 w-4" />{busy ? "Memproses…" : "Isi Data Awal"}</Button>
+            <Button edit onClick={run} disabled={busy}><Play className="h-4 w-4" />{busy ? "Memproses…" : "Isi Data Awal"}</Button>
             <Button variant="outline" onClick={status.reload}><RefreshCw className="h-4 w-4" />Cek Status</Button>
           </div>
           {log.length > 0 && (

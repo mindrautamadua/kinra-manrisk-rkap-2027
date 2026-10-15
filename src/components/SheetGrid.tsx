@@ -51,9 +51,9 @@ export function buildLayout(t: SheetTemplate): GridLayout {
   return { spans, covered, lists, sections, maxCol };
 }
 
-export const SheetGrid = memo(function SheetGrid({ t, layout, wb, version, onEdit, showHeaders = true }: {
+export const SheetGrid = memo(function SheetGrid({ t, layout, wb, version, onEdit, showHeaders = true, readonly = false }: {
   t: SheetTemplate; layout: GridLayout; wb: Workbook; version: number;
-  onEdit: (addr: string, v: CellValue) => void; showHeaders?: boolean;
+  onEdit: (addr: string, v: CellValue) => void; showHeaders?: boolean; readonly?: boolean;
 }) {
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
@@ -83,10 +83,11 @@ export const SheetGrid = memo(function SheetGrid({ t, layout, wb, version, onEdi
       if (layout.covered.has(addr)) continue;
       const c = t.cells[addr];
       const span = layout.spans.get(addr);
-      const inp = isInputCell(c);
+      const isInp = isInputCell(c);
+      const inp = isInp && !readonly;
       const list = layout.lists.get(addr);
       void version; // nilai diambil ulang setiap kali workbook berubah
-      const v = c ? (c.f || inp ? wb.get(t.code, addr) : c.v ?? null) : null;
+      const v = c ? (c.f || isInp ? wb.get(t.code, addr) : c.v ?? null) : null;
       const text = formatCell(v as CellValue, c?.nf);
       const isEditing = editing === addr;
       const style: React.CSSProperties = {};

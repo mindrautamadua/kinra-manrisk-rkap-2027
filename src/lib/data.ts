@@ -1,9 +1,18 @@
 "use client";
 import { sb, must } from "./supabase";
 import type {
+  ChallengeLog, ModePresentasi, Snapshot, SnapshotData,
   CatAksi, KategoriRisiko, KriteriaDampak, ParameterSheet, RamPengendalian, RamTambahan, Ras, RasTambahan, RiskDriver,
   RiskRegister, Sampul, Taksonomi,
 } from "./types";
+
+// ---------- mode presentasi: kunci semua penulisan kecuali Log Challenge ----------
+let readonly = false;
+export const setReadonlyFlag = (v: boolean) => { readonly = v; };
+const BEBAS_KUNCI = new Set(["challenge_log", "snapshot"]);
+function guard(table: string) {
+  if (readonly && !BEBAS_KUNCI.has(table)) throw new Error("Mode presentasi aktif: data dikunci. Matikan mode presentasi untuk mengubah.");
+}
 
 export const api = {
   async sampul(): Promise<Sampul> {
@@ -11,6 +20,7 @@ export const api = {
     return (rows[0]?.value ?? { nama_entitas: "PT KINRA", versi: "1" }) as Sampul;
   },
   async saveSampul(v: Sampul) {
+    guard("app_settings");
     must(await sb().from("app_settings").upsert({ key: "sampul", value: v, updated_at: new Date().toISOString() }));
   },
   kategori: async () => must(await sb().from("kategori_risiko").select("*").order("no")) as KategoriRisiko[],
@@ -35,18 +45,58 @@ export const api = {
   },
 
   async update<T extends object>(table: string, key: string, id: string | number, patch: Partial<T>) {
+    guard(table);
     must(await sb().from(table).update(patch as Record<string, unknown>).eq(key, id));
   },
   async insert<T extends object>(table: string, row: Partial<T>) {
+    guard(table);
     return (must(await sb().from(table).insert(row as Record<string, unknown>).select()) as T[])[0];
   },
   async remove(table: string, key: string, id: string | number) {
+    guard(table);
     must(await sb().from(table).delete().eq(key, id));
   },
   async upsert<T extends object>(table: string, row: Partial<T>) {
+    guard(table);
     must(await sb().from(table).upsert(row as Record<string, unknown>));
   },
 };
+
+export const challengeApi = {
+  list: async () => must(await sb().from("challenge_log").select("*").order("created_at", { ascending: false })) as ChallengeLog[],
+  add: async (row: Partial<ChallengeLog>) => (must(await sb().from("challenge_log").insert(row).select()) as ChallengeLog[])[0],
+  update: async (id: string, patch: Partial<ChallengeLog>) => { must(await sb().from("challenge_log").update({ ...patch, updated_at: new Date().toISOString() }).eq("id", id)); },
+  remove: async (id: string) => { must(await sb().from("challenge_log").delete().eq("id", id)); },
+};
+
+export const snapshotApi = {
+  list: async () => must(await sb().from("snapshot").select("id,created_at,nama,catatan").order("created_at", { ascending: false })) as Snapshot[],
+  get: async (id: string) => (must(await sb().from("snapshot").select("*").eq("id", id)) as Snapshot[])[0],
+  add: async (nama: string, catatan: string | null, data: SnapshotData) =>
+    (must(await sb().from("snapshot").insert({ nama, catatan, data }).select("id,created_at,nama,catatan")) as Snapshot[])[0],
+  remove: async (id: string) => { must(await sb().from("snapshot").delete().eq("id", id)); },
+};
+
+export const modeApi = {
+  async get(): Promise<ModePresentasi> {
+    const rows = must(await sb().from("app_settings").select("value").eq("key", "presentasi"));
+    return (rows[0]?.value ?? { aktif: false }) as ModePresentasi;
+  },
+  async set(v: ModePresentasi) {
+    must(await sb().from("app_settings").upsert({ key: "presentasi", value: v, updated_at: new Date().toISOString() }));
+  },
+};
+
+/** Seluruh data yang dibekukan pada snapshot. */
+export async function captureSnapshot(): Promise<SnapshotData> {
+  const [sampul, ras, ras_tambahan, register, params, pengendalian, ram_tambahan, cat] = await Promise.all([
+    api.sampul(), api.ras(), api.rasTambahan(), api.register(), api.params(), api.pengendalian(), api.ramTambahan(), api.cat(),
+  ]);
+  return {
+    sampul, ras, ras_tambahan, register, pengendalian, ram_tambahan, cat,
+    params: params.map(({ code, diterapkan, summary, inputs }) => ({ code, diterapkan, summary, inputs })),
+  };
+}
 
 /** Status inisialisasi database. */
 export async function dbStatus() {

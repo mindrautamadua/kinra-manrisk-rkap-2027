@@ -40,7 +40,7 @@ export default function RekapPage() {
     <SheetPage title="Rekap Parameter RAM RKAP 2027 - PT KINRA" code="Rekap"
       actions={<>{saver.indicator}
         <Button variant="outline" onClick={() => exportRekap(params)}><Download className="h-4 w-4" />Excel</Button>
-        <Button onClick={recompute} disabled={busy || !q.data}><Calculator className="h-4 w-4" />{busy ? "Menghitung…" : "Hitung Ulang Semua"}</Button></>}>
+        <Button edit onClick={recompute} disabled={busy || !q.data}><Calculator className="h-4 w-4" />{busy ? "Menghitung…" : "Hitung Ulang Semua"}</Button></>}>
       {q.loading ? <Loading /> : q.error ? <ErrorBox error={q.error} /> : (
         <TableWrap>
           <table className="kk-table min-w-[1200px]">

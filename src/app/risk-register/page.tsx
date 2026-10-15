@@ -6,6 +6,9 @@ import {
   Button, DampakBadge, EditCell, ErrorBox, Loading, Section, SelectCell, SheetPage, Stat, TableWrap, useLoad, useSaver,
 } from "@/components/ui";
 import { TaxonomyPicker, groupT3, type T3Option } from "@/components/TaxonomyPicker";
+import { ParamPicker } from "@/components/ParamPicker";
+import { paramOptions } from "@/lib/trace";
+import { useReadonly } from "@/lib/mode";
 import { api } from "@/lib/data";
 import { isTopRisk, persen, rupiah } from "@/lib/format";
 import { note } from "@/lib/static";
@@ -14,10 +17,13 @@ import { KATEGORI_DAMPAK, KATEGORI_MITIGASI, type RiskRegister } from "@/lib/typ
 
 export default function RiskRegisterPage() {
   const q = useLoad(async () => {
-    const [register, kategori, drivers, kriteria, tax] = await Promise.all([api.register(), api.kategori(), api.drivers(), api.kriteria(), api.taksonomi()]);
-    return { register, kategori, drivers, kriteria, t3: groupT3(tax) };
+    const [register, kategori, drivers, kriteria, tax, params, tambahan] = await Promise.all([
+      api.register(), api.kategori(), api.drivers(), api.kriteria(), api.taksonomi(), api.params(), api.ramTambahan(),
+    ]);
+    return { register, kategori, drivers, kriteria, t3: groupT3(tax), popts: paramOptions(params, tambahan) };
   });
   const saver = useSaver();
+  const ro = useReadonly();
   const [picker, setPicker] = useState<RiskRegister | null>(null);
   const [filter, setFilter] = useState("");
   const [search, setSearch] = useState("");
@@ -55,7 +61,7 @@ export default function RiskRegisterPage() {
 
   return (
     <SheetPage title="Risk Register RKAP 2027 - PT KINRA" code="Risk Register" note={note("Risk Register")} wide
-      actions={<>{saver.indicator}<Button variant="outline" onClick={() => d && exportRegister(d.register)}><Download className="h-4 w-4" />Excel</Button><Button onClick={add}><Plus className="h-4 w-4" />Tambah Risiko</Button></>}>
+      actions={<>{saver.indicator}<Button variant="outline" onClick={() => d && exportRegister(d.register)}><Download className="h-4 w-4" />Excel</Button><Button edit onClick={add}><Plus className="h-4 w-4" />Tambah Risiko</Button></>}>
       {q.loading ? <Loading variant="stats-table" /> : q.error ? <ErrorBox error={q.error} /> : d && (
         <>
           <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -76,21 +82,21 @@ export default function RiskRegisterPage() {
               </select>
             </div>}>
             <TableWrap>
-              <table className="kk-table min-w-[2600px]">
+              <table className="kk-table min-w-[2820px]">
                 <thead><tr>
                   <th className="sticky left-0 z-[3] w-12">No</th>
                   <th className="w-40">Taksonomi Risiko</th><th className="w-48">Risk Driver</th><th className="w-56">Risk Event</th>
                   <th className="w-72">Deskripsi Risk Event</th><th className="w-60">Root Cause</th><th className="w-24">Probabilitas Kejadian (0%-100%)</th>
                   <th className="w-52">Deskripsi Dampak Risiko</th><th className="w-40">Nilai Dampak Risiko (Rp)</th><th className="w-52">Kriteria Dampak Acuan</th>
                   <th className="w-32">Kategori Dampak Risiko</th><th className="w-20">Tagging Top Risk</th><th className="w-40">Expected Loss (Rp)</th>
-                  <th className="w-56">Existing Control</th><th className="w-56">Rencana Mitigasi</th><th className="w-32">Kategori Mitigasi</th><th className="w-10" />
+                  <th className="w-56">Existing Control</th><th className="w-56">Rencana Mitigasi</th><th className="w-32">Kategori Mitigasi</th><th className="w-52">Parameter RAM Terkait</th><th className="w-10" />
                 </tr></thead>
                 <tbody>
                   <tr className="example">
                     <td className="sticky left-0">Contoh</td><td>Risiko Pasar</td><td>Perubahan harga komoditas</td><td>Penurunan harga CPO</td><td>Harga CPO turun di bawah asumsi RKAP 2027.</td>
                     <td>Kelebihan pasokan minyak nabati global</td><td className="text-right">30%</td><td>Penurunan marjin penjualan CPO</td><td className="text-right">450.000.000.000</td>
                     <td>b. Dampak perubahan harga komoditas terhadap penurunan margin</td><td>Moderat</td><td>Ya</td><td className="text-right">135.000.000.000</td>
-                    <td>Kontrak penjualan berjangka</td><td>Menambah porsi kontrak penjualan berharga tetap</td><td>Preventive</td><td />
+                    <td>Kontrak penjualan berjangka</td><td>Menambah porsi kontrak penjualan berharga tetap</td><td>Preventive</td><td>K1</td><td />
                   </tr>
                   {rows.map((r, i) => {
                     const drivers = d.drivers.filter((x) => x.kategori === r.kategori).map((x) => x.driver);
@@ -105,7 +111,7 @@ export default function RiskRegisterPage() {
                           <SelectCell value={r.risk_driver} options={driverUnknown ? [r.risk_driver!, ...drivers] : drivers} placeholder={r.kategori ? "Pilih driver…" : "Pilih kategori dulu"} onSave={(v) => patch(r.id, { risk_driver: v })} />
                         </td>
                         <td className="input">
-                          <button onClick={() => setPicker(r)} className="group flex w-full items-start gap-1.5 text-left">
+                          <button onClick={() => !ro && setPicker(r)} disabled={ro} className="group flex w-full items-start gap-1.5 text-left">
                             <Library className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-600" />
                             <span className={clsx("font-semibold group-hover:underline", !r.risk_event && "font-normal text-slate-400 italic")}>{r.risk_event ?? "Pilih dari taksonomi…"}</span>
                           </button>
@@ -126,11 +132,14 @@ export default function RiskRegisterPage() {
                         <td className="input"><EditCell value={r.existing_control} onSave={(v) => patch(r.id, { existing_control: v as string })} /></td>
                         <td className="input"><EditCell value={r.rencana_mitigasi} onSave={(v) => patch(r.id, { rencana_mitigasi: v as string })} /></td>
                         <td className="input"><SelectCell value={r.kategori_mitigasi} options={KATEGORI_MITIGASI} onSave={(v) => patch(r.id, { kategori_mitigasi: v })} /></td>
-                        <td><button onClick={() => del(r)} className="text-slate-400 hover:text-rose-600" title="Hapus"><Trash2 className="h-4 w-4" /></button></td>
+                        <td className={clsx("input", !(r.parameter_ram ?? []).length && "!bg-amber-100/70")}>
+                          <ParamPicker value={r.parameter_ram ?? []} options={d.popts} kategori={r.kategori} onSave={(v) => patch(r.id, { parameter_ram: v })} />
+                        </td>
+                        <td><button data-edit onClick={() => del(r)} className="text-slate-400 hover:text-rose-600" title="Hapus"><Trash2 className="h-4 w-4" /></button></td>
                       </tr>
                     );
                   })}
-                  {rows.length === 0 && <tr><td colSpan={17} className="py-10 text-center text-slate-400">Belum ada risiko. Klik “Tambah Risiko”.</td></tr>}
+                  {rows.length === 0 && <tr><td colSpan={18} className="py-10 text-center text-slate-400">Belum ada risiko. Klik “Tambah Risiko”.</td></tr>}
                 </tbody>
               </table>
             </TableWrap>

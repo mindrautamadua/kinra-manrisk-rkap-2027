@@ -25,6 +25,8 @@ export interface RiskRegister {
   risk_event: string | null; deskripsi: string | null; root_cause: string | null; probabilitas: number | null;
   deskripsi_dampak: string | null; nilai_dampak: number | null; kriteria_dampak: string | null; kategori_dampak: string | null;
   expected_loss: number | null; existing_control: string | null; rencana_mitigasi: string | null; kategori_mitigasi: string | null;
+  /** Kode parameter RAM terkait (1a..U10 / kode parameter unik). Kolom dari migrasi 0002. */
+  parameter_ram?: string[] | null;
 }
 export interface ParamSummary { limit?: number | string | null; appetite?: number | string | null; tolerance?: number | string | null; hasil?: number | string | null; status?: string | null }
 export interface ParameterSheet {
@@ -50,3 +52,18 @@ export interface SheetTemplate {
   code: string; title: string; maxRow: number; maxCol: number; cells: Record<string, TemplateCell>;
   merges: string[]; widths: Record<string, number>; validations: { sqref: string; list: string }[];
 }
+
+export const STATUS_LOG = ["Terbuka", "Dalam proses", "Selesai"] as const;
+export const PRIORITAS = ["Tinggi", "Sedang", "Rendah"] as const;
+export interface ChallengeLog {
+  id: string; created_at: string; updated_at: string; ref_type: "umum" | "lembar" | "parameter" | "risiko" | string;
+  ref_id: string | null; ref_label: string | null; masukan: string; challenger: string | null; prioritas: string;
+  tanggapan: string | null; pic: string | null; tenggat: string | null; status: string;
+}
+export interface Snapshot { id: string; created_at: string; nama: string; catatan: string | null; data?: SnapshotData }
+export interface SnapshotData {
+  sampul: Sampul; ras: Ras[]; ras_tambahan: RasTambahan[]; register: RiskRegister[];
+  params: Pick<ParameterSheet, "code" | "diterapkan" | "summary" | "inputs">[];
+  pengendalian: RamPengendalian[]; ram_tambahan: RamTambahan[]; cat: CatAksi[];
+}
+export interface ModePresentasi { aktif: boolean; sejak?: string | null }

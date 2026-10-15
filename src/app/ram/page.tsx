@@ -112,14 +112,14 @@ export default function RamPage() {
                           )}
                           <td className="calc"><StatusBadge status={r.status} size="sm" /></td>
                           {ctl(r, "inisiatif")}{ctl(r, "kebijakan")}{ctl(r, "program")}{ctl(r, "anggaran")}
-                          <td>{t && <button onClick={() => delTambahan(t.id)} className="text-slate-400 hover:text-rose-600"><Trash2 className="h-4 w-4" /></button>}</td>
+                          <td>{t && <button data-edit onClick={() => delTambahan(t.id)} className="text-slate-400 hover:text-rose-600"><Trash2 className="h-4 w-4" /></button>}</td>
                         </tr>
                       );
                     })}
                     <tr>
                       {list.length === 0 && <><td className="group text-center">{ki + 1}</td><td className="group">{kat}</td></>}
                       <td colSpan={17} className="!bg-paper/60 py-1.5">
-                        <button onClick={() => addTambahan(kat)} className="inline-flex items-center gap-1 text-[12px] font-semibold text-brand-700 hover:underline">
+                        <button data-edit onClick={() => addTambahan(kat)} className="inline-flex items-center gap-1 text-[12px] font-semibold text-brand-700 hover:underline">
                           <Plus className="h-3.5 w-3.5" />Tambah parameter unik
                         </button>
                       </td>

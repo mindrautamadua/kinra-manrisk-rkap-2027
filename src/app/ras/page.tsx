@@ -70,7 +70,7 @@ export default function RasPage() {
             </TableWrap>
           </Section>
 
-          <Section letter="B" title="Pernyataan Selera Risiko Tambahan" right={<Button variant="outline" onClick={addTambahan}><Plus className="h-4 w-4" />Tambah</Button>}>
+          <Section letter="B" title="Pernyataan Selera Risiko Tambahan" right={<Button edit variant="outline" onClick={addTambahan}><Plus className="h-4 w-4" />Tambah</Button>}>
             <TableWrap>
               <table className="kk-table min-w-[1000px]">
                 <thead><tr><th className="w-14">No</th><th className="w-56">Kategori Risiko</th><th className="w-40">Sikap Risiko</th><th>Pernyataan Selera Risiko Tambahan</th><th>Rasionalisasi</th><th className="w-10" /></tr></thead>
@@ -83,7 +83,7 @@ export default function RasPage() {
                       <td className="input"><SelectCell value={r.sikap} options={SIKAP} onSave={(v) => patchTambahan(r.id, { sikap: v })} /></td>
                       <td className="input"><EditCell value={r.pernyataan} onSave={(v) => patchTambahan(r.id, { pernyataan: v as string })} /></td>
                       <td className="input"><EditCell value={r.rasionalisasi} onSave={(v) => patchTambahan(r.id, { rasionalisasi: v as string })} /></td>
-                      <td><button onClick={() => delTambahan(r.id)} className="text-slate-400 hover:text-rose-600"><Trash2 className="h-4 w-4" /></button></td>
+                      <td><button data-edit onClick={() => delTambahan(r.id)} className="text-slate-400 hover:text-rose-600"><Trash2 className="h-4 w-4" /></button></td>
                     </tr>
                   ))}
                   {d.tambahan.length === 0 && <tr><td colSpan={6} className="py-6 text-center text-slate-400">Belum ada pernyataan tambahan.</td></tr>}

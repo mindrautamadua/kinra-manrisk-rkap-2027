@@ -32,7 +32,7 @@ export default function CatPage() {
 
   return (
     <SheetPage title="Corporate Action Threshold (CAT) RKAP 2027 - PT KINRA" code="CAT" note={note("CAT")} wide
-      actions={<>{saver.indicator}<Button onClick={add}><Plus className="h-4 w-4" />Tambah Aksi Korporasi</Button></>}>
+      actions={<>{saver.indicator}<Button edit onClick={add}><Plus className="h-4 w-4" />Tambah Aksi Korporasi</Button></>}>
       {q.loading ? <Loading /> : q.error ? <ErrorBox error={q.error} /> : (
         <Section letter="A" title="Daftar Rencana Aksi Korporasi dan Parameter Akumulasi Transaksi">
           <TableWrap>
@@ -63,7 +63,7 @@ export default function CatPage() {
                     ))}
                     <td className="calc"><StatusBadge size="sm" status={r.hasil == null ? "" : hitungStatus(r.hasil, r.limit_v, r.appetite_v, r.tolerance_v, "Makin tinggi makin buruk")} /></td>
                     <td className="input"><EditCell value={r.rasionalisasi_threshold} onSave={(v) => patch(r.id, { rasionalisasi_threshold: v as string })} /></td>
-                    <td><button onClick={() => del(r.id)} className="text-slate-400 hover:text-rose-600"><Trash2 className="h-4 w-4" /></button></td>
+                    <td><button data-edit onClick={() => del(r.id)} className="text-slate-400 hover:text-rose-600"><Trash2 className="h-4 w-4" /></button></td>
                   </tr>
                 ))}
                 {rows.length === 0 && <tr><td colSpan={17} className="py-10 text-center text-slate-400">Belum ada rencana aksi korporasi RKAP 2027.</td></tr>}
