@@ -57,7 +57,7 @@ export default function CatPage() {
       actions={<>{saver.indicator}<Button edit variant="outline" onClick={() => setAi("baru")}><Sparkles className="h-4 w-4" />Isi dengan AI</Button><Button edit onClick={add}><Plus className="h-4 w-4" />Tambah Aksi Korporasi</Button></>}>
       {q.loading ? <Loading /> : q.error ? <ErrorBox error={q.error} /> : (
         <Section letter="A" title="Daftar Rencana Aksi Korporasi dan Parameter Akumulasi Transaksi">
-          <TableWrap>
+          <TableWrap stickyHeader>
             <table className="kk-table min-w-[2480px]">
               <thead><tr>
                 <th className="w-12">No</th>{TEXT.map(([k, l, w]) => <th key={k} className={w}>{l}</th>)}

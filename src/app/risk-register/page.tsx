@@ -205,7 +205,7 @@ export default function RiskRegisterPage() {
                 </select>
               )}
             </div>}>
-            <TableWrap>
+            <TableWrap stickyHeader>
               <table ref={tableRef} className="kk-table min-w-[3030px]">
                 <thead><tr>
                   <th className="fz fz-no w-12">No</th>

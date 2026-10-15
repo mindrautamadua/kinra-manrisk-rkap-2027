@@ -36,6 +36,8 @@ body { font-feature-settings: "ss01", "cv11"; }
   background: var(--color-brand-800); color: #fff; font-weight: 600; text-align: left; vertical-align: bottom;
   padding: 8px 10px; border-right: 1px solid rgb(255 255 255 / .12); position: sticky; top: 0; z-index: 2; line-height: 1.25;
 }
+/* Header dua baris: baris kedua menempel tepat di bawah baris pertama (--hdr2 diukur di halaman, mis. RAM). */
+.kk-table thead tr + tr th { top: var(--hdr2, 33px); }
 .kk-table th:first-child { border-top-left-radius: 8px; }
 .kk-table th:last-child { border-top-right-radius: 8px; border-right: 0; }
 .kk-table td { border-bottom: 1px solid var(--color-line); border-right: 1px solid var(--color-line); padding: 7px 10px; vertical-align: top; background: #fff; }

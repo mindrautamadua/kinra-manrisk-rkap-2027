@@ -96,8 +96,10 @@ export function Card({ children, className }: { children: React.ReactNode; class
   return <div className={clsx("glass rounded-2xl", className)}>{children}</div>;
 }
 
-export function TableWrap({ children, maxH }: { children: React.ReactNode; maxH?: string }) {
-  return <div className={clsx("scroll-thin overflow-auto rounded-lg", maxH)} style={{ maxHeight: maxH ? undefined : "none" }}>{children}</div>;
+/** Pembungkus tabel yang dapat digulir. `stickyHeader` membatasi tinggi ke layar agar header tabel tetap terlihat saat digulir vertikal. */
+export function TableWrap({ children, maxH, stickyHeader }: { children: React.ReactNode; maxH?: string; stickyHeader?: boolean }) {
+  const h = maxH ?? (stickyHeader ? "max-h-[calc(100vh-6rem)]" : undefined);
+  return <div className={clsx("scroll-thin overflow-auto rounded-lg", h)} style={{ maxHeight: h ? undefined : "none" }}>{children}</div>;
 }
 
 // ---------- skeleton (placeholder saat memuat) ----------

@@ -62,6 +62,9 @@ export default function RamPage() {
       t.style.setProperty("--fz-tax", `${no}px`);
       t.style.setProperty("--fz-kode", `${no + tax}px`);
       t.style.setProperty("--fz-param", `${no + tax + kode}px`);
+      // Baris header kedua (Limit, Appetite, ...) menempel tepat di bawah baris header pertama.
+      const r1 = t.tHead?.rows[0];
+      if (r1) t.style.setProperty("--hdr2", `${r1.getBoundingClientRect().height}px`);
     };
     ukur();
     const ro = new ResizeObserver(ukur);
@@ -159,7 +162,7 @@ export default function RamPage() {
         </Button>
       )}<Button variant="outline" onClick={() => exportRam(rows)}><Download className="h-4 w-4" />Excel</Button></>}>
       {q.loading ? <Loading /> : q.error ? <ErrorBox error={q.error} /> : d && (
-        <TableWrap>
+        <TableWrap stickyHeader>
           <table ref={tableRef} className="kk-table min-w-[2300px]">
             <thead>
               <tr>
@@ -170,8 +173,8 @@ export default function RamPage() {
                 <th colSpan={4} className="text-center">Rencana Pengendalian</th><th rowSpan={2} className="w-10" />
               </tr>
               <tr>
-                <th className="top-[33px] w-24"><ThresholdHint jenis="Limit" /></th><th className="top-[33px] w-24"><ThresholdHint jenis="Appetite" /></th><th className="top-[33px] w-24"><ThresholdHint jenis="Tolerance" /></th>
-                <th className="top-[33px] w-56">Inisiatif Strategis</th><th className="top-[33px] w-56">Kebijakan</th><th className="top-[33px] w-56">Program Kerja</th><th className="top-[33px] w-28">Anggaran (Rp miliar)</th>
+                <th className="w-24"><ThresholdHint jenis="Limit" /></th><th className="w-24"><ThresholdHint jenis="Appetite" /></th><th className="w-24"><ThresholdHint jenis="Tolerance" /></th>
+                <th className="w-56">Inisiatif Strategis</th><th className="w-56">Kebijakan</th><th className="w-56">Program Kerja</th><th className="w-28">Anggaran (Rp miliar)</th>
               </tr>
             </thead>
             <tbody>
