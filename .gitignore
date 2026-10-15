@@ -44,3 +44,8 @@ next-env.d.ts
 # supabase
 supabase/.temp/
 
+
+# kertas kerja sumber (data keuangan sensitif)
+/*.xlsx
+/*.pdf
+

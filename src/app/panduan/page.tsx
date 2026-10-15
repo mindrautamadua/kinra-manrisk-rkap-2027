@@ -30,17 +30,20 @@ const PERAN = {
       ["Perhitungan otomatis", "Rumus lembar parameter asli dihitung ulang langsung. Status Hijau/Kuning/Oranye/Merah, Risiko Utama, RAM, dan Rekap terisi sendiri dari data yang diinput."],
       ["Konsisten dengan standar Induk", "Risk Event dipilih dari Taksonomi PTPN Group, risk driver dari daftar baku 98 driver, dan sikap RAS dicek agar tidak lebih longgar dari sikap Induk (PTPN III)."],
       ["Lebih sedikit kesalahan", "Cek Kesiapan menemukan kolom wajib kosong, risiko duplikat, parameter merah tanpa rencana pengendalian, dan ketidakwajaran lain sebelum dilihat reviewer."],
-      ["Draf isian dibantu AI", "Tombol ✦ di RAS, Risk Register, RAM, dan CAT menyusun draf kolom teks (root cause, mitigasi, pernyataan selera risiko, rencana pengendalian, aksi korporasi) dari uraian bebas. Draf direviu dulu sebelum disimpan."],
-      ["Hemat waktu menyusun paparan", "Executive Summary (RAS, RAM, Top Risk) tersusun otomatis dalam format slide dan bisa langsung dicetak ke PDF."],
+      ["Mutu Risk Register terjaga", "Kategori dampak dicocokkan dengan Kriteria Dampak Acuan dan diberi saran bila tidak sesuai. Baris dengan root cause dangkal atau mitigasi tanpa PIC, waktu, dan target ditandai Perlu perbaikan."],
+      ["Draf isian dibantu AI", "Tombol ✦ di RAS, Risk Register, RAM, CAT, Program Strategis, dan lembar parameter 5c, 5d, 6a, 6b, 8a menyusun draf isian dari uraian bebas. RAM juga punya pengisian rencana pengendalian massal. Draf direviu dulu sebelum disimpan."],
+      ["Hemat waktu menyusun paparan", "Executive Summary (RAS, RAM, Top Risk, Program Strategis GRCS) tersusun otomatis dalam format slide dan bisa langsung dicetak ke PDF."],
+      ["Satu unduhan untuk semua lembar", "Tombol Unduh Semua di header menghasilkan satu file Excel berisi seluruh lembar kertas kerja, siap dikirim ke Induk atau diarsipkan."],
     ],
   },
   challenger: {
     label: "Challenger / Reviewer",
     sub: "Peninjau kertas kerja",
     items: [
-      ["Masukan tercatat rapi", "Setiap masukan dicatat dengan halaman rujukan, PIC, tenggat, prioritas, dan status, lalu bisa diekspor sebagai notulen Excel."],
+      ["Masukan tercatat rapi", "Setiap masukan dicatat dengan rujukan (lembar, parameter, atau risiko tertentu yang bisa dicari), PIC, tenggat, prioritas, dan status, lalu bisa diekspor sebagai notulen Excel."],
       ["Jejak perubahan jelas", "Snapshot membekukan data sebelum challenge session dan menunjukkan apa saja yang berubah sesudahnya."],
       ["Reviu kualitas berbantuan AI", "Selain cek kelengkapan, AI menilai kualitas isi (root cause dangkal, mitigasi tidak spesifik) dan menyarankan pertanyaan untuk reviewer."],
+      ["Keterkaitan mudah ditelusuri", "Matriks Keterkaitan Risiko–RAM menunjukkan risiko utama yang belum terhubung ke parameter dan parameter bermasalah yang belum ditopang risk event."],
     ],
   },
   pimpinan: {
@@ -61,13 +64,14 @@ const LANGKAH: { lembar: string; href: string; jenis: Jenis; isi: string }[] = [
   { lembar: "RAS", href: "/ras", jenis: "Diisi", isi: "Pilih sikap risiko dan tulis pernyataan selera risiko per kategori. Sikap entitas harus sama atau lebih ketat dari sikap Induk; aplikasi memberi tanda bila lebih longgar. Pernyataan tambahan dicatat di bagian B." },
   { lembar: "Kriteria Dampak", href: "/kriteria-dampak", jenis: "Referensi", isi: "Baca definisi kategori risiko dan kriteria dampak sebagai acuan." },
   { lembar: "Risk Driver", href: "/risk-driver", jenis: "Sebagian", isi: "Periksa 98 risk driver baku per kategori. Driver khusus entitas ditambahkan di bagian B." },
-  { lembar: "Risk Register", href: "/risk-register", jenis: "Diisi", isi: "Klik Tambah Risiko. Pilih Risk Event dari Taksonomi PTPN Group, lalu isi driver, deskripsi, root cause, probabilitas, dampak, kategori dampak, existing control, rencana dan kategori mitigasi, serta parameter RAM terkait. Tagging Top Risk terisi sendiri." },
+  { lembar: "Risk Register", href: "/risk-register", jenis: "Diisi", isi: "Klik Tambah Risiko. Pilih Risk Event dari Taksonomi PTPN Group, lalu isi driver, deskripsi, root cause, probabilitas, dampak, kriteria dampak acuan, kategori dampak, existing control, rencana dan kategori mitigasi, serta parameter RAM terkait. Di bawah kategori dampak tampil saran sesuai kriteria; klik pakai bila setuju. Tagging Top Risk terisi sendiri. Gunakan tombol Perlu perbaikan untuk menyaring baris yang mutunya masih kurang." },
   { lembar: "Risiko Utama", href: "/risiko-utama", jenis: "Otomatis", isi: "Terisi otomatis dari risiko berkategori dampak Moderat ke atas. Cukup diperiksa." },
   { lembar: "Rekap Parameter", href: "/rekap", jenis: "Sebagian", isi: "Pada parameter klaster dan unik, isi kolom Diterapkan (Ya/Tidak). Gunakan Hitung Ulang Semua bila perlu menyegarkan seluruh hasil." },
-  { lembar: "Lembar Parameter 1a–U10", href: "/parameter/1a", jenis: "Diisi", isi: "Buka tiap parameter yang diterapkan, isi sel kuning (rincian data RKAP bagian C, konfirmasi eksposur bagian D, sumber data bagian E, dasar usulan threshold bagian F bila ada). Hasil dan status langsung terhitung. Gunakan tombol panah untuk pindah parameter." },
-  { lembar: "RAM", href: "/ram", jenis: "Sebagian", isi: "Terisi otomatis dari RAS, Rekap, dan lembar parameter. Isi rencana pengendalian untuk parameter berstatus Kuning/Oranye/Merah, dan tambahkan parameter unik bila ada." },
+  { lembar: "Lembar Parameter 1a–U10", href: "/parameter/1a", jenis: "Diisi", isi: "Buka tiap parameter yang diterapkan, isi sel kuning (rincian data RKAP bagian C, konfirmasi eksposur bagian D, sumber data bagian E, dasar usulan threshold bagian F bila ada). Hasil dan status langsung terhitung. Lembar 5c, 5d, 6a, 6b, dan 8a punya tombol Isi dengan AI untuk menyusun draf rincian tabel. Gunakan tombol panah untuk pindah parameter." },
+  { lembar: "RAM", href: "/ram", jenis: "Sebagian", isi: "Terisi otomatis dari RAS, Rekap, dan lembar parameter. Isi rencana pengendalian untuk parameter berstatus Kuning/Oranye/Merah (atau gunakan Isi Pengendalian dengan AI untuk mengisi semua yang masih kosong sekaligus), dan tambahkan parameter unik bila ada. Kolom identitas parameter tetap terlihat saat tabel digulir ke samping." },
   { lembar: "CAT", href: "/cat", jenis: "Diisi", isi: "Klik Tambah Aksi Korporasi untuk setiap rencana aksi korporasi RKAP 2027 beserta data rinci dan parameter akumulasi transaksinya." },
-  { lembar: "Executive Summary", href: "/executive-summary", jenis: "Otomatis", isi: "Periksa slide RAS, RAM, dan Top Risk yang tersusun otomatis, lalu Cetak / PDF." },
+  { lembar: "Program Strategis GRCS", href: "/program-strategis", jenis: "Diisi", isi: "Isi minimal satu program per pilar GRCS (Governance, Risk Management, Compliance, Sustainability): inisiatif RJPP, program kerja, pemimpin dan pemilik, jadwal, tujuan, target, anggaran OPEX/CAPEX, serta risiko implementasi dan mitigasinya. Satu kartu menjadi satu slide 7.4." },
+  { lembar: "Executive Summary", href: "/executive-summary", jenis: "Otomatis", isi: "Periksa slide 7.1 RAS, 7.2 RAM, 7.3 Top Risk, dan 7.4 Program Strategis yang tersusun otomatis, lalu Cetak / PDF." },
 ];
 const JENIS_STYLE: Record<Jenis, string> = {
   Diisi: "bg-cell-input text-amber-900 ring-amber-300",
@@ -90,6 +94,7 @@ const SESI: { fase: string; tone: string; langkah: { judul: string; href?: strin
     fase: "Sebelum sesi", tone: "border-t-sky-500",
     langkah: [
       { judul: "Cek Kesiapan", href: "/kesiapan", isi: "Aplikasi memeriksa seluruh kertas kerja dan mengelompokkan temuan menjadi Kritis, Perhatian, dan Info per area. Klik temuan untuk menuju halaman yang perlu diperbaiki, lalu Periksa Ulang. Targetkan nol temuan Kritis." },
+      { judul: "Perbaiki mutu Risk Register", href: "/risk-register", isi: "Klik Perlu perbaikan untuk menyaring baris bermasalah, lalu sesuaikan kategori dampak dengan saran kriteria dan lengkapi root cause serta mitigasi (PIC, waktu, target)." },
       { judul: "Review Kualitas (AI)", href: "/kesiapan", isi: "Penilaian mutu isi RAS, Risk Register, dan rencana pengendalian RAM. Tiap temuan berisi masalah, saran perbaikan, dan pertanyaan yang mungkin diajukan reviewer. Aktif bila admin sudah mengisi kunci OpenAI." },
       { judul: "Keterkaitan Risiko–RAM", href: "/keterkaitan", isi: "Pastikan setiap risiko korporat terhubung ke parameter RAM yang relevan. Halaman ini hanya untuk peninjauan; kaitan diisi dari kolom Parameter RAM Terkait di Risk Register." },
       { judul: "Snapshot Versi", href: "/snapshot", isi: "Klik Bekukan Kondisi Sekarang dan beri nama, misalnya \"Sebelum Challenge Session 1\"." },
@@ -100,7 +105,7 @@ const SESI: { fase: string; tone: string; langkah: { judul: string; href?: strin
     langkah: [
       { judul: "Aktifkan Mode Presentasi", isi: "Klik tombol Mode Presentasi di header. Semua isian di semua layar terkunci; Log Challenge dan Snapshot tetap bisa dipakai." },
       { judul: "Tampilkan bahan", href: "/executive-summary", isi: "Tampilkan Dashboard, Executive Summary, atau lembar yang sedang dibahas." },
-      { judul: "Catat Masukan", isi: "Klik tombol Catat Masukan (kanan bawah, ada di setiap halaman). Masukan otomatis merujuk ke halaman yang sedang dibuka. Isi challenger, PIC, prioritas, dan tenggat." },
+      { judul: "Catat Masukan", isi: "Klik tombol Catat Masukan (kanan bawah, ada di setiap halaman). Rujukan otomatis mengikuti halaman yang sedang dibuka; ketik di kolom Terkait dengan untuk mencari lembar, parameter, atau risiko lain. Isi challenger, PIC, prioritas, dan tenggat, lalu simpan dengan Ctrl/⌘ + Enter." },
     ],
   },
   {
@@ -110,16 +115,18 @@ const SESI: { fase: string; tone: string; langkah: { judul: string; href?: strin
       { judul: "Tindak lanjut di Log Challenge", href: "/challenge", isi: "Saring per status (Terbuka / Dalam proses / Selesai), prioritas, atau kata kunci. Klik rujukan untuk menuju objek yang perlu direvisi, lalu isi tanggapan dan ubah status." },
       { judul: "Unduh Notulen Excel", href: "/challenge", isi: "Simpan sebagai bukti hasil sesi." },
       { judul: "Bandingkan Snapshot", href: "/snapshot", isi: "Pilih versi dasar dan pembandingnya, lalu klik Bandingkan untuk menunjukkan perubahan yang sudah dilakukan." },
+      { judul: "Unduh versi final", isi: "Setelah revisi selesai, klik Unduh Semua di header untuk menyimpan seluruh lembar kertas kerja dalam satu file Excel." },
     ],
   },
 ];
 
 const EKSPOR = [
+  { halaman: "Semua halaman (header)", href: "/", tombol: "Unduh Semua", hasil: "Satu file Excel berisi seluruh lembar kertas kerja: Sampul, RAS, Kriteria Dampak, Risk Driver, Risk Register, RAM, CAT, Rekap, Program Strategis, dan 32 lembar parameter (kecuali Executive Summary)" },
   { halaman: "Risk Register", href: "/risk-register", tombol: "Excel", hasil: "Daftar seluruh risiko korporat" },
   { halaman: "RAM", href: "/ram", tombol: "Excel", hasil: "Risk Acceptance Matrix" },
   { halaman: "Rekap Parameter", href: "/rekap", tombol: "Excel", hasil: "Rekap 32 parameter beserta status" },
   { halaman: "Log Challenge", href: "/challenge", tombol: "Notulen Excel", hasil: "Notulen masukan dan tindak lanjut" },
-  { halaman: "Executive Summary", href: "/executive-summary", tombol: "Cetak / PDF", hasil: "Slide paparan RAS, RAM, Top Risk" },
+  { halaman: "Executive Summary", href: "/executive-summary", tombol: "Cetak / PDF", hasil: "Slide paparan RAS, RAM, Top Risk, Program Strategis GRCS" },
 ];
 
 const TIPS = [
@@ -127,7 +134,10 @@ const TIPS = [
   "Bila status parameter tertulis \"Data belum lengkap\", lengkapi sel kuning bagian C atau isi konfirmasi eksposur di bagian D.",
   "Gunakan Taksonomi PTPN Group (menu Master Data) untuk mencari Risk Event yang paling tepat sebelum menambah risiko.",
   "Ambil snapshot sebelum perubahan besar agar selalu ada titik pembanding.",
-  "Tombol ✦ (Isi dengan AI) di RAS, Risk Register, RAM, dan CAT membuat draf kolom teks. Ceritakan konteksnya dengan bahasa bebas, periksa draf, centang kolom yang dipakai, lalu Terapkan. AI tidak mengisi angka; bagian bertanda [...] wajib dilengkapi sendiri.",
+  "Tombol ✦ (Isi dengan AI) di RAS, Risk Register, RAM, CAT, dan Program Strategis membuat draf kolom teks. Ceritakan konteksnya dengan bahasa bebas, periksa draf, centang kolom yang dipakai, lalu Terapkan. Bagian bertanda [...] wajib dilengkapi sendiri.",
+  "Isi dengan AI di lembar parameter 5c, 5d, 6a, 6b, dan 8a dapat mengusulkan angka rincian tabel. Cocokkan setiap angka dengan data RKAP sebelum menerapkannya.",
+  "Bila kategori dampak di Risk Register berwarna merah, nilainya tidak sesuai Kriteria Dampak Acuan. Klik pakai untuk mengikuti saran, atau perbaiki nilai dampaknya.",
+  "Tulis rencana mitigasi lengkap dengan PIC, waktu, dan target terukur agar tidak ditandai Perlu perbaikan.",
 ];
 
 const FAQ = [
@@ -137,6 +147,11 @@ const FAQ = [
   ["Kenapa parameter tidak muncul di RAM?", "Pastikan kolom Diterapkan di Rekap Parameter bernilai \"Ya\" untuk parameter klaster/unik."],
   ["Tombol Review Kualitas (AI) atau Isi dengan AI tidak berfungsi?", "Kedua fitur ini membutuhkan kunci OpenAI yang dipasang admin. Pemeriksaan kesiapan otomatis dan pengisian manual tetap berjalan tanpa AI."],
   ["Apakah hasil AI langsung tersimpan?", "Tidak. AI hanya membuat draf di jendela terpisah. Data baru tersimpan setelah Anda memilih kolom dan klik Terapkan. Tombol AI tersembunyi saat Mode Presentasi aktif."],
+  ["Bagaimana cara mendapatkan akun?", "Akun dibuat oleh admin. Hubungi admin untuk dibuatkan username dan password, atau untuk mengganti password yang lupa."],
+  ["Kenapa saya diminta login lagi?", "Sesi login berlaku 8 jam. Setelah itu, atau setelah Anda klik Keluar, login ulang diperlukan. Data yang sudah tersimpan tidak hilang."],
+  ["Akun saya terkunci, apa yang harus dilakukan?", "Setelah 5 kali salah password, akun dikunci sementara selama 15 menit. Tunggu, lalu coba lagi, atau minta admin mengatur ulang password."],
+  ["Apa isi file Unduh Semua?", "Satu workbook Excel berisi seluruh lembar kertas kerja, termasuk 32 lembar parameter dan Program Strategis. Executive Summary tidak ikut; cetak dari halamannya sebagai PDF."],
+  ["Kenapa slide 7.4 di Executive Summary kosong?", "Slide 7.4 diisi dari halaman Program Strategis GRCS. Pilar yang belum punya program tetap mendapat slide kosong."],
   ["Bagaimana menciutkan sidebar?", "Klik tombol di bawah sidebar atau tekan Ctrl/⌘ + B. Pilihan ini diingat oleh browser."],
   ["Apa arti warna sel?", "Kuning: diisi entitas. Biru: terhitung otomatis, jangan diisi. Abu-abu: label atau baris contoh yang tidak ikut dihitung."],
 ];
@@ -198,7 +213,7 @@ export default function PanduanPage() {
               </div>
             </Card>
             <p className="text-[13.5px] leading-relaxed text-slate-700">
-              Seluruh lembar Excel — Sampul, RAS, Risk Register, RAM, CAT, Rekap, sampai 32 lembar parameter (1a–U10) — tersedia sebagai halaman yang bisa diisi bersama, dihitung otomatis, diperiksa, dan dipresentasikan dari satu tempat.
+              Seluruh lembar Excel — Sampul, RAS, Risk Register, RAM, CAT, Rekap, sampai 32 lembar parameter (1a–U10) — ditambah Program Strategis GRCS untuk slide 7.4, tersedia sebagai halaman yang bisa diisi bersama, dihitung otomatis, diperiksa, dipresentasikan, dan diunduh kembali ke Excel dari satu tempat. Akses dilindungi login per pengguna.
             </p>
           </Bab>
 
@@ -236,7 +251,7 @@ export default function PanduanPage() {
                 <ul className="mt-2 space-y-1.5 text-[12.5px] text-slate-600">
                   <li><b className="text-ink">Dashboard</b> — ringkasan seluruh kertas kerja</li>
                   <li><b className="text-ink">Challenge Session</b> — Cek Kesiapan, Log Challenge, Keterkaitan Risiko–RAM, Snapshot Versi</li>
-                  <li><b className="text-ink">Kertas Kerja</b> — Sampul sampai Executive Summary, plus Lembar Parameter 1a–U10</li>
+                  <li><b className="text-ink">Kertas Kerja</b> — Sampul sampai Rekap Parameter, Program Strategis GRCS, Executive Summary, plus Lembar Parameter 1a–U10</li>
                   <li><b className="text-ink">Master Data</b> — Taksonomi PTPN Group dan Inisialisasi Data</li>
                 </ul>
                 <p className="mt-3 text-[12px] text-slate-500">Ciutkan dengan tombol di bawah sidebar atau <Kbd>Ctrl/⌘</Kbd> + <Kbd>B</Kbd>.</p>
@@ -252,6 +267,19 @@ export default function PanduanPage() {
                 </div>
               </Card>
               <Card className="p-5">
+                <div className="text-[13px] font-bold text-ink">Header atas</div>
+                <ul className="mt-2 space-y-1.5 text-[12.5px] text-slate-600">
+                  <li><b className="text-ink">Ikon tanda tanya</b> — membuka panduan ini</li>
+                  <li><b className="text-ink">Unduh Semua</b> — seluruh lembar kertas kerja dalam satu file Excel</li>
+                  <li><b className="text-ink">Mode Presentasi</b> — mengunci isian di semua layar (ON/OFF)</li>
+                  <li><b className="text-ink">Keluar</b> — mengakhiri sesi login di perangkat ini</li>
+                </ul>
+              </Card>
+              <Card className="p-5">
+                <div className="text-[13px] font-bold text-ink">Tombol Catat Masukan</div>
+                <p className="mt-2 text-[12.5px] leading-relaxed text-slate-600">Tombol emas di kanan bawah setiap halaman untuk mencatat masukan challenger ke Log Challenge, merujuk otomatis ke halaman yang sedang dibuka.</p>
+              </Card>
+              <Card className="p-5">
                 <div className="text-[13px] font-bold text-ink">Tab lembar</div>
                 <p className="mt-2 text-[12.5px] leading-relaxed text-slate-600">Deretan tab di bawah layar meniru tab sheet Excel untuk berpindah lembar dengan cepat.</p>
               </Card>
@@ -264,12 +292,12 @@ export default function PanduanPage() {
 
           {/* 4. Memulai */}
           <Bab id="memulai" no={4} title="Memulai (sekali saja, oleh admin)">
-            <ol className="grid gap-3 md:grid-cols-3">
-              {[["Buka Inisialisasi Data", "Menu Master Data → Inisialisasi Data."], ["Cek Status", "Lihat apakah tabel database sudah siap."], ["Isi Data Awal", "Bila masih kosong. Master taksonomi, risk driver, RAS, dan lembar parameter terisi dari template."]].map(([j, i], n) => (
+            <ol className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              {[["Buat akun pengguna", "Admin membuat akun setiap anggota tim (username dan password minimal 10 karakter), lalu membagikannya secara pribadi."], ["Buka Inisialisasi Data", "Menu Master Data → Inisialisasi Data."], ["Cek Status", "Lihat apakah tabel database sudah siap."], ["Isi Data Awal", "Bila masih kosong. Master taksonomi, risk driver, RAS, dan lembar parameter terisi dari template."]].map(([j, i], n) => (
                 <Card key={j} className="p-5"><Step n={n + 1} /><div className="mt-2 text-[13.5px] font-bold text-ink">{j}</div><p className="mt-1 text-[12.5px] text-slate-600">{i}</p></Card>
               ))}
             </ol>
-            <Callout tone="warn">Jangan menjalankan <b>Isi Data Awal</b> lagi setelah tim mulai mengisi, kecuali memang ingin mengulang dari awal.</Callout>
+            <Callout tone="info">Isi Data Awal hanya mengisi tabel yang masih kosong, sehingga aman diulang dan tidak menimpa data yang sudah diisi tim.</Callout>
             <GoLink href="/setup">Buka Inisialisasi Data</GoLink>
           </Bab>
 
@@ -362,8 +390,8 @@ export default function PanduanPage() {
                 </div>
               ))}
             </div>
-            <Callout tone="danger" icon={ShieldAlert}>
-              Aplikasi ini <b>tanpa login</b>: siapa pun yang membuka alamatnya dapat membaca dan mengubah data. Gunakan hanya di jaringan internal dan jangan bagikan alamatnya ke pihak luar.
+            <Callout tone="warn" icon={ShieldAlert}>
+              Setiap pengguna masuk dengan <b>akun masing-masing</b>. Jangan meminjamkan akun atau menyimpan password di perangkat bersama, dan klik <b>Keluar</b> setelah selesai bila memakai komputer umum. Sesi berakhir otomatis setelah 8 jam.
             </Callout>
           </Bab>
 

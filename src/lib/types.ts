@@ -27,6 +27,8 @@ export interface RiskRegister {
   expected_loss: number | null; existing_control: string | null; rencana_mitigasi: string | null; kategori_mitigasi: string | null;
   /** Kode parameter RAM terkait (1a..U10 / kode parameter unik). Kolom dari migrasi 0002. */
   parameter_ram?: string[] | null;
+  /** Kode Sasaran Strategis RJPP terkait (PD-1, SG-2, NB-3, FD-1, ...). Kolom dari migrasi 0006. */
+  sasaran_strategis?: string[] | null;
 }
 export interface ParamSummary { limit?: number | string | null; appetite?: number | string | null; tolerance?: number | string | null; hasil?: number | string | null; status?: string | null }
 export interface ParameterSheet {
@@ -51,6 +53,9 @@ export interface ProgramStrategis {
   deskripsi: string | null; tujuan_kualitatif: string | null; tujuan_kuantitatif: string | null; target: string | null;
   opex: number | null; capex: number | null; risiko_implementasi: string | null; mitigasi: string | null;
 }
+/** Induk Sasaran Strategis RJPP 2026-2030: 3 pilar strategis + Sasaran Korporasi sebagai Fondasi. */
+export const PILAR_RJPP = ["Performance Driven", "Stability and Growth", "New Business Expansion", "Fondasi"] as const;
+export interface SasaranStrategis { kode: string; urutan: number; pilar: string; nama: string; target: string | null; rujukan: string | null }
 export interface Sampul { nama_entitas: string; posisi_data: string | null; tanggal_penyusunan: string | null; versi: string; catatan: string | null }
 
 export type CellValue = string | number | boolean | null;
@@ -74,3 +79,12 @@ export interface SnapshotData {
   pengendalian: RamPengendalian[]; ram_tambahan: RamTambahan[]; cat: CatAksi[];
 }
 export interface ModePresentasi { aktif: boolean; sejak?: string | null }
+
+// ---------- Data Keuangan RKAP 2027 (migrasi 0005) ----------
+/** Satu pos laba rugi dalam rupiah penuh. `bulan` = Januari..Desember 2027. */
+export interface RkapPos { tahun: number | null; bulan: (number | null)[]; pembanding: Record<string, number | null> }
+export interface RkapData { sheet: string; pembanding: string[]; pos: Record<string, RkapPos> }
+export interface RkapKeuangan {
+  id: string; created_at: string; nama: string; sumber: string | null; catatan: string | null;
+  aktif: boolean; ebitda_basis: "holding" | "komite"; data: RkapData;
+}

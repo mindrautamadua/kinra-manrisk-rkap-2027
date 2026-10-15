@@ -73,10 +73,10 @@ const REGISTER_COLS: Col[] = [
   { header: "Kategori Dampak Risiko", key: "kategori_dampak", width: 16 }, { header: "Tagging Top Risk", key: "tagging", width: 10 },
   { header: "Expected Loss (Rp)", key: "expected_loss", width: 20, fmt: RP }, { header: "Existing Control", key: "existing_control", width: 36 },
   { header: "Rencana Mitigasi", key: "rencana_mitigasi", width: 36 }, { header: "Kategori Mitigasi", key: "kategori_mitigasi", width: 14 },
-  { header: "Parameter RAM Terkait", key: "param", width: 18 },
+  { header: "Parameter RAM Terkait", key: "param", width: 18 }, { header: "Sasaran Strategis RJPP Terkait", key: "sasaran", width: 18 },
 ];
 const registerRows = (rows: RiskRegister[]) => rows.map((r, i) => ({
-  ...r, no: i + 1, param: (r.parameter_ram ?? []).join(", "), tagging: r.kategori_dampak ? (isTopRisk(r.kategori_dampak) ? "Ya" : "Tidak") : "",
+  ...r, no: i + 1, param: (r.parameter_ram ?? []).join(", "), sasaran: (r.sasaran_strategis ?? []).join(", "), tagging: r.kategori_dampak ? (isTopRisk(r.kategori_dampak) ? "Ya" : "Tidak") : "",
 }));
 
 const REKAP_COLS: Col[] = [

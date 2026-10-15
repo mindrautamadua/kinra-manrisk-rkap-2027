@@ -3,7 +3,7 @@ import { sb, must } from "./supabase";
 import type {
   ChallengeLog, ModePresentasi, Snapshot, SnapshotData,
   CatAksi, KategoriRisiko, ProgramStrategis, KriteriaDampak, ParameterSheet, RamPengendalian, RamTambahan, Ras, RasTambahan, RiskDriver,
-  RiskRegister, Sampul, Taksonomi,
+  RiskRegister, RkapKeuangan, Sampul, SasaranStrategis, Taksonomi,
 } from "./types";
 
 // ---------- mode presentasi: kunci semua penulisan kecuali Log Challenge ----------
@@ -34,7 +34,10 @@ export const api = {
   pengendalian: async () => must(await sb().from("ram_pengendalian").select("*")) as RamPengendalian[],
   ramTambahan: async () => must(await sb().from("ram_tambahan").select("*").order("kategori")) as RamTambahan[],
   cat: async () => must(await sb().from("cat_aksi").select("*").order("urutan")) as CatAksi[],
+  sasaran: async () => must(await sb().from("sasaran_strategis").select("*").order("urutan")) as SasaranStrategis[],
   program: async () => must(await sb().from("program_strategis").select("*").order("urutan")) as ProgramStrategis[],
+  rkapList: async () => must(await sb().from("rkap_keuangan").select("*").order("created_at", { ascending: false })) as RkapKeuangan[],
+  rkapAktif: async () => (must(await sb().from("rkap_keuangan").select("*").eq("aktif", true)) as RkapKeuangan[])[0] ?? null,
   async taksonomi(): Promise<Taksonomi[]> {
     const out: Taksonomi[] = [];
     for (let from = 0; ; from += 1000) {

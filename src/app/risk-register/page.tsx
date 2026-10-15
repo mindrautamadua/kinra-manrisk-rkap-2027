@@ -7,6 +7,7 @@ import {
 } from "@/components/ui";
 import { TaxonomyPicker, groupT3, type T3Option } from "@/components/TaxonomyPicker";
 import { ParamPicker } from "@/components/ParamPicker";
+import { SasaranPicker } from "@/components/SasaranPicker";
 import { AiFillModal, AiRowButton } from "@/components/AiFill";
 import type { FieldSpec } from "@/lib/isi-ai";
 import { paramOptions } from "@/lib/trace";
@@ -20,16 +21,18 @@ import { KATEGORI_DAMPAK, KATEGORI_MITIGASI, type RiskRegister } from "@/lib/typ
 
 export default function RiskRegisterPage() {
   const q = useLoad(async () => {
-    const [register, kategori, drivers, kriteria, tax, params, tambahan] = await Promise.all([
+    const [register, kategori, drivers, kriteria, tax, params, tambahan, sasaran] = await Promise.all([
       api.register(), api.kategori(), api.drivers(), api.kriteria(), api.taksonomi(), api.params(), api.ramTambahan(),
+      api.sasaran().catch(() => null), // null = migrasi 0006 belum dijalankan
     ]);
-    return { register, kategori, drivers, kriteria, t3: groupT3(tax), popts: paramOptions(params, tambahan), ebitda: ebitdaRkap(params) };
+    return { register, kategori, drivers, kriteria, t3: groupT3(tax), popts: paramOptions(params, tambahan), ebitda: ebitdaRkap(params), sasaran };
   });
   const saver = useSaver();
   const ro = useReadonly();
   const [picker, setPicker] = useState<RiskRegister | null>(null);
   const [ai, setAi] = useState<RiskRegister | null>(null);
   const [filter, setFilter] = useState("");
+  const [filterSasaran, setFilterSasaran] = useState("");
   const [search, setSearch] = useState("");
   const [hanyaIsu, setHanyaIsu] = useState(false);
   const [buka, setBuka] = useState<string | null>(null);
@@ -47,8 +50,8 @@ export default function RiskRegisterPage() {
   const jumlahIsu = [...mutu.values()].filter((x) => x.isu.length).length;
 
   const rows = useMemo(() => (d?.register ?? []).filter((r) =>
-    (!filter || r.kategori === filter) && (!hanyaIsu || !!mutu.get(r.id)?.isu.length) &&
-    (!search || [r.risk_event, r.deskripsi, r.root_cause, r.rencana_mitigasi].some((x) => (x ?? "").toLowerCase().includes(search.toLowerCase())))), [d, filter, search, hanyaIsu, mutu]);
+    (!filter || r.kategori === filter) && (!filterSasaran || (r.sasaran_strategis ?? []).includes(filterSasaran)) && (!hanyaIsu || !!mutu.get(r.id)?.isu.length) &&
+    (!search || [r.risk_event, r.deskripsi, r.root_cause, r.rencana_mitigasi].some((x) => (x ?? "").toLowerCase().includes(search.toLowerCase())))), [d, filter, filterSasaran, search, hanyaIsu, mutu]);
 
   const patch = (id: string, p: Partial<RiskRegister>) => {
     q.setData({ ...d!, register: d!.register.map((r) => (r.id === id ? { ...r, ...p } : r)) });
@@ -93,6 +96,7 @@ export default function RiskRegisterPage() {
     taksonomi_kode: r.taksonomi_kode, risk_event: r.risk_event, deskripsi_risk_event: r.deskripsi,
     probabilitas: r.probabilitas, nilai_dampak_rp: r.nilai_dampak, kategori_dampak: r.kategori_dampak,
     parameter_ram_terkait: (r.parameter_ram ?? []).map((k) => { const o = d!.popts.find((x) => x.kode === k); return o ? `${k} ${o.parameter}` : k; }),
+    sasaran_strategis_rjpp_terkait: (r.sasaran_strategis ?? []).map((k) => { const o = d!.sasaran?.find((x) => x.kode === k); return o ? `${k} ${o.nama}` : k; }),
     contoh_baris: {
       risk_event: "Penurunan harga CPO", root_cause: "Kelebihan pasokan minyak nabati global", deskripsi_dampak: "Penurunan marjin penjualan CPO",
       existing_control: "Kontrak penjualan berjangka", rencana_mitigasi: "Menambah porsi kontrak penjualan berharga tetap", kategori_mitigasi: "Preventive",
@@ -129,23 +133,29 @@ export default function RiskRegisterPage() {
                 <option value="">Semua kategori</option>
                 {d.kategori.map((k) => <option key={k.no}>{k.nama}</option>)}
               </select>
+              {!!d.sasaran?.length && (
+                <select value={filterSasaran} onChange={(e) => setFilterSasaran(e.target.value)} className="max-w-56 rounded-lg border border-line bg-white px-2 text-[13px]">
+                  <option value="">Semua sasaran RJPP</option>
+                  {d.sasaran.map((x) => <option key={x.kode} value={x.kode}>{x.kode} {x.nama}</option>)}
+                </select>
+              )}
             </div>}>
             <TableWrap>
-              <table className="kk-table min-w-[2820px]">
+              <table className="kk-table min-w-[3030px]">
                 <thead><tr>
                   <th className="sticky left-0 z-[3] w-12">No</th>
                   <th className="w-40">Taksonomi Risiko</th><th className="w-48">Risk Driver</th><th className="w-56">Risk Event</th>
                   <th className="w-72">Deskripsi Risk Event</th><th className="w-60">Root Cause</th><th className="w-24">Probabilitas Kejadian (0%-100%)</th>
                   <th className="w-52">Deskripsi Dampak Risiko</th><th className="w-40">Nilai Dampak Risiko (Rp)</th><th className="w-52">Kriteria Dampak Acuan</th>
                   <th className="w-32">Kategori Dampak Risiko</th><th className="w-20">Tagging Top Risk</th><th className="w-40">Expected Loss (Rp)</th>
-                  <th className="w-56">Existing Control</th><th className="w-56">Rencana Mitigasi</th><th className="w-32">Kategori Mitigasi</th><th className="w-52">Parameter RAM Terkait</th><th className="w-12" />
+                  <th className="w-56">Existing Control</th><th className="w-56">Rencana Mitigasi</th><th className="w-32">Kategori Mitigasi</th><th className="w-52">Parameter RAM Terkait</th><th className="w-52">Sasaran Strategis RJPP Terkait</th><th className="w-12" />
                 </tr></thead>
                 <tbody>
                   <tr className="example">
                     <td className="sticky left-0">Contoh</td><td>Risiko Pasar</td><td>Perubahan harga komoditas</td><td>Penurunan harga CPO</td><td>Harga CPO turun di bawah asumsi RKAP 2027.</td>
                     <td>Kelebihan pasokan minyak nabati global</td><td className="text-right">30%</td><td>Penurunan marjin penjualan CPO</td><td className="text-right">450.000.000.000</td>
                     <td>b. Dampak perubahan harga komoditas terhadap penurunan margin</td><td>Moderat</td><td>Ya</td><td className="text-right">135.000.000.000</td>
-                    <td>Kontrak penjualan berjangka</td><td>Menambah porsi kontrak penjualan berharga tetap</td><td>Preventive</td><td>K1</td><td />
+                    <td>Kontrak penjualan berjangka</td><td>Menambah porsi kontrak penjualan berharga tetap</td><td>Preventive</td><td>K1</td><td>SG-1</td><td />
                   </tr>
                   {rows.map((r, i) => {
                     const drivers = d.drivers.filter((x) => x.kategori === r.kategori).map((x) => x.driver);
@@ -209,11 +219,15 @@ export default function RiskRegisterPage() {
                         <td className={clsx("input", !(r.parameter_ram ?? []).length && "!bg-amber-100/70")}>
                           <ParamPicker value={r.parameter_ram ?? []} options={d.popts} kategori={r.kategori} onSave={(v) => patch(r.id, { parameter_ram: v })} />
                         </td>
+                        <td className={clsx("input", d.sasaran && !(r.sasaran_strategis ?? []).length && "!bg-amber-100/70")}>
+                          {d.sasaran ? <SasaranPicker value={r.sasaran_strategis ?? []} options={d.sasaran} onSave={(v) => patch(r.id, { sasaran_strategis: v })} />
+                            : <span className="text-[11px] text-slate-400 italic">Jalankan migrasi 0006_sasaran_strategis.sql</span>}
+                        </td>
                         <td><div className="flex flex-col items-center gap-2"><AiRowButton onClick={() => bukaAi(r)} /><button data-edit onClick={() => del(r)} className="text-slate-400 hover:text-rose-600" title="Hapus"><Trash2 className="h-4 w-4" /></button></div></td>
                       </tr>
                       {buka === r.id && isu.length > 0 && (
                         <tr>
-                          <td colSpan={18} className="!bg-amber-50/70 !py-2">
+                          <td colSpan={19} className="!bg-amber-50/70 !py-2">
                             <div className="sticky left-12 max-w-[900px] space-y-1 pl-2 text-[12px]">
                               {isu.map((x, j) => (
                                 <div key={j} className="flex gap-2"><span className="w-36 shrink-0 font-semibold text-amber-900">{x.kolom}</span><span className="text-slate-700">{x.pesan}</span></div>
@@ -226,7 +240,7 @@ export default function RiskRegisterPage() {
                       </Fragment>
                     );
                   })}
-                  {rows.length === 0 && <tr><td colSpan={18} className="py-10 text-center text-slate-400">Belum ada risiko. Klik “Tambah Risiko”.</td></tr>}
+                  {rows.length === 0 && <tr><td colSpan={19} className="py-10 text-center text-slate-400">Belum ada risiko. Klik “Tambah Risiko”.</td></tr>}
                 </tbody>
               </table>
             </TableWrap>

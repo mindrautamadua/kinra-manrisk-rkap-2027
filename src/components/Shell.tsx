@@ -6,7 +6,7 @@ import clsx from "clsx";
 import {
   LayoutDashboard, Presentation, FileText, BookOpen, Target, Gauge, Network, ListChecks, Flame, Grid3x3, Briefcase, Sigma,
   Library, Database, ChevronDown, Menu, X, PanelLeftClose, PanelLeftOpen, Table2,
-  ClipboardCheck, MessagesSquare, GitCompareArrows, Workflow, Lock, LockOpen, MessageSquarePlus, LifeBuoy, HelpCircle, LogOut, Rocket, FileSpreadsheet, Loader2,
+  ClipboardCheck, MessagesSquare, GitCompareArrows, Workflow, Lock, LockOpen, MessageSquarePlus, LifeBuoy, HelpCircle, LogOut, Rocket, FileSpreadsheet, Loader2, Landmark, Flag,
 } from "lucide-react";
 import { useMode } from "@/lib/mode";
 import { ChallengeModal, refFromPath } from "./ChallengeForm";
@@ -16,6 +16,7 @@ import { SHEETS } from "@/lib/nav";
 const MAIN = [
   { href: "/sampul", label: "Sampul", icon: FileText },
   { href: "/petunjuk", label: "Petunjuk Pengisian", icon: BookOpen },
+  { href: "/data-keuangan", label: "Data Keuangan RKAP", icon: Landmark },
   { href: "/ras", label: "Risk Appetite Statement", icon: Target },
   { href: "/kriteria-dampak", label: "Kriteria Dampak", icon: Gauge },
   { href: "/risk-driver", label: "Risk Driver", icon: Network },
@@ -138,6 +139,7 @@ function AppShell({ children, path }: { children: React.ReactNode; path: string 
         <div>
           <SectionLabel mini={mini}>Master Data</SectionLabel>
           <NavItem href="/taksonomi" label="Taksonomi PTPN Group" icon={Library} active={active("/taksonomi")} mini={mini} />
+          <NavItem href="/sasaran-strategis" label="Sasaran Strategis RJPP" icon={Flag} active={active("/sasaran-strategis")} mini={mini} />
           <NavItem href="/setup" label="Inisialisasi Data" icon={Database} active={active("/setup")} mini={mini} />
         </div>
       </div>

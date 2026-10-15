@@ -1,7 +1,7 @@
 "use client";
 import { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Grid2x2, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Grid2x2, Landmark, RotateCcw, Sparkles } from "lucide-react";
 import clsx from "clsx";
 import { Card, ErrorBox, Loading, SheetPage, StatusBadge, useSaver } from "@/components/ui";
 import { SheetGrid, buildLayout } from "@/components/SheetGrid";
@@ -9,10 +9,11 @@ import { SheetAiModal } from "@/components/SheetAi";
 import { SHEET_AI } from "@/lib/sheet-ai";
 import { REKAP, Workbook, isInputCell, loadTemplate } from "@/lib/engine";
 import { api } from "@/lib/data";
-import { nilaiParam } from "@/lib/format";
+import { angka, nilaiParam } from "@/lib/format";
+import { LABEL_SUMBER, TAUTAN, nilaiTautan, samaNilai } from "@/lib/rkap";
 import { supabaseConfigured } from "@/lib/supabase";
 import { useReadonly } from "@/lib/mode";
-import type { CellValue, ParameterSheet, SheetTemplate } from "@/lib/types";
+import type { CellValue, ParameterSheet, RkapKeuangan, SheetTemplate } from "@/lib/types";
 
 export default function ParameterPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = use(params);
@@ -30,6 +31,11 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const saver = useSaver();
   const ro = useReadonly();
+  const [rkap, setRkap] = useState<RkapKeuangan | null>(null);
+  const tautan = TAUTAN.filter((t) => t.code === code);
+  useEffect(() => {
+    if (supabaseConfigured && TAUTAN.some((t) => t.code === code)) api.rkapAktif().then(setRkap).catch(() => setRkap(null));
+  }, [code]);
 
   useEffect(() => {
     let alive = true;
@@ -130,6 +136,26 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
               )}
             </Card>
           </div>
+
+          {rkap && tautan.map((t) => {
+            const target = nilaiTautan(t, rkap);
+            const sesuai = samaNilai(wb.get(code, t.addr), target);
+            return (
+              <div key={t.addr} className={clsx("mb-3 flex flex-wrap items-center gap-3 rounded-xl border px-4 py-2.5 text-[12.5px]",
+                sesuai ? "border-emerald-200 bg-emerald-50/60" : "border-amber-300 bg-amber-50")}>
+                <Landmark className={clsx("h-4 w-4", sesuai ? "text-emerald-700" : "text-amber-700")} />
+                <span>
+                  Sel <b className="font-mono">{t.addr}</b> ({LABEL_SUMBER[t.sumber]}, {t.satuan}) bersumber dari{" "}
+                  <Link href="/data-keuangan" className="font-semibold underline">Data Keuangan RKAP · {rkap.nama}</Link>:{" "}
+                  <b className="tabnum">{angka(target, t.satuan === "Rp juta" ? 2 : 0)}</b>
+                  {sesuai ? " · sudah sesuai." : " · isian lembar berbeda."}
+                </span>
+                {!sesuai && target != null && (
+                  <button data-edit onClick={() => onEdit(t.addr, target)} className="ml-auto rounded-lg bg-brand-700 px-2.5 py-1 text-[12px] font-semibold text-white hover:bg-brand-800">Isi dari RKAP</button>
+                )}
+              </div>
+            );
+          })}
 
           <div className="mb-3 flex flex-wrap items-center gap-2">
             {layout.sections.map((s) => (
