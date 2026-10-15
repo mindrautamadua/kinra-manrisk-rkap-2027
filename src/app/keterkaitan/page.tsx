@@ -3,11 +3,10 @@ import { Fragment, useMemo, useState } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { Check } from "lucide-react";
-import { Card, DampakBadge, ErrorBox, Loading, Migrasi2, SheetPage, Stat, StatusBadge, useLoad, useSaver } from "@/components/ui";
+import { Card, DampakBadge, ErrorBox, Loading, Migrasi2, SheetPage, Stat, StatusBadge, useLoad } from "@/components/ui";
 import { api } from "@/lib/data";
 import { buildRam, KATEGORI_URUT, perluPengendalian } from "@/lib/ram";
 import { isTopRisk, statusStyle } from "@/lib/format";
-import { useReadonly } from "@/lib/mode";
 import type { RiskRegister } from "@/lib/types";
 
 export default function KeterkaitanPage() {
@@ -15,21 +14,12 @@ export default function KeterkaitanPage() {
     const [register, params, ras, pengendalian, tambahan] = await Promise.all([api.register(), api.params(), api.ras(), api.pengendalian(), api.ramTambahan()]);
     return { register, ram: buildRam(params, ras, pengendalian, tambahan), siap: register.length === 0 || register.some((r) => "parameter_ram" in r) };
   });
-  const saver = useSaver();
-  const ro = useReadonly();
   const [semua, setSemua] = useState(false);
   const d = q.data;
 
   const cols = useMemo(() => (d?.ram ?? []).filter((r) => r.kode && (semua || r.diterapkan)), [d, semua]);
   const register = d?.register ?? [];
   const linked = (r: RiskRegister, kode: string) => (r.parameter_ram ?? []).includes(kode);
-
-  const toggle = (r: RiskRegister, kode: string) => {
-    if (ro) return;
-    const next = linked(r, kode) ? (r.parameter_ram ?? []).filter((x) => x !== kode) : [...(r.parameter_ram ?? []), kode];
-    q.setData({ ...d!, register: register.map((x) => (x.id === r.id ? { ...x, parameter_ram: next } : x)) });
-    saver.run(() => api.update<RiskRegister>("risk_register", "id", r.id, { parameter_ram: next }));
-  };
 
   const risikoTanpa = register.filter((r) => !(r.parameter_ram ?? []).length);
   const paramTanpa = cols.filter((c) => c.diterapkan && !register.some((r) => linked(r, c.kode)));
@@ -38,8 +28,9 @@ export default function KeterkaitanPage() {
 
   return (
     <SheetPage title="Keterkaitan Risk Register – Parameter RAM" code="Challenge Session" wide
-      note="Parameter unik yang diusulkan wajib menangkap risk driver dari beberapa risk event dalam Risk Register (catatan lembar RAM). Matriks ini menunjukkan risk event mana yang dipantau oleh parameter RAM mana. Klik sel untuk mengaitkan atau melepas."
-      actions={<>{saver.indicator}
+      note="Parameter unik yang diusulkan wajib menangkap risk driver dari beberapa risk event dalam Risk Register (catatan lembar RAM). Matriks ini menunjukkan risk event mana yang dipantau oleh parameter RAM mana. Halaman ini hanya untuk peninjauan; keterkaitan diisi pada kolom Parameter RAM Terkait di lembar Risk Register."
+      actions={<>
+        <Link href="/risk-register" className="text-[12.5px] font-semibold text-brand-700 hover:underline">Ubah keterkaitan di Risk Register →</Link>
         <label className="flex items-center gap-2 text-[12.5px] text-slate-600"><input type="checkbox" checked={semua} onChange={(e) => setSemua(e.target.checked)} className="accent-brand-600" />Tampilkan parameter yang tidak diterapkan</label></>}>
       {q.loading ? <Loading variant="stats-table" /> : q.error ? <ErrorBox error={q.error} /> : d && !d.siap ? <Migrasi2 /> : d && (
         <>
@@ -85,7 +76,7 @@ export default function KeterkaitanPage() {
                             <div className="flex items-start gap-2">
                               <span className="font-bold text-slate-400">#{register.indexOf(r) + 1}</span>
                               <div className="min-w-0">
-                                <div className="font-semibold">{r.risk_event ?? "(tanpa risk event)"}</div>
+                                <Link href="/risk-register" title="Ubah keterkaitan di Risk Register" className="font-semibold hover:text-brand-700 hover:underline">{r.risk_event ?? "(tanpa risk event)"}</Link>
                                 <div className="mt-0.5"><DampakBadge k={r.kategori_dampak} /></div>
                               </div>
                             </div>
@@ -93,8 +84,8 @@ export default function KeterkaitanPage() {
                           {kats.map((kk) => cols.filter((c) => c.kategori === kk).map((c) => {
                             const on = linked(r, c.kode);
                             return (
-                              <td key={c.key} onClick={() => toggle(r, c.kode)}
-                                className={clsx("border-r border-b border-line text-center align-middle", c.kategori === r.kategori && "bg-brand-50/50", !ro && "cursor-pointer hover:bg-amber-50")}>
+                              <td key={c.key}
+                                className={clsx("border-r border-b border-line text-center align-middle", c.kategori === r.kategori && "bg-brand-50/50")}>
                                 {on && <span className="inline-grid h-5 w-5 place-items-center rounded-full bg-brand-600 text-white"><Check className="h-3 w-3" /></span>}
                               </td>
                             );

@@ -91,7 +91,7 @@ const SESI: { fase: string; tone: string; langkah: { judul: string; href?: strin
     langkah: [
       { judul: "Cek Kesiapan", href: "/kesiapan", isi: "Aplikasi memeriksa seluruh kertas kerja dan mengelompokkan temuan menjadi Kritis, Perhatian, dan Info per area. Klik temuan untuk menuju halaman yang perlu diperbaiki, lalu Periksa Ulang. Targetkan nol temuan Kritis." },
       { judul: "Review Kualitas (AI)", href: "/kesiapan", isi: "Penilaian mutu isi RAS, Risk Register, dan rencana pengendalian RAM. Tiap temuan berisi masalah, saran perbaikan, dan pertanyaan yang mungkin diajukan reviewer. Aktif bila admin sudah mengisi kunci OpenAI." },
-      { judul: "Keterkaitan Risiko–RAM", href: "/keterkaitan", isi: "Pastikan setiap risiko korporat terhubung ke parameter RAM yang relevan. Kaitan juga bisa diisi dari kolom Parameter RAM Terkait di Risk Register." },
+      { judul: "Keterkaitan Risiko–RAM", href: "/keterkaitan", isi: "Pastikan setiap risiko korporat terhubung ke parameter RAM yang relevan. Halaman ini hanya untuk peninjauan; kaitan diisi dari kolom Parameter RAM Terkait di Risk Register." },
       { judul: "Snapshot Versi", href: "/snapshot", isi: "Klik Bekukan Kondisi Sekarang dan beri nama, misalnya \"Sebelum Challenge Session 1\"." },
     ],
   },

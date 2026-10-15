@@ -131,7 +131,7 @@ export function periksa(d: InputKesiapan): Pemeriksaan[] {
     add("trace-risiko", "Keterkaitan", "Setiap risiko utama terkait parameter RAM",
       reg.map((r, i) => ({ r, i })).filter(({ r }) => isTopRisk(r.kategori_dampak) && !(r.parameter_ram ?? []).length).map(({ r, i }) => ({
         id: `trr-${r.id}`, severity: "perhatian", area: "Keterkaitan", judul: `${nama(r, i)} belum dikaitkan ke parameter RAM`,
-        href: "/keterkaitan", ref: refR(r, i),
+        href: "/risk-register", ref: refR(r, i),
       })));
     add("trace-param", "Keterkaitan", "Parameter Kuning/Oranye/Merah ditopang risk event",
       d.ram.filter((r) => r.diterapkan && perluPengendalian(r.status) && r.kode && !reg.some((x) => (x.parameter_ram ?? []).includes(r.kode))).map((r) => ({

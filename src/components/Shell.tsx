@@ -6,7 +6,7 @@ import clsx from "clsx";
 import {
   LayoutDashboard, Presentation, FileText, BookOpen, Target, Gauge, Network, ListChecks, Flame, Grid3x3, Briefcase, Sigma,
   Library, Database, ChevronDown, Menu, X, PanelLeftClose, PanelLeftOpen, Table2,
-  ClipboardCheck, MessagesSquare, GitCompareArrows, Workflow, Lock, LockOpen, MessageSquarePlus, LifeBuoy, HelpCircle, LogOut, Rocket,
+  ClipboardCheck, MessagesSquare, GitCompareArrows, Workflow, Lock, LockOpen, MessageSquarePlus, LifeBuoy, HelpCircle, LogOut, Rocket, FileSpreadsheet, Loader2,
 } from "lucide-react";
 import { useMode } from "@/lib/mode";
 import { ChallengeModal, refFromPath } from "./ChallengeForm";
@@ -188,6 +188,7 @@ function AppShell({ children, path }: { children: React.ReactNode; path: string 
             className="ml-auto shrink-0 rounded-lg p-2 text-slate-500 transition hover:bg-black/5 hover:text-brand-700 xl:ml-2">
             <HelpCircle className="h-5 w-5" />
           </Link>
+          <UnduhSemua />
           <button onClick={mode.toggle} disabled={mode.busy}
             title={mode.readonly ? "Mode presentasi aktif: semua data terkunci. Klik untuk membuka kunci." : "Kunci semua isian di semua layar selama presentasi"}
             className={clsx("flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold transition",
@@ -231,6 +232,30 @@ const tabCls = (on: boolean) =>
 function SectionLabel({ children, mini }: { children: React.ReactNode; mini?: boolean }) {
   if (mini) return <div className="mx-3 mb-2 border-t border-white/10" title={String(children)} />;
   return <div className="px-3 pb-2 text-[10.5px] font-bold tracking-[0.14em] text-brand-200/50 uppercase">{children}</div>;
+}
+
+/** Unduh seluruh lembar kertas kerja (kecuali Executive Summary) dalam satu file Excel. */
+function UnduhSemua() {
+  const [busy, setBusy] = useState(false);
+  const unduh = async () => {
+    setBusy(true);
+    try {
+      const [{ api }, { exportSemua }, { loadAllTemplates }] = await Promise.all([import("@/lib/data"), import("@/lib/export"), import("@/lib/engine")]);
+      const [sampul, kategori, ras, rasTambahan, kriteria, drivers, register, params, pengendalian, ramTambahan, cat, program, templates] = await Promise.all([
+        api.sampul(), api.kategori(), api.ras(), api.rasTambahan(), api.kriteria(), api.drivers(), api.register(), api.params(),
+        api.pengendalian(), api.ramTambahan(), api.cat(), api.program().catch(() => []), loadAllTemplates(),
+      ]);
+      await exportSemua({ sampul, kategori, ras, rasTambahan, kriteria, drivers, register, params, pengendalian, ramTambahan, cat, program, templates });
+    } catch (e) { alert(`Gagal mengunduh Excel: ${(e as Error).message}`); }
+    setBusy(false);
+  };
+  return (
+    <button onClick={unduh} disabled={busy} title="Unduh seluruh lembar kertas kerja (kecuali Executive Summary) dalam satu file Excel"
+      className="flex shrink-0 items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-600 transition hover:border-brand-500 hover:text-brand-700 disabled:opacity-60">
+      {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileSpreadsheet className="h-3.5 w-3.5" />}
+      <span className="hidden sm:inline">{busy ? "Menyiapkan…" : "Unduh Semua"}</span>
+    </button>
+  );
 }
 
 function NavItem({ href, label, icon: Icon, active, mini }: { href: string; label: string; icon: React.ElementType; active: boolean; mini?: boolean }) {
