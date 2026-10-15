@@ -1,0 +1,2297 @@
+{
+"sampul": {
+"nama_entitas": "PT KINRA",
+"posisi_data": null,
+"tanggal_penyusunan": null,
+"versi": "2",
+"catatan": "Disusun mengikuti template Risk Management RKAP 2027 (v.2) PT Danantara Asset Management (Persero) dan RAS PT Perkebunan Nusantara III (Persero) pada Executive Summary RKAP 2027 versi 2.1. Bab H dan Lampiran Manajemen Risiko Pedoman Umum RKAP 2027 berlaku untuk hal yang tidak diatur template."
+},
+"ras": [
+{
+"no": 1,
+"kategori": "Risiko Strategis",
+"sikap_induk": "Aggressive",
+"pernyataan_induk": "PT Perkebunan Nusantara III (Persero) bersedia mengambil risiko strategis yang terukur untuk mendorong pertumbuhan, transformasi bisnis, hilirisasi, dan penciptaan nilai jangka panjang yang berkelanjutan, sepanjang setiap keputusan strategis didukung kajian kelayakan yang memadai, selaras dengan arahan pemegang saham, dan tetap berada dalam kapasitas risiko Perusahaan.",
+"sikap": "Moderate",
+"pernyataan": "PT KINRA bersedia mengambil risiko strategis yang terukur untuk mendorong penyewaan lahan industri, transformasi digital kawasan, peningkatan pelayanan utilitas, dan penciptaan nilai jangka panjang bagi kawasan secara berkelanjutan, sepanjang setiap keputusan investasi didukung kajian kelayakan yang komprehensif, kepatuhan terhadap regulasi lingkungan, selaras dengan arahan pemegang saham, serta tetap berada dalam kapasitas keuangan dan operasional Perusahaan",
+"rasionalisasi": "PT KINRA sebagai anak perusahaan BUMN yang bergerak di bidang penyewaan lahan dan pengelola utilitas  kawasan yang mempertimbangkan permintaan investor yang beragam, kepatuhan dengan ketentauan peraturan perundangan dan kehati-hatian dalam mengelola kegiatan operasional perusahaan"
+},
+{
+"no": 2,
+"kategori": "Risiko Pasar",
+"sikap_induk": "Moderate",
+"pernyataan_induk": "PT Perkebunan Nusantara III (Persero) menerima eksposur risiko volatilitas pasar atas harga komoditas, harga input produksi, nilai tukar, dan suku bunga pada tingkat moderat, dengan mengelola dampaknya melalui strategi kontrak penjualan, pengendalian biaya, dan lindung nilai sesuai kebutuhan yang terbatas pada perlindungan eksposur usaha, serta menyediakan kapasitas risiko yang memadai untuk menjaga stabilitas operasi dan memanfaatkan peluang pengembangan usaha.",
+"sikap": "Moderate",
+"pernyataan": "PT KINRA mengambil posisi risiko investasi yang terukur  untuk pengembangan kegiatan operasional untuk mengoptimalkan layanan utilitas kawasan guna memberikan nilai tambah yang responsif bagi para tenant, yang didukung kajian kelayakan yang matang dan menjaga stabilitas arus kas operasional Perusahaan.",
+"rasionalisasi": "PT KINRA sebagai anak perusahaan BUMN yang bergerak di bidang penyewaan lahan dan pengelola utilitas  kawasan yang mempertimbangkan permintaan investor yang beragam, pendapatan yang didapatkan dan biaya yang harus dikeluarkan  dengan mempertimbangkan risiko yang dapat terjadi"
+},
+{
+"no": 3,
+"kategori": "Risiko Keuangan",
+"sikap_induk": "Conservative",
+"pernyataan_induk": "PT Perkebunan Nusantara III (Persero) menjaga neraca keuangan yang tangguh (resilient balance sheet) dengan mengelola kecukupan likuiditas, kemampuan memenuhi kewajiban yang jatuh tempo, pemenuhan persyaratan pinjaman, serta struktur pendanaan dan tingkat leverage yang sehat, sehingga Perusahaan mampu menghadapi gejolak pasar dan siklus ekonomi.",
+"sikap": "Conservative",
+"pernyataan": "PT KINRA menjaga neraca keuangan yang tangguh (resilient balance sheet) dengan mengelola kecukupan likuiditas operasional, memastikan ketepatan pemenuhan kewajiban kepada mitra/ vendor serta mengoptimalkan struktur pendanaan modal kerja dan tingkat leverage yang sehat, sehingga Perusahaan mampu menghadapi gejolak pasar, fluktuasi beban pokok pengelolaan utilitas, dan siklus ekonomi.",
+"rasionalisasi": "Sebagai badan pemasaran kawasan industri dan pengelolaan utilitas kawasan, PT KINRA menghadapi penyewaan lahan yang berfluktuasi diakibatkan  investor sangat  sensitif  terhadap perubahan makroekonomi dan biaya dalam pengelolaan utilitas, sehingga kestabilan keuangan perusahaan untuk menjaga kelangsungan bisnis perusahaan"
+},
+{
+"no": 4,
+"kategori": "Risiko Kredit",
+"sikap_induk": "Conservative",
+"pernyataan_induk": "PT Perkebunan Nusantara III (Persero) selektif dalam menjalin hubungan dengan pelanggan, pemasok, dan mitra kerja sama dengan mengedepankan prinsip kehati-hatian, penilaian kelayakan yang memadai, dan diversifikasi eksposur, termasuk eksposur kepada entitas dalam grup, serta memantau kepatuhan pembayaran, termasuk kewajiban mitra dalam kerja sama operasi dan pemanfaatan aset.",
+"sikap": "Conservative",
+"pernyataan": "PT KINRA menjaga neraca keuangan yang tangguh (resilient balance sheet) dengan mengelola kecukupan likuiditas operasional, memastikan ketepatan pemenuhan kewajiban kepada mitra/ vendor serta mengoptimalkan struktur pendanaan modal kerja dan tingkat leverage yang sehat, sehingga Perusahaan mampu menghadapi gejolak pasar, fluktuasi beban pokok pengelolaan utilitas, dan siklus ekonomi.",
+"rasionalisasi": "Sebagai badan pemasaran kawasan industri dan pengelolaan utilitas kawasan, dalam penyewaan lahan kawasan industri  sangat fluktuasi karena investor  sangat sensitif terhadap perubahan makroekonomi , PT KINRA harus mengelola keuangan dalam membayar kewajiban kepada mitra/vendor"
+},
+{
+"no": 5,
+"kategori": "Risiko Investasi dan Proyek",
+"sikap_induk": "Aggressive",
+"pernyataan_induk": "PT Perkebunan Nusantara III (Persero) bersedia mengambil risiko investasi secara prudent yang sepadan dengan manfaat, nilai tambah, dan tingkat pengembalian yang sesuai, sepanjang setiap keputusan investasi didukung kajian kelayakan yang menyeluruh, berada dalam batas kewenangan aksi korporasi, dan tidak mengancam keberlangsungan keuangan Perusahaan.",
+"sikap": "Moderate",
+"pernyataan": "PT KINRA  bersedia mengambil risiko investasi secara prudent (bijaksana) yang sepadan dengan manfaat, peningkatan daya saing kawasan, dan tingkat pengembalian yang sesuai dan didukung kajian kelayakan yang menyeluruh, berada dalam batas kewenangan aksi korporasi anak perusahaan, memenuhi komitmen tingkat layanan (Service Level Agreement), serta tidak mengancam stabilitas arus kas operasional dan keberlangsungan keuangan Perusahaan.",
+"rasionalisasi": "Sebagai badan pemasaran kawasan industri dan pengelolaan utilitas kawasan, PT KINRA dalam pengelolaan kawasan dibutuhkan pengemabangan usaha untuk mengakomodir  permintaan kebutuhan para tenant dengan mempertimbangkan tingkat pengembalian  dalam bentuk kajian kelayakan yang mempertimbangkan keseluruhan aspek"
+},
+{
+"no": 5,
+"kategori": "Risiko Investasi dan Proyek",
+"sikap_induk": "Moderate",
+"pernyataan_induk": "PT Perkebunan Nusantara III (Persero) menerima penyimpangan biaya dan waktu pelaksanaan proyek dalam batas yang ditetapkan pada Risk Acceptance Matrix, sepanjang tingkat pengembalian proyek yang dihitung ulang tidak turun di bawah tingkat pengembalian minimum dan mutu hasil proyek tetap memenuhi persyaratan keselamatan dan izin operasi.",
+"sikap": "Conservative",
+"pernyataan": "PT KINRA secara proaktif memitigasi risiko keterlambatan serah terima (handover), memastikan mutu hasil proyek dari induk memenuhi standar keandalan operasional kawasan, memenuhi komitmen Service Level Agreement (SLA) kepada induk perusahaan, serta tetap mematuhi seluruh persyaratan keselamatan kerja (K3) dan izin lingkungan.",
+"rasionalisasi": "PT KINRA berkomitmen melakukan mitigasi risiko proyek secara proaktif untuk mencegah keterlambatan serah terima (handover) demi memberikan kepastian operasional bagi para tenant. Melalui pengawasan mutu infrastruktur dari induk perusahaan, PT KINRA memastikan keandalan operasional kawasan jangka panjang sekaligus memenuhi komitmen Service Level Agreement (SLA) kepada holding. Selain itu, kepatuhan ketat terhadap standar K3 dan izin lingkungan diterapkan untuk melindungi perusahaan dari risiko hukum serta menjaga keberlanjutan bisnis berbasis prinsip ESG."
+},
+{
+"no": 6,
+"kategori": "Risiko Operasional",
+"sikap_induk": "Conservative",
+"pernyataan_induk": "PT Perkebunan Nusantara III (Persero) mengendalikan keberlangsungan operasional kegiatan usaha dengan menjaga efektivitas proses kebun dan pabrik, keandalan mesin, instalasi, dan sistem informasi, serta keamanan aset dan informasi (cyber security), dan hanya menerima gangguan operasional yang terbatas dan dapat dipulihkan dalam kerangka Business Continuity Management.",
+"sikap": "Conservative",
+"pernyataan": "PT KINRA mengendalikan keberlangsungan operasional kegiatan usaha dengan menjaga efektivitas pengelolaan kawasan, keandalan jaringan distribusi utilitas (listrik, air bersih, dan limbah cair), ketersediaan sistem informasi layanan penunjang kawasan, serta keamanan aset fisik dan informasi (cyber security), dan hanya menerima gangguan operasional serta deviasi tingkat layanan (Service Level Agreement) yang terbatas dan dapat dipulihkan segera dalam kerangka Business Continuity Management (BCM).",
+"rasionalisasi": "PT KINRA berkomitmen menjaga keberlangsungan operasional kawasan melalui pengelolaan yang efektif, pengamanan aset fisik, serta keandalan jaringan distribusi utilitas utama demi mendukung produktivitas tenant. Perusahaan juga menerapkan sistem informasi penunjang yang andal serta keamanan siber (cyber security) berlapis untuk melindungi data strategis dari ancaman digital. Melalui kerangka Business Continuity Management (BCM), PT KINRA memastikan setiap gangguan operasional atau deviasi SLA ditekan seminimal mungkin dan dapat dipulihkan dalam waktu singkat demi menjaga stabilitas bisnis kawasan."
+},
+{
+"no": 6,
+"kategori": "Risiko Operasional",
+"sikap_induk": "Zero Tolerance",
+"pernyataan_induk": "PT Perkebunan Nusantara III (Persero) tidak menoleransi pelanggaran ketentuan keselamatan dan kesehatan kerja maupun pembiaran tindakan dan kondisi tidak aman yang berpotensi mengakibatkan kematian, cedera berat, atau penyakit akibat kerja pada pekerja Perusahaan, pekerja kontraktor, dan pihak lain di wilayah kerja dan kegiatan angkutan Perusahaan.",
+"sikap": "Zero Tolerance",
+"pernyataan": "PT KINRA tidak menoleransi pelanggaran ketentuan keselamatan dan kesehatan kerja serta lingkungan hidup (K3LH), maupun pembiaran tindakan dan kondisi tidak aman (unsafe acts & unsafe conditions) yang berpotensi mengakibatkan kematian, cedera berat, penyakit akibat kerja, atau insiden pencemaran lingkungan pada pekerja Perusahaan, pekerja kontraktor, para penyewa (tenants) beserta pekerja mereka, dan pihak lain di wilayah kerja serta seluruh area operasional kawasan industri.",
+"rasionalisasi": "PT KINRA menerapkan kebijakan nol toleransi terhadap pelanggaran K3LH untuk memastikan perlindungan menyeluruh bagi pekerja internal, kontraktor, tenants, hingga masyarakat di sekitar kawasan industri. Perusahaan secara proaktif mengeliminasi tindakan dan kondisi tidak aman guna mencegah terjadinya fatality, kecelakaan kerja berat, penyakit akibat kerja, serta pencemaran lingkungan. Ketegasan ini merupakan komitmen mutlak PT KINRA dalam membangun lingkungan kerja yang aman dan berkelanjutan, sekaligus menjaga reputasi kawasan dari risiko hukum dan operasional."
+},
+{
+"no": 7,
+"kategori": "Risiko Reputasi",
+"sikap_induk": "Zero Tolerance",
+"pernyataan_induk": "PT Perkebunan Nusantara III (Persero) menjunjung tinggi kredibilitas dan kepercayaan yang diberikan pemegang saham, pemerintah, mitra, dan masyarakat sehingga Perusahaan tidak menoleransi tindakan atau kelalaian yang merusak reputasi Perusahaan, serta senantiasa menjaga transparansi komunikasi serta menanggapi isu publik secara cepat dan terukur.",
+"sikap": "Zero Tolerance",
+"pernyataan": "PT KINRA menjunjung tinggi kredibilitas dan kepercayaan yang diberikan oleh pemegang saham (termasuk induk perusahaan selaku pemilik aset), pemerintah selaku regulator, para tenants, serta masyarakat sekitar kawasan, sehingga Perusahaan tidak menoleransi tindakan atau kelalaian yang merusak reputasi Perusahaan maupun merusak citra iklim investasi kawasan. Perusahaan senantiasa menjaga transparansi komunikasi serta menanggapi keluhan pelanggan dan isu publik terkait operasional atau lingkungan secara cepat, transparan, dan terukur.",
+"rasionalisasi": "PT KINRA berkomitmen menjaga kredibilitas dan kepercayaan publik dengan menerapkan kebijakan nol toleransi terhadap segala tindakan atau kelalaian yang dapat merusak reputasi perusahaan serta citra iklim investasi kawasan. Komitmen ini diwujudkan melalui transparansi komunikasi yang konsisten kepada pemegang saham, regulator, tenants, dan masyarakat sekitar. Dengan menanggapi setiap keluhan pelanggan serta isu lingkungan secara cepat, terbuka, dan terukur, PT KINRA memastikan stabilitas hubungan kelembagaan tetap harmonis dan iklim investasi di kawasan tetap kondusif"
+},
+{
+"no": 8,
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"sikap_induk": "Zero Tolerance",
+"pernyataan_induk": "PT Perkebunan Nusantara III (Persero) menerapkan budaya risiko yang kuat untuk menjaga kepatuhan, integritas, dan etika bisnis, termasuk hak atas tanah, perizinan, perlindungan lingkungan hidup, ketenagakerjaan, anti-penyuapan, anti-fraud, dan pelindungan data, dan tidak menoleransi pelanggaran terhadap peraturan perundang-undangan dan ketentuan yang berlaku.",
+"sikap": "Zero Tolerance",
+"pernyataan": "PT KINRA menerapkan budaya risiko yang kuat untuk menjaga kepatuhan, integritas, dan etika bisnis, termasuk dalam tata kelola hak atas tanah kawasan (HPL/HGB), perizinan berusaha dan operasional utilitas, perlindungan lingkungan hidup (AMDAL dan baku mutu limbah), ketenagakerjaan, anti-penyuapan, anti-fraud, serta perlindungan data rahasia para tenants. Perusahaan tidak menoleransi pelanggaran terhadap peraturan perundang-undangan dan ketentuan hukum yang berlaku.",
+"rasionalisasi": "PT KINRA berkomitmen menerapkan budaya risiko dan tata kelola yang kuat untuk memastikan kepatuhan mutlak terhadap hukum, integritas, dan etika bisnis di seluruh aspek operasional kawasan. Kebijakan nol toleransi ini diterapkan secara ketat mulai dari legalitas hak atas tanah (HPL/HGB), kepatuhan lingkungan (AMDAL), hingga penerapan program anti-fraud dan perlindungan data rahasia tenants. Melalui kepatuhan hukum yang menyeluruh, PT KINRA melindungi seluruh pemangku kepentingan dari risiko hukum sekaligus memperkuat reputasi kawasan sebagai destinasi investasi yang aman dan tepercaya."
+}
+],
+"ras_tambahan": [],
+"kategori": [
+{
+"no": 1,
+"nama": "Risiko Strategis",
+"nama_en": "Risiko Strategis (Strategic Risk)",
+"definisi": "Risiko Strategik adalah risiko akibat ketidaktepatan dalam pengambilan dan/atau pelaksanaan suatu keputusan strategik serta kegagalan dalam mengantisipasi perubahan lingkungan bisnis (termasuk di dalamnya demand changes, supply/competition, business model disruption, climate/natural disaster, terrorism threat)."
+},
+{
+"no": 2,
+"nama": "Risiko Pasar",
+"nama_en": "Risiko Pasar (Market Risk)",
+"definisi": "Risiko Pasar adalah potensi kerugian karena pergerakan variabel pasar atau faktor pasar dari posisi, portofolio ataupun business model yang dimiliki. Variabel pasar yang dimaksud adalah suku bunga, nilai tukar, perubahan harga komoditas, perubahan harga option, atau perubahan harga underlying (real estate, equity, dll)."
+},
+{
+"no": 3,
+"nama": "Risiko Keuangan",
+"nama_en": "Risiko Keuangan (Financial Risk)",
+"definisi": "Risiko Keuangan adalah risiko akibat ketidakmampuan mengoptimalkan atau kegagalan mendapatkan pendanaan eksternal atau sumber pendanaan internal dari arus kas dan/atau aset likuid perusahaan, dalam rangka mendukung kegiatan operasi atau pemenuhan kewajiban. Termasuk dalam bagian dari risiko keuangan adalah kegagalan memenuhi kewajiban yang jatuh tempo, bagi perusahaan yang bergerak di bidang usaha asuransi adalah kegagalan dalam memenuhi kewajiban kepada pemegang polis."
+},
+{
+"no": 4,
+"nama": "Risiko Kredit",
+"nama_en": "Risiko Kredit/Counterparty Kredit (Credit/Counterparty Credit Risk)",
+"definisi": "Risiko Kredit/Counterparty Kredit adalah risiko akibat kegagalan pihak lain dalam memenuhi kewajiban kepada perusahaan. Termasuk dalam risiko kredit/counterparty kredit adalah concentration risk, counterparty credit risk, settlement risk dan country risk (transfer risk, sovereign risk, dan macroeconomic risk)."
+},
+{
+"no": 5,
+"nama": "Risiko Operasional",
+"nama_en": "Risiko Operasional (Operational Risk)",
+"definisi": "Risiko Operasional adalah risiko akibat ketidakcukupan dan/atau tidak berfungsinya proses internal, kesalahan manusia, kegagalan sistem, dan/atau adanya kejadian eksternal yang mempengaruhi operasional perusahaan. Termasuk dalam risiko operasional yaitu terkait keamanan siber."
+},
+{
+"no": 6,
+"nama": "Risiko Investasi dan Proyek",
+"nama_en": "Risiko Investasi dan Proyek (Investment and Project Risk)",
+"definisi": "Risiko Investasi/Proyek adalah risiko perubahan ekspektasi return dari suatu investasi atau proyek akibat terjadi cost overrun, specification changes, time delay, kegagalan proses assessment risiko awal."
+},
+{
+"no": 7,
+"nama": "Risiko Reputasi",
+"nama_en": "Risiko Reputasi (Reputational Risk)",
+"definisi": "Risiko Reputasi adalah risiko akibat menurunnya tingkat kepercayaan stakeholder yang bersumber dari persepsi negatif, kegagalan menangani krisis, penurunan brand value, rusaknya citra perusahaan."
+},
+{
+"no": 8,
+"nama": "Risiko Peraturan, Hukum dan Kepatuhan",
+"nama_en": "Risiko Peraturan, Hukum dan Kepatuhan (Regulatory, Legal and Compliance Risk)",
+"definisi": "Risiko Peraturan, Hukum dan Kepatuhan adalah risiko akibat terjadi perubahan peraturan perundang-undangan, tuntutan hukum dan/atau kelemahan aspek yuridis (contract, legal system, dispute & litigation), ketidakpatuhan dan/atau tidak melaksanakan peraturan perundang-undangan dan ketentuan yang berlaku."
+}
+],
+"kriteria": [
+{
+"kategori": "Risiko Strategis",
+"kode": "a",
+"kriteria": "Deviasi pencapaian target strategis",
+"perhitungan": "Target strategis tidak terealisasi dari rencana × 100%",
+"sangat_rendah": "≤5%",
+"rendah": "5% < x ≤ 10%",
+"moderat": "10% < x ≤ 20%",
+"tinggi": "20% < x ≤ 40%",
+"sangat_tinggi": ">40%"
+},
+{
+"kategori": "Risiko Strategis",
+"kode": "b",
+"kriteria": "Penurunan market share",
+"perhitungan": "Penurunan yoy",
+"sangat_rendah": "≤1%",
+"rendah": "1% < x ≤ 3%",
+"moderat": "3% < x ≤ 5%",
+"tinggi": "5% < x ≤ 10%",
+"sangat_tinggi": ">10%"
+},
+{
+"kategori": "Risiko Strategis",
+"kode": "c",
+"kriteria": "Penurunan enterprise value (EV)",
+"perhitungan": "Penurunan yoy atas nilai ekuitas + utang berbunga − kas",
+"sangat_rendah": "≤1%",
+"rendah": "1% < x ≤ 3%",
+"moderat": "3% < x ≤ 5%",
+"tinggi": "5% < x ≤ 10%",
+"sangat_tinggi": ">10%"
+},
+{
+"kategori": "Risiko Strategis",
+"kode": "d",
+"kriteria": "Program transformasi yang tertunda",
+"perhitungan": "Jumlah program tertunda dari total program × 100%",
+"sangat_rendah": "≤5%",
+"rendah": "5% < x ≤ 10%",
+"moderat": "10% < x ≤ 20%",
+"tinggi": "20% < x ≤ 40%",
+"sangat_tinggi": ">40%"
+},
+{
+"kategori": "Risiko Pasar",
+"kode": "a",
+"kriteria": "Dampak perubahan FX terhadap penurunan laba",
+"perhitungan": "Penurunan yoy (%)",
+"sangat_rendah": "≤2%",
+"rendah": "2% < x ≤ 5%",
+"moderat": "5% < x ≤ 10%",
+"tinggi": "10% < x ≤ 20%",
+"sangat_tinggi": ">20%"
+},
+{
+"kategori": "Risiko Pasar",
+"kode": "b",
+"kriteria": "Dampak perubahan harga komoditas terhadap penurunan margin",
+"perhitungan": "Penurunan yoy (%)",
+"sangat_rendah": "≤2%",
+"rendah": "2% < x ≤ 5%",
+"moderat": "5% < x ≤ 10%",
+"tinggi": "10% < x ≤ 20%",
+"sangat_tinggi": ">20%"
+},
+{
+"kategori": "Risiko Pasar",
+"kode": "c",
+"kriteria": "Penurunan interest coverage ratio (ICR)",
+"perhitungan": "Penurunan yoy (%)",
+"sangat_rendah": "≤5%",
+"rendah": "5% < x ≤ 10%",
+"moderat": "10% < x ≤ 20%",
+"tinggi": "20% < x ≤ 30%",
+"sangat_tinggi": ">30%"
+},
+{
+"kategori": "Risiko Keuangan",
+"kode": "a",
+"kriteria": "Penurunan likuiditas",
+"perhitungan": "Penurunan yoy (%)",
+"sangat_rendah": "≤5%",
+"rendah": "5% < x ≤ 10%",
+"moderat": "10% < x ≤ 20%",
+"tinggi": "20% < x ≤ 30%",
+"sangat_tinggi": ">30%"
+},
+{
+"kategori": "Risiko Keuangan",
+"kode": "b",
+"kriteria": "Penurunan DSCR",
+"perhitungan": "Penurunan yoy (%)",
+"sangat_rendah": "≤5%",
+"rendah": "5% < x ≤ 10%",
+"moderat": "10% < x ≤ 20%",
+"tinggi": "20% < x ≤ 30%",
+"sangat_tinggi": ">30%"
+},
+{
+"kategori": "Risiko Keuangan",
+"kode": "c",
+"kriteria": "Kenaikan DER",
+"perhitungan": "Kenaikan yoy (%)",
+"sangat_rendah": "≤5%",
+"rendah": "5% < x ≤ 10%",
+"moderat": "10% < x ≤ 20%",
+"tinggi": "20% < x ≤ 30%",
+"sangat_tinggi": ">30%"
+},
+{
+"kategori": "Risiko Keuangan",
+"kode": "d",
+"kriteria": "Kenaikan cost of funding",
+"perhitungan": "Kenaikan (bps)",
+"sangat_rendah": "≤25 bps",
+"rendah": "25 bps < x ≤ 50 bps",
+"moderat": "50 bps < x ≤ 100 bps",
+"tinggi": "100 bps < x ≤ 200 bps",
+"sangat_tinggi": ">200 bps"
+},
+{
+"kategori": "Risiko Keuangan",
+"kode": "e",
+"kriteria": "Dampak terhadap bantalan (cushion) terhadap covenant",
+"perhitungan": "Cushion yang masih tersedia",
+"sangat_rendah": "≥25%",
+"rendah": "15% ≤ x < 25%",
+"moderat": "<15%",
+"tinggi": "Covenant breach potensial dalam 12 bulan",
+"sangat_tinggi": "Covenant breach aktual"
+},
+{
+"kategori": "Risiko Kredit",
+"kode": "a",
+"kriteria": "Penurunan nilai piutang",
+"perhitungan": "Dibanding dengan total piutang (%)",
+"sangat_rendah": "≤1%",
+"rendah": "1% < x ≤ 3%",
+"moderat": "3% < x ≤ 5%",
+"tinggi": "5% < x ≤ 10%",
+"sangat_tinggi": ">10%"
+},
+{
+"kategori": "Risiko Kredit",
+"kode": "b",
+"kriteria": "Keterlambatan pembayaran",
+"perhitungan": "Jumlah hari",
+"sangat_rendah": "≤30 hari",
+"rendah": "30 < x ≤ 60 hari",
+"moderat": "60 < x ≤ 90 hari",
+"tinggi": "90 < x ≤ 180 hari",
+"sangat_tinggi": ">180 hari"
+},
+{
+"kategori": "Risiko Kredit",
+"kode": "c",
+"kriteria": "Recovery rate piutang yang sudah dihapusbuku",
+"perhitungan": "%",
+"sangat_rendah": "≥90%",
+"rendah": "75% ≤ x < 90%",
+"moderat": "50% ≤ x < 75%",
+"tinggi": "25% ≤ x < 50%",
+"sangat_tinggi": "<25%"
+},
+{
+"kategori": "Risiko Kredit",
+"kode": "d",
+"kriteria": "Pencadangan kerugian kredit",
+"perhitungan": "Dibanding dengan EBITDA (%)",
+"sangat_rendah": "≤1%",
+"rendah": "1% < x ≤ 3%",
+"moderat": "3% < x ≤ 5%",
+"tinggi": "5% < x ≤ 10%",
+"sangat_tinggi": ">10%"
+},
+{
+"kategori": "Risiko Kredit",
+"kode": "e",
+"kriteria": "Ketergantungan dengan satu mitra bisnis/pelanggan",
+"perhitungan": "Jumlah mitra bisnis/pelanggan besar yang menguasai 80% kebutuhan/portofolio perusahaan dari total mitra/pelanggan × 100%",
+"sangat_rendah": "≤10%",
+"rendah": "10% < x ≤ 15%",
+"moderat": "15% < x ≤ 20%",
+"tinggi": "20% < x ≤ 25%",
+"sangat_tinggi": ">25%"
+},
+{
+"kategori": "Risiko Operasional",
+"kode": "a",
+"kriteria": "Gangguan operasional",
+"perhitungan": "Jumlah jam/hari",
+"sangat_rendah": "≤4 jam",
+"rendah": "4 jam < x ≤ 1 hari",
+"moderat": "1 hari < x ≤ 3 hari",
+"tinggi": "3 hari < x ≤ 7 hari",
+"sangat_tinggi": ">7 hari"
+},
+{
+"kategori": "Risiko Operasional",
+"kode": "b",
+"kriteria": "Dampak kerugian operasional terhadap EBITDA",
+"perhitungan": "Kerugian dibanding total EBITDA",
+"sangat_rendah": "≤1%",
+"rendah": "1% < x ≤ 3%",
+"moderat": "3% < x ≤ 5%",
+"tinggi": "5% < x ≤ 10%",
+"sangat_tinggi": ">10%"
+},
+{
+"kategori": "Risiko Operasional",
+"kode": "c",
+"kriteria": "Downtime sistem IT",
+"perhitungan": "Jumlah jam/hari",
+"sangat_rendah": "≤2 jam",
+"rendah": "2 jam < x ≤ 8 jam",
+"moderat": "8 jam < x ≤ 1 hari",
+"tinggi": "1 hari < x ≤ 3 hari",
+"sangat_tinggi": ">3 hari"
+},
+{
+"kategori": "Risiko Operasional",
+"kode": "d",
+"kriteria": "Keselamatan dan Kesehatan Kerja",
+"perhitungan": "-",
+"sangat_rendah": "Near miss tanpa cedera",
+"rendah": "Cedera ringan tanpa kehilangan hari kerja",
+"moderat": "Cedera yang memerlukan perawatan medis",
+"tinggi": "Cedera serius",
+"sangat_tinggi": "Fatality"
+},
+{
+"kategori": "Risiko Operasional",
+"kode": "e",
+"kriteria": "Kegagalan proses internal",
+"perhitungan": "-",
+"sangat_rendah": "Kesalahan terbatas pada satu aktivitas kerja",
+"rendah": "Kesalahan mempengaruhi satu fungsi",
+"moderat": "Kesalahan mempengaruhi beberapa fungsi",
+"tinggi": "Kesalahan mempengaruhi proses bisnis utama",
+"sangat_tinggi": "Kesalahan menyebabkan penghentian aktivitas bisnis utama"
+},
+{
+"kategori": "Risiko Operasional",
+"kode": "f",
+"kriteria": "Fraud",
+"perhitungan": "-",
+"sangat_rendah": "Insiden kecil dan cepat dipulihkan",
+"rendah": "Kerugian terbatas dan tidak berulang",
+"moderat": "Kerugian material pada satu unit bisnis",
+"tinggi": "Kerugian signifikan dengan dampak lintas fungsi",
+"sangat_tinggi": "Fraud besar mempengaruhi keberlangsungan usaha atau reputasi perusahaan"
+},
+{
+"kategori": "Risiko Operasional",
+"kode": "g",
+"kriteria": "Dampak BCM",
+"perhitungan": "-",
+"sangat_rendah": "Aktivitas berjalan normal",
+"rendah": "Gangguan minor dan mudah dipulihkan",
+"moderat": "Memerlukan aktivasi sebagian prosedur BCP",
+"tinggi": "Memerlukan aktivasi penuh BCP dan recovery site",
+"sangat_tinggi": "BCP tidak mampu memulihkan operasi secara memadai"
+},
+{
+"kategori": "Risiko Investasi dan Proyek",
+"kode": "a",
+"kriteria": "Penurunan NPV",
+"perhitungan": "Dibanding rencana (%)",
+"sangat_rendah": "≤5%",
+"rendah": "5% < x ≤ 10%",
+"moderat": "10% < x ≤ 25%",
+"tinggi": "25% < x ≤ 50%",
+"sangat_tinggi": ">50% atau NPV negatif"
+},
+{
+"kategori": "Risiko Investasi dan Proyek",
+"kode": "b",
+"kriteria": "Penurunan IRR",
+"perhitungan": "Dibanding rencana (%)",
+"sangat_rendah": "≤5%",
+"rendah": "5% < x ≤ 10%",
+"moderat": "10% < x ≤ 20%",
+"tinggi": "20% < x ≤ 30%",
+"sangat_tinggi": ">30% atau di bawah hurdle rate"
+},
+{
+"kategori": "Risiko Investasi dan Proyek",
+"kode": "c",
+"kriteria": "Cost overrun",
+"perhitungan": "Dibanding anggaran (%)",
+"sangat_rendah": "≤5%",
+"rendah": "5% < x ≤ 10%",
+"moderat": "10% < x ≤ 20%",
+"tinggi": "20% < x ≤ 40%",
+"sangat_tinggi": ">40%"
+},
+{
+"kategori": "Risiko Investasi dan Proyek",
+"kode": "d",
+"kriteria": "Schedule delay",
+"perhitungan": "Jumlah bulan",
+"sangat_rendah": "≤1 bulan",
+"rendah": "1 bulan < x ≤ 3 bulan",
+"moderat": "3 bulan < x ≤ 6 bulan",
+"tinggi": "6 bulan < x ≤ 12 bulan",
+"sangat_tinggi": ">12 bulan"
+},
+{
+"kategori": "Risiko Investasi dan Proyek",
+"kode": "e",
+"kriteria": "Penurunan Return On Investment (ROI)",
+"perhitungan": "Dibanding rencana (%)",
+"sangat_rendah": "≤5%",
+"rendah": "5% < x ≤ 10%",
+"moderat": "10% < x ≤ 20%",
+"tinggi": "20% < x ≤ 40%",
+"sangat_tinggi": ">40% atau ROI negatif"
+},
+{
+"kategori": "Risiko Reputasi",
+"kode": "a",
+"kriteria": "Pemberitaan negatif",
+"perhitungan": "Dibanding dengan total media (%)",
+"sangat_rendah": "≤10%",
+"rendah": "10% < x ≤ 20%",
+"moderat": "20% < x ≤ 40%",
+"tinggi": "40% < x ≤ 60%",
+"sangat_tinggi": ">60%"
+},
+{
+"kategori": "Risiko Reputasi",
+"kode": "b",
+"kriteria": "Skala pemberitaan negatif",
+"perhitungan": "Jumlah berita",
+"sangat_rendah": "≤5 berita",
+"rendah": "5 berita < x ≤ 10 berita",
+"moderat": "10 berita < x ≤ 25 berita",
+"tinggi": "25 berita < x ≤ 50 berita",
+"sangat_tinggi": ">50 berita atau menjadi isu nasional"
+},
+{
+"kategori": "Risiko Reputasi",
+"kode": "c",
+"kriteria": "Memerlukan response time",
+"perhitungan": "Jumlah jam",
+"sangat_rendah": "≤4 jam",
+"rendah": "4 jam < x ≤ 12 jam",
+"moderat": "12 jam < x ≤ 24 jam",
+"tinggi": "24 jam < x ≤ 72 jam",
+"sangat_tinggi": ">72 jam"
+},
+{
+"kategori": "Risiko Reputasi",
+"kode": "d",
+"kriteria": "Mendapatkan perhatian regulator",
+"perhitungan": "-",
+"sangat_rendah": "Tidak ada permintaan khusus regulator",
+"rendah": "Permintaan klarifikasi informal",
+"moderat": "Permintaan penjelasan resmi",
+"tinggi": "Pemeriksaan/investigasi regulator",
+"sangat_tinggi": "Sanksi, pembatasan aktivitas, pengawasan khusus"
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"kode": "a",
+"kriteria": "Penalti dari regulator",
+"perhitungan": "Dibanding dengan EBITDA (%)",
+"sangat_rendah": "≤1%",
+"rendah": "1% < x ≤ 3%",
+"moderat": "3% < x ≤ 5%",
+"tinggi": "5% < x ≤ 10%",
+"sangat_tinggi": ">10%"
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"kode": "b",
+"kriteria": "Tambahan opex atas regulasi baru",
+"perhitungan": "Dibanding dengan opex sebelum regulasi baru",
+"sangat_rendah": "≤1%",
+"rendah": "1% < x ≤ 3%",
+"moderat": "3% < x ≤ 5%",
+"tinggi": "5% < x ≤ 10%",
+"sangat_tinggi": ">10%"
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"kode": "c",
+"kriteria": "Gangguan akibat isu perizinan",
+"perhitungan": "Jumlah minggu/bulan",
+"sangat_rendah": "≤1 minggu",
+"rendah": "1 minggu < x ≤ 1 bulan",
+"moderat": "1 bulan < x ≤ 3 bulan",
+"tinggi": "3 bulan < x ≤ 6 bulan",
+"sangat_tinggi": ">6 bulan"
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"kode": "d",
+"kriteria": "Pelanggaran ketentuan",
+"perhitungan": "-",
+"sangat_rendah": "Tidak ada pelanggaran material",
+"rendah": "1-2 pelanggaran minor",
+"moderat": "3-5 pelanggaran minor atau 1 pelanggaran material",
+"tinggi": ">5 pelanggaran minor atau >1 pelanggaran material",
+"sangat_tinggi": "Pelanggaran signifikan yang memicu sanksi regulator"
+}
+],
+"drivers": [
+{
+"kategori": "Risiko Strategis",
+"driver": "Ketidaktepatan penetapan strategi",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Strategis",
+"driver": "Ketidakselarasan strategi dengan lingkungan bisnis",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Strategis",
+"driver": "Kegagalan eksekusi strategi",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Strategis",
+"driver": "Kegagalan pertumbuhan dan penciptaan nilai",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Strategis",
+"driver": "Kegagalan mengantisipasi emerging risk",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Strategis",
+"driver": "Kegagalan integrasi keberlanjutan (ESG)",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Strategis",
+"driver": "Kehilangan daya saing produk atau layanan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Strategis",
+"driver": "Ketidakberlanjutan model bisnis",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Strategis",
+"driver": "Ketidaktepatan alokasi modal dan prioritas dukungan pendanaan atau investasi",
+"bentuk": "Holding company",
+"tambahan": false
+},
+{
+"kategori": "Risiko Strategis",
+"driver": "Kegagalan transformasi dan restrukturisasi portofolio",
+"bentuk": "Holding company",
+"tambahan": false
+},
+{
+"kategori": "Risiko Strategis",
+"driver": "Ketidakselarasan portofolio terhadap mandat pemegang saham",
+"bentuk": "Holding company",
+"tambahan": false
+},
+{
+"kategori": "Risiko Pasar",
+"driver": "Perubahan nilai tukar",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Pasar",
+"driver": "Perubahan suku bunga",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Pasar",
+"driver": "Perubahan harga komoditas",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Pasar",
+"driver": "Perubahan harga pasar aset atau investasi",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Pasar",
+"driver": "Penurunan permintaan pasar",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Pasar",
+"driver": "Perubahan harga produk atau jasa",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Pasar",
+"driver": "Peningkatan biaya akibat perubahan harga input",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Keuangan",
+"driver": "Ketidakmampuan memenuhi kewajiban likuiditas",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Keuangan",
+"driver": "Ketidakmampuan memperoleh atau memperpanjang pendanaan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Keuangan",
+"driver": "Memburuknya struktur permodalan dan solvabilitas",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Keuangan",
+"driver": "Kegagalan pengelolaan kas dan pendanaan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Keuangan",
+"driver": "Penurunan profitabilitas",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Keuangan",
+"driver": "Ketidakefisienan pengelolaan modal kerja",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Keuangan",
+"driver": "Penurunan kapasitas pembayaran dividen portofolio",
+"bentuk": "Holding company",
+"tambahan": false
+},
+{
+"kategori": "Risiko Keuangan",
+"driver": "Penurunan peringkat kredit",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Keuangan",
+"driver": "Ketidaksesuaian jatuh tempo antara aset dan liabilitas",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Keuangan",
+"driver": "Peningkatan kebutuhan dukungan pendanaan kepada perusahaan portofolio",
+"bentuk": "Holding company",
+"tambahan": false
+},
+{
+"kategori": "Risiko Keuangan",
+"driver": "Kesalahan pengakuan, pengukuran, atau penyajian laporan keuangan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Kredit",
+"driver": "Kegagalan counterparty memenuhi kewajibannya",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Kredit",
+"driver": "Kegagalan pelanggan memenuhi kewajibannya",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Kredit",
+"driver": "Kegagalan vendor atau pemasok memenuhi kewajibannya",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Kredit",
+"driver": "Konsentrasi eksposur kredit",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Kredit",
+"driver": "Kegagalan penyelesaian transaksi (settlement risk)",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Kredit",
+"driver": "Perubahan kondisi negara atau sovereign",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Kredit",
+"driver": "Penurunan kualitas kredit",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Kredit",
+"driver": "Kelemahan proses penilaian kelayakan lawan transaksi",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Kredit",
+"driver": "Penurunan nilai atau kualitas jaminan dan agunan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Kredit",
+"driver": "Eksposur antar perusahaan dalam grup",
+"bentuk": "Holding company",
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Kegagalan proses dan pengendalian internal",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Kesalahan, kecurangan atau ketidakcukupan SDM",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Gangguan sistem teknologi informasi",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Serangan siber",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Kegagalan pengelolaan data dan informasi",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Ketergantungan terhadap pihak ketiga",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Kegagalan keberlangsungan operasi pada kondisi krisis",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Kerusakan/kegagalan alat produksi utama",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Gangguan rantai pasok",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Kecelakaan kerja dan kegagalan penerapan HSSE",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Kegagalan pengendalian mutu produk atau layanan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Bencana yang merusak aset atau menghentikan kegiatan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Wabah penyakit pada manusia, hewan, atau tanaman",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Tindakan terorisme, sabotase, dan perusakan aset",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Konflik sosial, kerusuhan, dan gangguan keamanan di wilayah operasi",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Pencurian dan pengambilan tidak sah atas aset operasional",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Pemogokan dan perselisihan hubungan industrial",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Ketergantungan terhadap shared services grup",
+"bentuk": "Holding company",
+"tambahan": false
+},
+{
+"kategori": "Risiko Operasional",
+"driver": "Kelemahan tata kelola dan pengendalian grup",
+"bentuk": "Holding company",
+"tambahan": false
+},
+{
+"kategori": "Risiko Investasi dan Proyek",
+"driver": "Kesalahan penilaian investasi atau proyek",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Investasi dan Proyek",
+"driver": "Kegagalan perencanaan investasi atau proyek",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Investasi dan Proyek",
+"driver": "Kegagalan pelaksanaan investasi atau proyek",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Investasi dan Proyek",
+"driver": "Cost overrun dan schedule delay",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Investasi dan Proyek",
+"driver": "Kegagalan vendor, kontraktor atau mitra proyek",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Investasi dan Proyek",
+"driver": "Kegagalan pencapaian manfaat atau return investasi atau proyek",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Investasi dan Proyek",
+"driver": "Perubahan spesifikasi",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Investasi dan Proyek",
+"driver": "Kegagalan pembebasan lahan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Investasi dan Proyek",
+"driver": "Kegagalan pemenuhan perizinan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Investasi dan Proyek",
+"driver": "Kegagalan integrasi setelah penggabungan atau pengambilalihan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Investasi dan Proyek",
+"driver": "Kegagalan aksi korporasi dan transaksi strategis",
+"bentuk": "Holding company",
+"tambahan": false
+},
+{
+"kategori": "Risiko Investasi dan Proyek",
+"driver": "Penurunan kinerja investasi pasca akuisisi",
+"bentuk": "Holding company",
+"tambahan": false
+},
+{
+"kategori": "Risiko Investasi dan Proyek",
+"driver": "Kegagalan divestasi atau exit strategy",
+"bentuk": "Holding company",
+"tambahan": false
+},
+{
+"kategori": "Risiko Reputasi",
+"driver": "Menurunnya kepercayaan pemangku kepentingan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Reputasi",
+"driver": "Persepsi negatif publik dan media",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Reputasi",
+"driver": "Menurunnya reputasi akibat kelemahan tata kelola atau etika",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Reputasi",
+"driver": "Menurunnya reputasi ESG dan keberlanjutan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Reputasi",
+"driver": "Kegagalan penanganan krisis reputasi",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Reputasi",
+"driver": "Menurunnya brand values",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Reputasi",
+"driver": "Menurunnya kepercayaan akibat kualitas produk atau layanan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Reputasi",
+"driver": "Penolakan masyarakat sekitar terhadap kegiatan usaha",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Reputasi",
+"driver": "Penyebaran informasi tidak benar mengenai perusahaan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Reputasi",
+"driver": "Perkara hukum yang menjadi pemberitaan berkelanjutan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Reputasi",
+"driver": "Penularan reputasi antar perusahaan dalam grup",
+"bentuk": "Holding company",
+"tambahan": false
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"driver": "Ketidakmampuan mengantisipasi perubahan regulasi",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"driver": "Ketidakpatuhan terhadap regulasi dan ketentuan yang berlaku",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"driver": "Gugatan dan sengketa hukum",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"driver": "Ketidakpatuhan pelaporan dan pengungkapan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"driver": "Pelanggaran penyuapan dan korupsi",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"driver": "Kelemahan pengelolaan kontrak dan komitmen hukum",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"driver": "Ketidakpatuhan terhadap perizinan dan persyaratan usaha",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"driver": "Kelemahan aspek yuridis perikatan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"driver": "Ketiadaan peraturan perundangan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"driver": "Berakhirnya atau tidak diperpanjangnya izin dan hak pengusahaan",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"driver": "Ketidakmampuan memenuhi persyaratan prudensial atau standar minimum sektoral",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"driver": "Perbedaan penafsiran atas ketentuan yang berlaku",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"driver": "Temuan pemeriksa eksternal yang berlanjut menjadi perkara",
+"bentuk": null,
+"tambahan": false
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"driver": "Ketidakpatuhan terhadap tata kelola korporasi secara grup",
+"bentuk": "Holding company",
+"tambahan": false
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"driver": "Kelemahan struktur kepemilikan dan hak hukum",
+"bentuk": "Holding company",
+"tambahan": false
+},
+{
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"driver": "Kelemahan pengawasan kepatuhan grup",
+"bentuk": "Holding company",
+"tambahan": false
+}
+],
+"register": [
+{
+"kategori": "Risiko Strategis",
+"risk_driver": null,
+"risk_event": "Penurunan Serapan dan Pangsa Pasar",
+"deskripsi": "Produk, jasa, dan fasilitas perusahaan diserap pasar lebih sedikit daripada rencana, dan posisi tawarnya melemah. Misalnya pengunjung agrowisata, penyewa kawasan industri, dan pesanan tangki timbun berkurang, atau tarif paket ditekan penjamin. Sebabnya segmen salah dipilih, pelanggan beralih, pesaing menguat, impor masuk, atau anggaran pengguna jasa naik turun. Kuota dan kewajiban yang baru ditetapkan pemerintah masuk Perubahan Kebijakan Pemerintah yang Merugikan Usaha. Usaha baru yang serapannya di bawah kajian masuk Imbal Hasil Investasi di Bawah Kajian Kelayakan.",
+"root_cause": "1. Isu perubahan kebijakan dalam pelaksanaan satu pintu ini khususnya Komoditas CPO/CPKO\n2. Birokrasi atau regulasi yang dilakukan dalam pelaksanaan kebijakan satu pintu CPO/CPKO yang belum matang di lapangan\n3. Perubahan perilaku investor berubah menjadi efisiensi biaya, memitigasi risiko bisnisn dan pengamanan rantai pasok",
+"probabilitas": 0.25,
+"deskripsi_dampak": "Penghasilan yang tidak didapatkan oleh perusahaan jika tidak mencapai target perusahaan",
+"nilai_dampak": 50820000000,
+"kriteria_dampak": "a. Deviasi pencapaian target strategis",
+"kategori_dampak": "Tinggi",
+"expected_loss": 0,
+"existing_control": "1. Melakukan pemasaran lahan melalu berbagai media",
+"rencana_mitigasi": "1. Menetapkan rencana pemasaran lahan",
+"kategori_mitigasi": "Preventive",
+"urutan": 1
+},
+{
+"kategori": "Risiko Keuangan",
+"risk_driver": null,
+"risk_event": "Kegagalan Memperoleh Pendanaan Sesuai Rencana",
+"deskripsi": "Dana dari luar tidak diperoleh dalam jumlah, waktu, dan biaya yang direncanakan. Misalnya pinjaman investasi terlambat cair, atau plafon kredit modal kerja musim giling habis. Sebabnya peta jalan keuangan tak tuntas, berkas dan agunan tak memenuhi syarat, atau kreditur menolak menggulung utang. Termasuk setoran modal induk yang tertunda bagi entitas anak. Kas sendiri yang tak cukup masuk Kekurangan Likuiditas untuk Kewajiban Jatuh Tempo. Dukungan dana bagi entitas anak dari sisi induk masuk Penurunan Dividen dan Kenaikan Dukungan Dana Entitas Anak.",
+"root_cause": "Penundaan pembayaran dari Tenant dalam pembayaran utilitas",
+"probabilitas": 0.05,
+"deskripsi_dampak": "Penagihan Piutang Tak Tertagih selama 1 tahun lebih",
+"nilai_dampak": 7410000,
+"kriteria_dampak": "e. Dampak terhadap bantalan (cushion) terhadap covenant",
+"kategori_dampak": "Tinggi",
+"expected_loss": null,
+"existing_control": "Melaksanakan penagihan terhadap pembayaran yang dilakukan oleh Tenant dan Mitra",
+"rencana_mitigasi": "Melakukan perencanaan penagihan terhadap Tenant/Mitra",
+"kategori_mitigasi": "Preventive",
+"urutan": 2
+},
+{
+"kategori": "Risiko Kredit",
+"risk_driver": null,
+"risk_event": "Tunggakan dan Gagal Bayar Pelanggan serta Mitra Usaha",
+"deskripsi": "Pembeli, penyewa, mitra, pemerintah, dan pihak lain tak melunasi utang transaksi usaha pada waktunya. Misalnya sewa aset, tagihan hotel dan MICE, uang muka tebang tebu, atau pinjaman pekebun mitra. Termasuk mitra KSO yang tak menyetor komitmen investasi atau bagi hasil, serta kompensasi penugasan dan dana penyandang riset yang tertunggak. Termasuk juga barang yang diserahkan tanpa imbalan, tagihan memburuk, tempo tanpa uji kelayakan, dan jaminan yang tak menutup tagihan. Tagihan tertahan karena dokumen perusahaan sendiri tak lengkap masuk Ketidaklengkapan Bukti dan Arsip Dokumen Perusahaan.",
+"root_cause": "Penundaan pembayaran dari Tenant dalam pembayaran utilitas",
+"probabilitas": 0.05,
+"deskripsi_dampak": "Penagihan Piutang Tak Tertagih selama 1 tahun lebih",
+"nilai_dampak": 7410001,
+"kriteria_dampak": "e. Dampak terhadap bantalan (cushion) terhadap covenant",
+"kategori_dampak": "Tinggi",
+"expected_loss": null,
+"existing_control": "Melaksanakan penagihan terhadap pembayaran yang dilakukan oleh Tenant dan Mitra",
+"rencana_mitigasi": "Melakukan perencanaan penagihan terhadap Tenant/Mitra",
+"kategori_mitigasi": "Preventive",
+"urutan": 3
+},
+{
+"kategori": "Risiko Operasional",
+"risk_driver": null,
+"risk_event": "Pencemaran Tanah, Air, dan Udara",
+"deskripsi": "Bahan pencemar lepas dari wadah, saluran, atau unit pengolah ke tanah, badan air, dan udara melampaui batas yang berlaku. Misalnya effluent IPAL di atas baku mutu, oli dan solar bocor, limbah B3 tercecer saat diangkut, atau asap pengasapan sit dan bising genset. Termasuk residu pestisida di lahan kebun, dan air limbah penyewa kawasan industri. Bocoran yang tertahan di area kerja masuk Kerusakan Mesin dan Kebocoran Instalasi Pabrik. Kewajiban uji, lapor, dan izin lingkungan yang tidak dijalankan, walau pencemar belum lepas, masuk Pelanggaran Kewajiban Izin dan Baku Mutu Lingkungan.",
+"root_cause": "Pemadaman Listrik secara tak terduga\nKetidakpatuhan Tenant dalam mengelola Limbah",
+"probabilitas": 0.25,
+"deskripsi_dampak": "Denda maksimal atas kelalaian pengelolaan  Limbah",
+"nilai_dampak": 3000000000,
+"kriteria_dampak": "b. Dampak kerugian operasional terhadap EBITDA",
+"kategori_dampak": "Tinggi",
+"expected_loss": 0,
+"existing_control": "Melakukan pengawasan atas jalur distribusi Limbah Cair",
+"rencana_mitigasi": "1. Melakukan program pengelola Limbah Cair\n2. Melakukan sosialisasi mengenai pengelolaan limbah cair",
+"kategori_mitigasi": "Preventive",
+"urutan": 4
+},
+{
+"kategori": "Risiko Operasional",
+"risk_driver": null,
+"risk_event": "Penurunan Kondisi & Kelaikan Aset Perusahaan",
+"deskripsi": "Kondisi fisik aset merosot sebelum umurnya sampai tak laik, tetapi tetap dipakai atau dihuni. Misalnya kerak ketel karena pembersihan terlewat, genset tak laik operasi, perabot tanpa pemegang, atau jalan kebun dan rumah dinas yang perawatannya tertinggal. Mesin yang berhenti atau bocor saat dioperasikan, beserta jam hentinya, masuk Kerusakan Mesin dan Kebocoran Instalasi Pabrik. Aset laik yang keluaran dan pemakaiannya di luar norma masuk Penurunan Kinerja dan Efisiensi Peralatan Produksi. Aset yang rusak selama disewakan atau dikerjasamakan masuk Kegagalan Optimalisasi dan Pelepasan Aset.",
+"root_cause": "Kebutuhan Tenant tidak sesuai dengan  keadaan rumah yang tersedia",
+"probabilitas": 0.5,
+"deskripsi_dampak": "Pendapatan yang hilang dan biaya yang dikeluarkan",
+"nilai_dampak": 530120000,
+"kriteria_dampak": "a. Gangguan operasional",
+"kategori_dampak": "Moderat",
+"expected_loss": null,
+"existing_control": "Melakukan pendataan atas aset rumah yang disewakan maupun harus diperbaiki",
+"rencana_mitigasi": "1. Membuat perencanaan atas perbaikan rumah \n2. Mencari mitra dalam pengembangan perumahan",
+"kategori_mitigasi": "Preventive",
+"urutan": 5
+},
+{
+"kategori": "Risiko Operasional",
+"risk_driver": null,
+"risk_event": "Kebakaran dan Ledakan yang Merusak Berat Aset",
+"deskripsi": "Bangunan, mesin, atau instalasi terbakar atau meledak sampai harus dibangun ulang atau diganti. Misalnya genset meledak, back fire boiler, atau tumpukan cangkang, fiber, dan tankos terbakar. Sebabnya sumber panas, hubung singkat listrik, dan bahan mudah terbakar tak dikendalikan. Lahan, gambut, dan tanaman yang terbakar masuk Kebakaran Lahan dan Kerusakan Kawasan Lindung. Api yang dinyalakan orang luar tanpa hak masuk Perusakan dan Pembakaran Aset oleh Pihak Luar. Bangunan yang rusak oleh banjir, gempa, atau angin masuk Cuaca Ekstrem dan Bencana Alam yang Mengganggu Operasi.",
+"root_cause": "Korsleting Listrik\nTerjadinya Human Error dalam kegiatan pengelolaan Kawasan",
+"probabilitas": 0.25,
+"deskripsi_dampak": null,
+"nilai_dampak": 2300000000,
+"kriteria_dampak": null,
+"kategori_dampak": null,
+"expected_loss": null,
+"existing_control": null,
+"rencana_mitigasi": null,
+"kategori_mitigasi": null,
+"urutan": 6
+},
+{
+"kategori": null,
+"risk_driver": null,
+"risk_event": null,
+"deskripsi": null,
+"root_cause": null,
+"probabilitas": null,
+"deskripsi_dampak": null,
+"nilai_dampak": 13000000000,
+"kriteria_dampak": null,
+"kategori_dampak": null,
+"expected_loss": null,
+"existing_control": null,
+"rencana_mitigasi": null,
+"kategori_mitigasi": null,
+"urutan": 7
+}
+],
+"ram": [
+{
+"row": 7,
+"kategori_no": 1,
+"kode": "1a",
+"parameter": "Strategic Initiative Progress",
+"formula": "(Jumlah inisiatif on-track ÷ Total inisiatif strategis) × 100%",
+"satuan": "%",
+"kategori_parameter": "Parameter Standar",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 8,
+"kategori_no": null,
+"kode": "1b",
+"parameter": "Penurunan Market Share (YoY)",
+"formula": "(Market Share Prognosa 2026 - Market Share RKAP 2027) ÷ Market Share Prognosa 2026",
+"satuan": "%",
+"kategori_parameter": "Parameter Standar",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 9,
+"kategori_no": null,
+"kode": "U1",
+"parameter": "Tingkat Serapan Kapasitas (Capacity Take-up Rate)",
+"formula": "(Kapasitas terisi atau kapasitas terikat kontrak) ÷ (kapasitas siap pakai atau volume yang tersedia untuk dijual) × 100%",
+"satuan": "%",
+"kategori_parameter": "Parameter Unik",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 10,
+"kategori_no": null,
+"kode": null,
+"parameter": null,
+"formula": null,
+"satuan": null,
+"kategori_parameter": "Parameter Unik",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 11,
+"kategori_no": 2,
+"kode": "2a",
+"parameter": "Net Open FX Position terhadap EBITDA",
+"formula": "Σ |NOP setiap mata uang setelah lindung nilai| ÷ EBITDA",
+"satuan": "kali",
+"kategori_parameter": "Parameter Standar",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 12,
+"kategori_no": null,
+"kode": "2b",
+"parameter": "Net Debt Floating terhadap EBITDA",
+"formula": "Net Debt Floating ÷ EBITDA",
+"satuan": "kali",
+"kategori_parameter": "Parameter Standar",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 13,
+"kategori_no": null,
+"kode": "K1",
+"parameter": "Commodity Price Sensitivity",
+"formula": "ΔEBITDA ÷ ΔHarga Komoditas Utama",
+"satuan": "Rp per unit harga",
+"kategori_parameter": "Parameter Klaster",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 14,
+"kategori_no": null,
+"kode": "K2",
+"parameter": "Sensitivitas Marjin terhadap Harga Pupuk dan Bahan Bakar",
+"formula": "Perubahan Marjin ÷ Perubahan Harga Pupuk dan Bahan Bakar",
+"satuan": "%",
+"kategori_parameter": "Parameter Klaster",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 15,
+"kategori_no": null,
+"kode": "U7",
+"parameter": "Rasio Cash Cost terhadap Harga Jual (Cash Cost to Price Ratio)",
+"formula": "Cash cost per kg ÷ harga jual bersih per kg × 100%, dihitung untuk setiap komoditas",
+"satuan": "%",
+"kategori_parameter": "Parameter Unik",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 16,
+"kategori_no": null,
+"kode": null,
+"parameter": null,
+"formula": null,
+"satuan": null,
+"kategori_parameter": "Parameter Unik",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 17,
+"kategori_no": 3,
+"kode": "3a",
+"parameter": "Debt Service Coverage Ratio (DSCR)",
+"formula": "EBITDA ÷ (Bunga + Pokok)",
+"satuan": "kali",
+"kategori_parameter": "Parameter Standar",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 18,
+"kategori_no": null,
+"kode": "3b",
+"parameter": "Operating Cash Flow Ratio",
+"formula": "Arus Kas Operasi ÷ Liabilitas Jangka Pendek",
+"satuan": "kali",
+"kategori_parameter": "Parameter Standar",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 19,
+"kategori_no": null,
+"kode": null,
+"parameter": null,
+"formula": null,
+"satuan": null,
+"kategori_parameter": "Parameter Unik",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 20,
+"kategori_no": 4,
+"kode": "4a",
+"parameter": "Counterparty Concentration Ratio",
+"formula": "Nilai Piutang dari Top Counterparty ÷ Total Piutang",
+"satuan": "%",
+"kategori_parameter": "Parameter Standar",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 21,
+"kategori_no": null,
+"kode": "4b",
+"parameter": "Rasio Cadangan Kerugian",
+"formula": "Nominal Cadangan Kerugian ÷ Total Piutang",
+"satuan": "%",
+"kategori_parameter": "Parameter Standar",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 22,
+"kategori_no": null,
+"kode": "U2",
+"parameter": "Rasio Konsentrasi Pendapatan (Revenue Concentration Ratio)",
+"formula": "(Pendapatan dari pelanggan terbesar atau pendapatan dari entitas PTPN Group) ÷ total pendapatan usaha × 100%",
+"satuan": "%",
+"kategori_parameter": "Parameter Unik",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 23,
+"kategori_no": null,
+"kode": "U3",
+"parameter": "Rasio Tagihan Lewat Jatuh Tempo (Overdue Receivables Ratio)",
+"formula": "Tagihan, bagi hasil, uang muka, dan kewajiban serah mitra yang lewat jatuh tempo lebih dari N hari ÷ total eksposur kepada mitra dari jenis yang sama × 100%. Pembilang dan pembagi memakai nilai sebelum dikurangi cadangan kerugian.",
+"satuan": "%",
+"kategori_parameter": "Parameter Unik",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 24,
+"kategori_no": null,
+"kode": null,
+"parameter": null,
+"formula": null,
+"satuan": null,
+"kategori_parameter": "Parameter Unik",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 25,
+"kategori_no": 5,
+"kode": "5a",
+"parameter": "Rasio Kerugian Operasional: Kegagalan Sistem",
+"formula": "Kerugian Operasional Kegagalan Sistem ÷ EBITDA",
+"satuan": "%",
+"kategori_parameter": "Parameter Standar",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 26,
+"kategori_no": null,
+"kode": "5b",
+"parameter": "Rasio Kerugian Operasional: Serangan Siber",
+"formula": "Kerugian Operasional Serangan Siber ÷ EBITDA",
+"satuan": "%",
+"kategori_parameter": "Parameter Standar",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 27,
+"kategori_no": null,
+"kode": "5c",
+"parameter": "Rasio Kerugian Operasional: Kegagalan Manusia (Fraud)",
+"formula": "Kerugian Operasional Fraud ÷ EBITDA",
+"satuan": "%",
+"kategori_parameter": "Parameter Standar",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 28,
+"kategori_no": null,
+"kode": "5d",
+"parameter": "Rasio Kerugian Operasional: Kecelakaan Kerja dan Bencana",
+"formula": "Kerugian Operasional Kecelakaan Kerja dan Bencana ÷ EBITDA",
+"satuan": "%",
+"kategori_parameter": "Parameter Standar",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 29,
+"kategori_no": null,
+"kode": "K3",
+"parameter": "Yield Realization Rate",
+"formula": "Produktivitas Aktual (ton/ha) ÷ Target",
+"satuan": "%",
+"kategori_parameter": "Parameter Klaster",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 30,
+"kategori_no": null,
+"kode": "K4",
+"parameter": "Weather/Climate Loss Ratio",
+"formula": "Kerugian Akibat Cuaca Ekstrem ÷ Total Pendapatan",
+"satuan": "%",
+"kategori_parameter": "Parameter Klaster",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 31,
+"kategori_no": null,
+"kode": "K5",
+"parameter": "ESG Controversy Incident Count",
+"formula": "Jumlah Insiden Lingkungan/Sosial Terkonfirmasi ÷ Periode",
+"satuan": "kejadian/tahun",
+"kategori_parameter": "Parameter Klaster",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 32,
+"kategori_no": null,
+"kode": "U4",
+"parameter": "Rasio Penolakan Keluaran Produksi (Output Rejection Rate)",
+"formula": "(Nilai produk yang gagal mutu sebelum diserahkan ditambah nilai produk yang ditolak, dikembalikan, atau dipotong harganya oleh penerima) ÷ total nilai produk yang diserahkan atau diperiksa × 100%",
+"satuan": "%",
+"kategori_parameter": "Parameter Unik",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 33,
+"kategori_no": null,
+"kode": "U5",
+"parameter": "Rasio Jam Henti Tak Terencana (Unplanned Downtime Ratio)",
+"formula": "Jam henti tak terencana aset kritis ÷ jam operasi terencana × 100%. Untuk layanan jaringan: Σ(lama padam × jumlah pelanggan terdampak) ÷ jumlah pelanggan tersambung",
+"satuan": "%",
+"kategori_parameter": "Parameter Unik",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 34,
+"kategori_no": null,
+"kode": "U6",
+"parameter": "Rasio Susut Hasil dan Persediaan (Yield and Inventory Loss Ratio)",
+"formula": "(Nilai atau berat hasil dan persediaan yang susut, rusak, atau hampir tidak laku) ÷ (nilai atau berat hasil dan persediaan yang dikuasai, diolah, atau diangkut) × 100%",
+"satuan": "%",
+"kategori_parameter": "Parameter Unik",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 35,
+"kategori_no": null,
+"kode": "U9",
+"parameter": "Tingkat Pemenuhan Masukan Produksi (Production Input Fulfilment Rate)",
+"formula": "Masukan kritis yang tersedia atau terlaksana dalam rentang waktu yang dibutuhkan ÷ kebutuhan masukan pada rentang waktu yang sama × 100%",
+"satuan": "%",
+"kategori_parameter": "Parameter Unik",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 36,
+"kategori_no": null,
+"kode": "U10",
+"parameter": "Rasio Lahan Terokupasi (Encroached Land Ratio)",
+"formula": "Luas areal hak yang diduduki, digarap, atau dikuasai pihak lain ÷ total luas areal hak × 100%",
+"satuan": "%",
+"kategori_parameter": "Parameter Unik",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 37,
+"kategori_no": null,
+"kode": null,
+"parameter": null,
+"formula": null,
+"satuan": null,
+"kategori_parameter": "Parameter Unik",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 38,
+"kategori_no": 6,
+"kode": "6a",
+"parameter": "Project IRR vs Hurdle Rate",
+"formula": "IRR Proyek ÷ Hurdle Rate",
+"satuan": "%",
+"kategori_parameter": "Parameter Standar",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 39,
+"kategori_no": null,
+"kode": "6b",
+"parameter": "Schedule Overrun Ratio",
+"formula": "Rencana Waktu Penyelesaian ÷ Perkiraan Waktu Penyelesaian × 100%",
+"satuan": "%",
+"kategori_parameter": "Parameter Standar",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 40,
+"kategori_no": null,
+"kode": null,
+"parameter": null,
+"formula": null,
+"satuan": null,
+"kategori_parameter": "Parameter Unik",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 41,
+"kategori_no": 7,
+"kode": "7a",
+"parameter": "Negative Sentiment Ratio",
+"formula": "Pemberitaan negatif yang mendapat perhatian regulator, pemerintah, atau pemegang saham ÷ Total pemberitaan negatif × 100%",
+"satuan": "%",
+"kategori_parameter": "Parameter Standar",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 42,
+"kategori_no": null,
+"kode": null,
+"parameter": null,
+"formula": null,
+"satuan": null,
+"kategori_parameter": "Parameter Unik",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 43,
+"kategori_no": 8,
+"kode": "8a",
+"parameter": "Rasio Kerugian Gugatan Hukum",
+"formula": "Potensi Kerugian Gugatan Hukum yang Open ÷ EBITDA",
+"satuan": "%",
+"kategori_parameter": "Parameter Standar",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 44,
+"kategori_no": null,
+"kode": "8b",
+"parameter": "Rasio Pelanggaran dan Denda Kepatuhan",
+"formula": "Pelanggaran/Denda Regulatory Compliance ÷ EBITDA",
+"satuan": "%",
+"kategori_parameter": "Parameter Standar",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 45,
+"kategori_no": null,
+"kode": "U8",
+"parameter": "Rasio Hak dan Izin Tidak Berlaku (Lapsed Rights and Permits Ratio)",
+"formula": "(Luas hak atas tanah atau jumlah izin yang sudah tidak berlaku, ditambah yang akan berakhir dalam jendela perpanjangan tetapi belum diproses perpanjangannya) ÷ (total luas hak atas tanah atau total izin wajib) × 100%",
+"satuan": "%",
+"kategori_parameter": "Parameter Unik",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+},
+{
+"row": 46,
+"kategori_no": null,
+"kode": null,
+"parameter": null,
+"formula": null,
+"satuan": null,
+"kategori_parameter": "Parameter Unik",
+"inisiatif": null,
+"kebijakan": null,
+"program": null,
+"anggaran": null
+}
+],
+"rekap": [
+{
+"no": 1,
+"kode": "1a",
+"parameter": "Strategic Initiative Progress",
+"kategori": "Risiko Strategis",
+"satuan": "%",
+"grup": "Parameter Standar",
+"diterapkan": "Ya",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I80",
+"ref_status": "I81"
+},
+{
+"no": 2,
+"kode": "1b",
+"parameter": "Penurunan Market Share (YoY)",
+"kategori": "Risiko Strategis",
+"satuan": "%",
+"grup": "Parameter Standar",
+"diterapkan": "Ya",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I51",
+"ref_status": "I52"
+},
+{
+"no": 3,
+"kode": "2a",
+"parameter": "Net Open FX Position terhadap EBITDA",
+"kategori": "Risiko Pasar",
+"satuan": "kali",
+"grup": "Parameter Standar",
+"diterapkan": "Ya",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I141",
+"ref_status": "I142"
+},
+{
+"no": 4,
+"kode": "2b",
+"parameter": "Net Debt Floating terhadap EBITDA",
+"kategori": "Risiko Pasar",
+"satuan": "kali",
+"grup": "Parameter Standar",
+"diterapkan": "Ya",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I83",
+"ref_status": "I84"
+},
+{
+"no": 5,
+"kode": "3a",
+"parameter": "Debt Service Coverage Ratio (DSCR)",
+"kategori": "Risiko Keuangan",
+"satuan": "kali",
+"grup": "Parameter Standar",
+"diterapkan": "Ya",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I67",
+"ref_status": "I68"
+},
+{
+"no": 6,
+"kode": "3b",
+"parameter": "Operating Cash Flow Ratio",
+"kategori": "Risiko Keuangan",
+"satuan": "kali",
+"grup": "Parameter Standar",
+"diterapkan": "Ya",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I71",
+"ref_status": "I72"
+},
+{
+"no": 7,
+"kode": "4a",
+"parameter": "Counterparty Concentration Ratio",
+"kategori": "Risiko Kredit",
+"satuan": "%",
+"grup": "Parameter Standar",
+"diterapkan": "Ya",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I137",
+"ref_status": "I138"
+},
+{
+"no": 8,
+"kode": "4b",
+"parameter": "Rasio Cadangan Kerugian",
+"kategori": "Risiko Kredit",
+"satuan": "%",
+"grup": "Parameter Standar",
+"diterapkan": "Ya",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I138",
+"ref_status": "I139"
+},
+{
+"no": 9,
+"kode": "5a",
+"parameter": "Rasio Kerugian Operasional: Kegagalan Sistem",
+"kategori": "Risiko Operasional",
+"satuan": "%",
+"grup": "Parameter Standar",
+"diterapkan": "Ya",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I57",
+"ref_status": "I58"
+},
+{
+"no": 10,
+"kode": "5b",
+"parameter": "Rasio Kerugian Operasional: Serangan Siber",
+"kategori": "Risiko Operasional",
+"satuan": "%",
+"grup": "Parameter Standar",
+"diterapkan": "Ya",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I57",
+"ref_status": "I58"
+},
+{
+"no": 11,
+"kode": "5c",
+"parameter": "Rasio Kerugian Operasional: Kegagalan Manusia (Fraud)",
+"kategori": "Risiko Operasional",
+"satuan": "%",
+"grup": "Parameter Standar",
+"diterapkan": "Ya",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I57",
+"ref_status": "I58"
+},
+{
+"no": 12,
+"kode": "5d",
+"parameter": "Rasio Kerugian Operasional: Kecelakaan Kerja dan Bencana",
+"kategori": "Risiko Operasional",
+"satuan": "%",
+"grup": "Parameter Standar",
+"diterapkan": "Ya",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I74",
+"ref_status": "I75"
+},
+{
+"no": 13,
+"kode": "6a",
+"parameter": "Project IRR vs Hurdle Rate",
+"kategori": "Risiko Investasi dan Proyek",
+"satuan": "%",
+"grup": "Parameter Standar",
+"diterapkan": "Ya",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I83",
+"ref_status": "I84"
+},
+{
+"no": 14,
+"kode": "6b",
+"parameter": "Schedule Overrun Ratio",
+"kategori": "Risiko Investasi dan Proyek",
+"satuan": "%",
+"grup": "Parameter Standar",
+"diterapkan": "Ya",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I53",
+"ref_status": "I54"
+},
+{
+"no": 15,
+"kode": "7a",
+"parameter": "Negative Sentiment Ratio",
+"kategori": "Risiko Reputasi",
+"satuan": "%",
+"grup": "Parameter Standar",
+"diterapkan": "Ya",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I91",
+"ref_status": "I92"
+},
+{
+"no": 16,
+"kode": "8a",
+"parameter": "Rasio Kerugian Gugatan Hukum",
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"satuan": "%",
+"grup": "Parameter Standar",
+"diterapkan": "Ya",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I137",
+"ref_status": "I138"
+},
+{
+"no": 17,
+"kode": "8b",
+"parameter": "Rasio Pelanggaran dan Denda Kepatuhan",
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"satuan": "%",
+"grup": "Parameter Standar",
+"diterapkan": "Ya",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I66",
+"ref_status": "I67"
+},
+{
+"no": 18,
+"kode": "K1",
+"parameter": "Commodity Price Sensitivity",
+"kategori": "Risiko Pasar",
+"satuan": "Rp per unit harga",
+"grup": "Parameter Klaster Food & Agriculture",
+"diterapkan": "Tidak",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I43",
+"ref_status": "I44"
+},
+{
+"no": 19,
+"kode": "K2",
+"parameter": "Sensitivitas Marjin terhadap Harga Pupuk dan Bahan Bakar",
+"kategori": "Risiko Pasar",
+"satuan": "%",
+"grup": "Parameter Klaster Food & Agriculture",
+"diterapkan": "Tidak",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I45",
+"ref_status": "I46"
+},
+{
+"no": 20,
+"kode": "K3",
+"parameter": "Yield Realization Rate",
+"kategori": "Risiko Operasional",
+"satuan": "%",
+"grup": "Parameter Klaster Food & Agriculture",
+"diterapkan": "Tidak",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I43",
+"ref_status": "I44"
+},
+{
+"no": 21,
+"kode": "K4",
+"parameter": "Weather/Climate Loss Ratio",
+"kategori": "Risiko Operasional",
+"satuan": "%",
+"grup": "Parameter Klaster Food & Agriculture",
+"diterapkan": "Tidak",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I57",
+"ref_status": "I58"
+},
+{
+"no": 22,
+"kode": "K5",
+"parameter": "ESG Controversy Incident Count",
+"kategori": "Risiko Operasional",
+"satuan": "kejadian/tahun",
+"grup": "Parameter Klaster Food & Agriculture",
+"diterapkan": "Tidak",
+"ref_limit": "I20",
+"ref_appetite": "I21",
+"ref_tolerance": "I22",
+"ref_hasil": "I65",
+"ref_status": "I66"
+},
+{
+"no": 23,
+"kode": "U1",
+"parameter": "Tingkat Serapan Kapasitas (Capacity Take-up Rate)",
+"kategori": "Risiko Strategis",
+"satuan": "%",
+"grup": "Parameter Unik",
+"diterapkan": "Ya",
+"ref_limit": "I22",
+"ref_appetite": "I23",
+"ref_tolerance": "I24",
+"ref_hasil": "I52",
+"ref_status": "I53"
+},
+{
+"no": 24,
+"kode": "U2",
+"parameter": "Rasio Konsentrasi Pendapatan (Revenue Concentration Ratio)",
+"kategori": "Risiko Kredit",
+"satuan": "%",
+"grup": "Parameter Unik",
+"diterapkan": null,
+"ref_limit": "I22",
+"ref_appetite": "I23",
+"ref_tolerance": "I24",
+"ref_hasil": "I39",
+"ref_status": "I40"
+},
+{
+"no": 25,
+"kode": "U3",
+"parameter": "Rasio Tagihan Lewat Jatuh Tempo (Overdue Receivables Ratio)",
+"kategori": "Risiko Kredit",
+"satuan": "%",
+"grup": "Parameter Unik",
+"diterapkan": null,
+"ref_limit": "I22",
+"ref_appetite": "I23",
+"ref_tolerance": "I24",
+"ref_hasil": "I44",
+"ref_status": "I45"
+},
+{
+"no": 26,
+"kode": "U4",
+"parameter": "Rasio Penolakan Keluaran Produksi (Output Rejection Rate)",
+"kategori": "Risiko Operasional",
+"satuan": "%",
+"grup": "Parameter Unik",
+"diterapkan": null,
+"ref_limit": "I22",
+"ref_appetite": "I23",
+"ref_tolerance": "I24",
+"ref_hasil": "I50",
+"ref_status": "I51"
+},
+{
+"no": 27,
+"kode": "U5",
+"parameter": "Rasio Jam Henti Tak Terencana (Unplanned Downtime Ratio)",
+"kategori": "Risiko Operasional",
+"satuan": "%",
+"grup": "Parameter Unik",
+"diterapkan": null,
+"ref_limit": "I22",
+"ref_appetite": "I23",
+"ref_tolerance": "I24",
+"ref_hasil": "I76",
+"ref_status": "I77"
+},
+{
+"no": 28,
+"kode": "U6",
+"parameter": "Rasio Susut Hasil dan Persediaan (Yield and Inventory Loss Ratio)",
+"kategori": "Risiko Operasional",
+"satuan": "%",
+"grup": "Parameter Unik",
+"diterapkan": null,
+"ref_limit": "I22",
+"ref_appetite": "I23",
+"ref_tolerance": "I24",
+"ref_hasil": "I52",
+"ref_status": "I53"
+},
+{
+"no": 29,
+"kode": "U7",
+"parameter": "Rasio Cash Cost terhadap Harga Jual (Cash Cost to Price Ratio)",
+"kategori": "Risiko Pasar",
+"satuan": "%",
+"grup": "Parameter Unik",
+"diterapkan": null,
+"ref_limit": "I22",
+"ref_appetite": "I23",
+"ref_tolerance": "I24",
+"ref_hasil": "I45",
+"ref_status": "I46"
+},
+{
+"no": 30,
+"kode": "U8",
+"parameter": "Rasio Hak dan Izin Tidak Berlaku (Lapsed Rights and Permits Ratio)",
+"kategori": "Risiko Peraturan, Hukum dan Kepatuhan",
+"satuan": "%",
+"grup": "Parameter Unik",
+"diterapkan": null,
+"ref_limit": "I22",
+"ref_appetite": "I23",
+"ref_tolerance": "I24",
+"ref_hasil": "I50",
+"ref_status": "I51"
+},
+{
+"no": 31,
+"kode": "U9",
+"parameter": "Tingkat Pemenuhan Masukan Produksi (Production Input Fulfilment Rate)",
+"kategori": "Risiko Operasional",
+"satuan": "%",
+"grup": "Parameter Unik",
+"diterapkan": null,
+"ref_limit": "I22",
+"ref_appetite": "I23",
+"ref_tolerance": "I24",
+"ref_hasil": "I50",
+"ref_status": "I51"
+},
+{
+"no": 32,
+"kode": "U10",
+"parameter": "Rasio Lahan Terokupasi (Encroached Land Ratio)",
+"kategori": "Risiko Operasional",
+"satuan": "%",
+"grup": "Parameter Unik",
+"diterapkan": null,
+"ref_limit": "I22",
+"ref_appetite": "I23",
+"ref_tolerance": "I24",
+"ref_hasil": "I136",
+"ref_status": "I137"
+}
+],
+"cat": [],
+"notes": {
+"RAS": "Catatan:\n- Sikap dan pernyataan Induk Perusahaan dikutip dari RAS PT Perkebunan Nusantara III (Persero) pada Executive Summary RKAP 2027 versi 2.1. Seluruh sikap Induk Perusahaan berada dalam rentang sikap PT DAM.\n- Satu Kategori Risiko dapat memuat lebih dari satu pernyataan. Pada Risiko Investasi dan Proyek, baris pertama berlaku untuk keputusan investasi dan baris kedua untuk pelaksanaan proyek. Pada Risiko Operasional, baris pertama berlaku umum dan baris kedua untuk keselamatan dan kesehatan kerja (K3).\n- Pada setiap baris, entitas menetapkan sikap risiko yang sama dengan sikap Induk Perusahaan atau yang lebih ketat. Urutan sikap dari yang paling ketat adalah Zero Tolerance, Conservative, Moderate, dan Aggressive.\n- Definisi sikap risiko menurut template PT DAM v.2:\n  Zero Tolerance: tidak bersedia mengambil risiko dan tidak memperkenankan adanya pelanggaran atau penyimpangan serta mengutamakan keberlangsungan operasi dengan kepatuhan mutlak dan pengendalian yang ketat.\n  Conservative: bersedia mengambil risiko pada tingkat yang rendah dan terkontrol dengan prioritas pada keberlangsungan usaha, perlindungan aset, dan pencapaian target yang berkelanjutan.\n  Moderate: bersedia mengambil risiko dengan tingkat risiko yang seimbang dengan manfaat atau nilai yang diharapkan sepanjang masih berada dalam kapasitas risiko perusahaan dan dijalankan sebagai bagian dari proses penciptaan nilai perusahaan.\n  Aggressive: bersedia mengambil risiko dengan tingkat yang relatif tinggi untuk mencapai pertumbuhan, transformasi atau penciptaan nilai yang lebih besar sepanjang masih berada dalam kapasitas risiko perusahaan dan mendukung tujuan strategis yang signifikan.\n- Entitas dapat menambahkan pernyataan selera risiko lain pada bagian B, asalkan selaras dengan tujuan strategisnya dan disertai rasionalisasi.\n- Sel kuning diisi entitas. Sel biru terhitung otomatis. Baris contoh berwarna abu-abu tidak ikut dihitung.",
+"Kriteria Dampak": "Catatan:\n- Isi lembar ini sama dengan kriteria dampak pada Acuan DAM di ERIN: 37 kriteria pada 8 Kategori Risiko dari lembar Kriteria Dampak template PT DAM v.2.\n- Cacat penulisan template dibetulkan seperti di ERIN: rentang Risiko Keuangan huruf e dan Risiko Kredit huruf c yang terbalik ditulis ulang; Risiko Kredit huruf e (pada template tertulis 10%< x <10%) ditulis 10% < x ≤ 15%; Risiko Kredit huruf b ditulis 30 < x ≤ 60 hari agar keterlambatan 31 hari tercakup; batas atas ditulis dengan tanda ≤ agar setiap nilai masuk tepat satu kategori; salah ketik dibetulkan.\n- Kategori dampak ditentukan dari besar dampak inheren apa adanya, tidak dikalikan probabilitas kejadian. Probabilitas dicatat pada kolom tersendiri di Risk Register.\n- Risiko utama adalah Risiko Korporat yang dampak inherennya berada pada kategori Moderat atau lebih tinggi. Kategori tersebut cukup tercapai pada salah satu kriteria dampak.\n- Lembar ini tidak diisi.",
+"Risk Driver": "Catatan:\n- Daftar risk driver sama dengan daftar Risk Driver di ERIN, yang dimuat dari lembar Risk Driver template PT DAM v.2 (98 driver). Kolom E menandai driver yang timbul karena bentuk perusahaan holding.\n- Tiga salah ketik pada template dibetulkan: Cost overrun dan schedule delay; Ketidakmampuan mengantisipasi perubahan regulasi; Ketidakpatuhan terhadap regulasi dan ketentuan yang berlaku. Driver Kegagalan integrasi setelah penggabungan atau pengambilalihan tercantum dua kali pada template dan dimuat sekali.\n- Entitas dapat menambahkan risk driver yang belum tersedia pada tabel bagian B sebelum dipakai pada Risk Register.\n- Sel kuning diisi entitas. Baris contoh berwarna abu-abu tidak ikut dihitung.",
+"Risk Register": "Catatan:\n- Kolom mengikuti lembar Risk Register template PT DAM v.2. Kolom Kriteria Dampak Acuan ditempatkan sebelum Kategori Dampak Risiko, sebab template menyatakan dampak risiko mengacu pada tabel kriteria dampak. Kolom ini mencatat kriteria yang dipakai untuk menentukan kategori dampak; bila tidak ada kriteria yang sesuai, tuliskan kriteria yang berlaku di perusahaan.\n- Risk Register memuat seluruh Risiko Korporat entitas beserta hasil penilaiannya, disusun dengan sudut pandang konsolidasi entitas sehingga risiko anak usaha entitas ikut tercakup. Risiko tingkat unit kerja tidak dicantumkan.\n- Probabilitas kejadian diisi dari 0% sampai dengan 100%. Nilai dampak risiko diisi apa adanya dan tidak dikalikan probabilitas.\n- Nilai Dampak Risiko dan Expected Loss ditulis dalam rupiah penuh.\n- Expected Loss tidak wajib untuk seluruh risk event. Expected Loss wajib diisi apabila (i) probabilitas terjadinya kerugian dapat diperkirakan, (ii) eksposur atau nilai posisi dapat diperkirakan secara kuantitatif, dan (iii) nilai kerugian apabila peristiwa terjadi dapat diperkirakan. Expected Loss beberapa risk event yang saling berhubungan dapat digabung menjadi satu hitungan.\n- Kategori dampak mengacu pada lembar Kriteria Dampak. Tagging Top Risk terisi Ya secara otomatis apabila kategori dampak Moderat, Tinggi, atau Sangat Tinggi.\n- Risk driver dipilih dari lembar Risk Driver. Risk driver yang tidak tercantum pada lembar Risk Driver, termasuk tabel tambahan entitas, ditandai merah.\n- Sel kuning diisi entitas. Sel biru terhitung otomatis. Baris contoh berwarna abu-abu tidak ikut dihitung.",
+"Risiko Utama": "Catatan:\n- Daftar risiko utama memuat risiko dalam Risk Register yang memenuhi kriteria risiko utama.\n- Lembar ini terisi otomatis dari Risk Register dan tidak diisi.",
+"RAM": "Catatan:\n- Kolom mengikuti lembar Risk.RAM-form isian template PT DAM v.2. Kolom Top Risk Events tidak lagi dipakai; daftar risiko utama ada di lembar Risiko Utama.\n- Parameter standar: parameter dan risk threshold ditetapkan PT DAM untuk seluruh anak perusahaan. Parameter klaster: berlaku bagi anggota klaster. Parameter unik: diusulkan entitas sesuai karakter usahanya. Bila PT DAM tidak menetapkan risk threshold, entitas mengusulkannya.\n- Parameter unik yang diusulkan wajib (i) menangkap risk driver dari beberapa risk event dalam Risk Register, (ii) bersifat leading indicator, dan (iii) didukung data yang akurat dan kredibel.\n- Parameter unik wajib memuat parameter yang membatasi rencana transaksi aksi korporasi tahun 2027 yang belum tercakup parameter standar atau klaster (lihat lembar CAT).\n- Hasil pengukuran pada RKAP 2027 adalah risiko inheren, yaitu sebelum mitigasi. Risk threshold adalah expected residual risk dan wajib didukung perhitungan yang menunjukkan entitas mampu menyerap risiko sebesar itu.\n- Status pengukuran: Hijau dalam Limit (pemantauan rutin); Kuning melewati Limit, masih dalam Appetite (tindakan perbaikan); Oranye melewati Appetite, masih dalam Tolerance (eskalasi kepada PT DAM); Merah melampaui Tolerance (eskalasi dan intervensi PT DAM).\n- Sikap risiko terisi otomatis dari lembar RAS menurut cakupan parameternya: 6a mengikuti pernyataan keputusan investasi, 6b mengikuti pernyataan pelaksanaan proyek, dan 5d mengikuti pernyataan K3 serta pernyataan umum Risiko Operasional.\n- Rencana pengendalian disusun untuk setiap parameter berstatus Kuning, Oranye, atau Merah. Sel rencana pengendalian berwarna merah muda selama belum diisi.\n- Sel kuning diisi entitas. Sel biru terhitung otomatis.",
+"CAT": "Catatan:\n- Lembar ini mengikuti lembar Risk.CAT-aksikorporasi template PT DAM v.2.\n- Seluruh rencana aksi korporasi pada RKAP 2027 disusun rencana detailnya. Aksi korporasi adalah tindakan Direksi yang direncanakan dalam RKAP 2027 menurut daftar tindakan Direksi dalam Anggaran Dasar yang kewenangannya memiliki threshold dari Pemegang Saham Seri B.\n- Apabila rencana detail masih terbatas, data minimum yang dimasukkan adalah data yang dibutuhkan untuk menyusun parameter dampak risiko aksi korporasi tersebut.\n- Setiap aksi korporasi yang direncanakan wajib memiliki parameter akumulasi transaksi. Parameter itu dapat dirumuskan dari parameter dampak risiko aksi korporasi dan dimasukkan sebagai parameter unik pada lembar RAM.\n- Hasil pengukuran adalah risiko inheren. Sel kuning diisi entitas. Baris contoh berwarna abu-abu tidak ikut dihitung.",
+"Petunjuk": "Catatan:\n1. Kertas kerja ini memuat Pernyataan Selera Risiko, Risk Register, daftar risiko utama, Risk Acceptance Matrix (RAM), Corporate Action Threshold (CAT), dan data perhitungan setiap parameter RAM entitas untuk penyusunan RKAP 2027. Format mengikuti template Risk Management RKAP 2027 (v.2) PT DAM. Pedoman Umum RKAP 2027 berlaku untuk hal yang tidak diatur template.\n2. Setiap parameter disusun pada satu lembar dengan kode yang sama dengan Lampiran Manajemen Risiko 2. Parameter klaster Food & Agriculture diberi kode K1 sampai dengan K5.\n3. Parameter standar diisi seluruh entitas. Parameter standar yang eksposurnya tidak ada atau tidak signifikan boleh tidak dipakai dengan penjelasan. Parameter klaster dan parameter unik diisi sesuai peta penerapan per entitas pada Lampiran Manajemen Risiko 2. Kolom Diterapkan pada lembar Rekap diisi Ya atau Tidak.\n4. Nama entitas, posisi data, tanggal penyusunan, dan versi diisi pada lembar Sampul.\n5. Bagian F hanya terdapat pada parameter yang batasnya diusulkan entitas. Bagian ini memuat data historis bulanan tahun 2023 sampai dengan 2026 dan rasionalisasi sebagai dasar usulan limit, appetite, dan tolerance.\n6. Nilai uang dinyatakan dalam Rp juta, kecuali disebut lain pada kepala kolom. Mengikuti lembar data PT DAM, nilai pada Risk Register (Nilai Dampak Risiko dan Expected Loss), parameter 5a sampai dengan 5d, 8a, dan 8b ditulis dalam rupiah penuh.\n7. Status pengukuran terhitung otomatis dalam empat warna: Hijau dalam Limit (pemantauan rutin); Kuning melewati Limit dan masih dalam Appetite (tindakan perbaikan); Oranye melewati Appetite dan masih dalam Tolerance (eskalasi kepada PT DAM); Merah melampaui Tolerance (eskalasi dan intervensi PT DAM). Batas belum diisi berarti limit, appetite, atau tolerance belum tersedia. Data belum lengkap berarti ada isian yang dibutuhkan rumus belum diisi.\n8. Apabila hasil pengukuran tidak terhitung karena pembagi bernilai nol akibat entitas tidak memiliki eksposur, pilih Ya pada baris konfirmasi di bagian D. Status menjadi Hijau. Alasan dan bukti dari RKAP 2027 dituliskan pada penjelasan hasil pengukuran.\n9. Kolom pada bagian C mengikuti format data minimum PT DAM. Kolom yang tidak dipakai rumus tetap diisi sebagai data pendukung.\n10. Nilai potensi kerugian pada parameter 5a sampai dengan 5d dan parameter klaster nomor 4 diisi penuh dan tidak dikalikan probabilitas. Probabilitas kejadian pada 5d dan K4 dicatat sebagai data pendukung.\n11. Lembar dikunci tanpa kata sandi agar rumus tidak tertimpa. Hanya sel kuning yang dapat diisi. Apabila baris isian tidak cukup atau entitas perlu menambah kolom, buka kunci melalui menu Review > Unprotect Sheet, sisipkan baris di antara baris isian pertama dan terakhir, salin rumus sel biru dari baris di atasnya, lalu kunci kembali melalui Review > Protect Sheet."
+},
+"petunjuk": [
+{
+"lembar": "Sampul",
+"isi": "Identitas entitas, posisi data, tanggal penyusunan, dan versi."
+},
+{
+"lembar": "RAS",
+"isi": "Sikap risiko dan Pernyataan Selera Risiko entitas pada setiap Kategori Risiko. Satu kategori dapat memuat lebih dari satu pernyataan. Sikap risiko entitas sama dengan sikap Induk Perusahaan atau lebih ketat."
+},
+{
+"lembar": "Kriteria Dampak",
+"isi": "Definisi Kategori Risiko dan kriteria dampak risiko sebagai acuan kategori dampak. Lembar ini tidak diisi."
+},
+{
+"lembar": "Risk Driver",
+"isi": "Daftar 98 risk driver template PT DAM v.2 per Kategori Risiko, sama dengan ERIN. Risk driver tambahan entitas dicatat pada bagian B."
+},
+{
+"lembar": "Risk Register",
+"isi": "Seluruh Risiko Korporat entitas beserta hasil penilaiannya, dengan kolom template PT DAM v.2. Tagging Top Risk terisi otomatis dari kategori dampak. Expected Loss diisi apabila memenuhi syarat pada catatan lembar."
+},
+{
+"lembar": "Risiko Utama",
+"isi": "Daftar risiko utama yang terisi otomatis dari Risk Register."
+},
+{
+"lembar": "Rekap",
+"isi": "Ringkasan parameter. Kolom Diterapkan diisi Ya atau Tidak untuk parameter klaster dan parameter unik."
+},
+{
+"lembar": "1a sampai U10",
+"isi": "Data perhitungan setiap parameter RAM."
+},
+{
+"lembar": "RAM",
+"isi": "Risk Acceptance Matrix yang terisi otomatis dari lembar RAS, Risk Register, Rekap, dan lembar parameter. Entitas mengisi rencana pengendalian dan parameter unik tambahan."
+},
+{
+"lembar": "CAT",
+"isi": "Daftar rencana aksi korporasi RKAP 2027, data rincinya, dan parameter akumulasi transaksi yang juga dimasukkan sebagai parameter unik pada RAM."
+}
+]
+}

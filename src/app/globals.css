@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --color-ink: #13201a;
+  --color-paper: #f6f5f0;
+  --color-line: #dcdcd2;
+  --color-brand-50: #eef6f1;
+  --color-brand-100: #d5eadc;
+  --color-brand-200: #a9d3b8;
+  --color-brand-500: #2f8a57;
+  --color-brand-600: #1f6e43;
+  --color-brand-700: #175636;
+  --color-brand-800: #123f29;
+  --color-brand-900: #0c2a1c;
+  --color-gold: #c9a227;
+
+  /* Warna sel kertas kerja */
+  --color-cell-input: #fffbd6;
+  --color-cell-input-strong: #fff3a8;
+  --color-cell-calc: #e4eef9;
+  --color-cell-label: #f1f1ee;
+}
+
+:root { color-scheme: light; }
+html, body { background: var(--color-paper); color: var(--color-ink); }
+body { font-feature-settings: "ss01", "cv11"; }
+.tabnum { font-variant-numeric: tabular-nums; }
+
+/* ---------- Tabel bergaya kertas kerja ---------- */
+.kk-table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 12.5px; }
+.kk-table th {
+  background: var(--color-brand-800); color: #fff; font-weight: 600; text-align: left; vertical-align: bottom;
+  padding: 8px 10px; border-right: 1px solid rgb(255 255 255 / .12); position: sticky; top: 0; z-index: 2; line-height: 1.25;
+}
+.kk-table th:first-child { border-top-left-radius: 8px; }
+.kk-table th:last-child { border-top-right-radius: 8px; border-right: 0; }
+.kk-table td { border-bottom: 1px solid var(--color-line); border-right: 1px solid var(--color-line); padding: 7px 10px; vertical-align: top; background: #fff; }
+.kk-table td:first-child { border-left: 1px solid var(--color-line); }
+.kk-table tr.example td { background: var(--color-cell-label); color: #6b6f68; font-style: italic; }
+.kk-table td.input { background: var(--color-cell-input); }
+.kk-table td.calc { background: var(--color-cell-calc); }
+.kk-table td.group { background: var(--color-brand-50); font-weight: 600; color: var(--color-brand-800); }
+.kk-table tbody tr:hover td:not(.group) { filter: brightness(0.985); }
+
+/* ---------- Grid lembar parameter (render sel Excel) ---------- */
+.xl-grid { border-collapse: collapse; table-layout: fixed; font-size: 12px; }
+.xl-grid td { padding: 3px 6px; vertical-align: top; line-height: 1.35; overflow: hidden; }
+.xl-grid td.bd { border: 1px solid #c9ccc4; }
+.xl-grid td.ov { overflow: visible; position: relative; z-index: 1; }
+.xl-grid td.inp { cursor: text; }
+.xl-grid td.inp:hover { outline: 2px solid var(--color-brand-500); outline-offset: -2px; }
+.xl-grid td.sel { outline: 2px solid var(--color-brand-700); outline-offset: -2px; }
+.xl-grid td.dirty { box-shadow: inset 3px 0 0 var(--color-gold); }
+.xl-rowhead, .xl-colhead { background: #eceee8; color: #7b8077; font-size: 10.5px; text-align: center; user-select: none; }
+
+.scroll-thin::-webkit-scrollbar { width: 10px; height: 10px; }
+.scroll-thin::-webkit-scrollbar-thumb { background: #c6cbc0; border-radius: 99px; border: 2px solid transparent; background-clip: padding-box; }
+.scroll-thin::-webkit-scrollbar-track { background: transparent; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.rise { animation: rise .35s cubic-bezier(.2,.7,.2,1) both; }
+
+/* ---------- Cetak (Executive Summary) ---------- */
+@media print {
+  html, body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

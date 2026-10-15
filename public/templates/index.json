@@ -1,0 +1,226 @@
+[
+ {
+  "code": "1a",
+  "title": "Strategic Initiative Progress",
+  "maxRow": 93,
+  "maxCol": 17,
+  "ncells": 693
+ },
+ {
+  "code": "1b",
+  "title": "Penurunan Market Share (YoY)",
+  "maxRow": 64,
+  "maxCol": 14,
+  "ncells": 313
+ },
+ {
+  "code": "2a",
+  "title": "Net Open FX Position terhadap EBITDA",
+  "maxRow": 153,
+  "maxCol": 15,
+  "ncells": 970
+ },
+ {
+  "code": "2b",
+  "title": "Net Debt Floating terhadap EBITDA",
+  "maxRow": 96,
+  "maxCol": 38,
+  "ncells": 1339
+ },
+ {
+  "code": "3a",
+  "title": "Debt Service Coverage Ratio (DSCR)",
+  "maxRow": 81,
+  "maxCol": 11,
+  "ncells": 326
+ },
+ {
+  "code": "3b",
+  "title": "Operating Cash Flow Ratio",
+  "maxRow": 85,
+  "maxCol": 11,
+  "ncells": 201
+ },
+ {
+  "code": "4a",
+  "title": "Counterparty Concentration Ratio",
+  "maxRow": 179,
+  "maxCol": 17,
+  "ncells": 921
+ },
+ {
+  "code": "4b",
+  "title": "Rasio Cadangan Kerugian",
+  "maxRow": 181,
+  "maxCol": 17,
+  "ncells": 926
+ },
+ {
+  "code": "5a",
+  "title": "Rasio Kerugian Operasional: Kegagalan Sistem",
+  "maxRow": 99,
+  "maxCol": 17,
+  "ncells": 576
+ },
+ {
+  "code": "5b",
+  "title": "Rasio Kerugian Operasional: Serangan Siber",
+  "maxRow": 99,
+  "maxCol": 17,
+  "ncells": 576
+ },
+ {
+  "code": "5c",
+  "title": "Rasio Kerugian Operasional: Kegagalan Manusia (Fraud)",
+  "maxRow": 99,
+  "maxCol": 17,
+  "ncells": 598
+ },
+ {
+  "code": "5d",
+  "title": "Rasio Kerugian Operasional: Kecelakaan Kerja dan Bencana",
+  "maxRow": 116,
+  "maxCol": 17,
+  "ncells": 733
+ },
+ {
+  "code": "6a",
+  "title": "Project IRR vs Hurdle Rate",
+  "maxRow": 129,
+  "maxCol": 31,
+  "ncells": 1219
+ },
+ {
+  "code": "6b",
+  "title": "Schedule Overrun Ratio",
+  "maxRow": 66,
+  "maxCol": 13,
+  "ncells": 352
+ },
+ {
+  "code": "7a",
+  "title": "Negative Sentiment Ratio",
+  "maxRow": 104,
+  "maxCol": 17,
+  "ncells": 537
+ },
+ {
+  "code": "8a",
+  "title": "Rasio Kerugian Gugatan Hukum",
+  "maxRow": 179,
+  "maxCol": 20,
+  "ncells": 2242
+ },
+ {
+  "code": "8b",
+  "title": "Rasio Pelanggaran dan Denda Kepatuhan",
+  "maxRow": 78,
+  "maxCol": 11,
+  "ncells": 377
+ },
+ {
+  "code": "K1",
+  "title": "Commodity Price Sensitivity",
+  "maxRow": 76,
+  "maxCol": 11,
+  "ncells": 323
+ },
+ {
+  "code": "K2",
+  "title": "Sensitivitas Marjin terhadap Harga Pupuk dan Bahan Bakar",
+  "maxRow": 72,
+  "maxCol": 11,
+  "ncells": 181
+ },
+ {
+  "code": "K3",
+  "title": "Yield Realization Rate",
+  "maxRow": 151,
+  "maxCol": 17,
+  "ncells": 1157
+ },
+ {
+  "code": "K4",
+  "title": "Weather/Climate Loss Ratio",
+  "maxRow": 99,
+  "maxCol": 17,
+  "ncells": 530
+ },
+ {
+  "code": "K5",
+  "title": "ESG Controversy Incident Count",
+  "maxRow": 98,
+  "maxCol": 17,
+  "ncells": 377
+ },
+ {
+  "code": "U1",
+  "title": "Tingkat Serapan Kapasitas (Capacity Take-up Rate)",
+  "maxRow": 94,
+  "maxCol": 17,
+  "ncells": 443
+ },
+ {
+  "code": "U2",
+  "title": "Rasio Konsentrasi Pendapatan (Revenue Concentration Ratio)",
+  "maxRow": 81,
+  "maxCol": 17,
+  "ncells": 318
+ },
+ {
+  "code": "U3",
+  "title": "Rasio Tagihan Lewat Jatuh Tempo (Overdue Receivables Ratio)",
+  "maxRow": 128,
+  "maxCol": 17,
+  "ncells": 716
+ },
+ {
+  "code": "U4",
+  "title": "Rasio Penolakan Keluaran Produksi (Output Rejection Rate)",
+  "maxRow": 96,
+  "maxCol": 17,
+  "ncells": 463
+ },
+ {
+  "code": "U5",
+  "title": "Rasio Jam Henti Tak Terencana (Unplanned Downtime Ratio)",
+  "maxRow": 118,
+  "maxCol": 17,
+  "ncells": 518
+ },
+ {
+  "code": "U6",
+  "title": "Rasio Susut Hasil dan Persediaan (Yield and Inventory Loss Ratio)",
+  "maxRow": 94,
+  "maxCol": 17,
+  "ncells": 409
+ },
+ {
+  "code": "U7",
+  "title": "Rasio Cash Cost terhadap Harga Jual (Cash Cost to Price Ratio)",
+  "maxRow": 154,
+  "maxCol": 17,
+  "ncells": 1164
+ },
+ {
+  "code": "U8",
+  "title": "Rasio Hak dan Izin Tidak Berlaku (Lapsed Rights and Permits Ratio)",
+  "maxRow": 114,
+  "maxCol": 17,
+  "ncells": 637
+ },
+ {
+  "code": "U9",
+  "title": "Tingkat Pemenuhan Masukan Produksi (Production Input Fulfilment Rate)",
+  "maxRow": 92,
+  "maxCol": 17,
+  "ncells": 423
+ },
+ {
+  "code": "U10",
+  "title": "Rasio Lahan Terokupasi (Encroached Land Ratio)",
+  "maxRow": 178,
+  "maxCol": 17,
+  "ncells": 1024
+ }
+]
