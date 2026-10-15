@@ -165,6 +165,7 @@ function AppShell({ children, path }: { children: React.ReactNode; path: string 
 
   return (
     <div className="min-h-screen">
+      <div aria-hidden className="app-bg"><div className="blob a" /><div className="blob b" /><div className="blob c" /></div>
       <aside className={clsx("fixed inset-y-0 left-0 z-30 hidden bg-brand-900 transition-[width] duration-200 lg:block print:!hidden", w)}>{nav(collapsed)}</aside>
       {open && (
         <div className="fixed inset-0 z-40 lg:hidden">
@@ -173,7 +174,7 @@ function AppShell({ children, path }: { children: React.ReactNode; path: string 
         </div>
       )}
       <div className={clsx("transition-[padding] duration-200 print:!pl-0", collapsed ? "lg:pl-[76px]" : "lg:pl-[264px]")}>
-        <header className="sticky top-0 z-20 flex h-14 items-center print:hidden gap-3 border-b border-line bg-paper/85 px-4 backdrop-blur md:px-8">
+        <header className="sticky top-0 z-20 flex h-14 items-center print:hidden gap-3 border-b border-white/70 bg-white/55 px-4 backdrop-blur-xl backdrop-saturate-150 md:px-8">
           <button className="rounded-lg p-2 hover:bg-black/5 lg:hidden" onClick={() => setOpen(true)} aria-label="Menu">
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -223,7 +224,7 @@ function AppShell({ children, path }: { children: React.ReactNode; path: string 
         </button>
         {catat && <ChallengeModal initial={refFromPath(path)} onClose={() => setCatat(false)} onSaved={() => window.dispatchEvent(new Event("challenge-log-updated"))} />}
         {/* Tab lembar ala Excel */}
-        {!lembarMaster && <div className={clsx("fixed right-0 bottom-0 left-0 z-20 border-t border-line bg-[#e9e8e1] transition-[left] duration-200 print:hidden", collapsed ? "lg:left-[76px]" : "lg:left-[264px]")}>
+        {!lembarMaster && <div className={clsx("fixed right-0 bottom-0 left-0 z-20 border-t border-white/70 bg-[#e9e8e1]/75 backdrop-blur-xl transition-[left] duration-200 print:hidden", collapsed ? "lg:left-[76px]" : "lg:left-[264px]")}>
           <div ref={tabsRef} className="scroll-thin flex overflow-x-auto px-2">
             <Link href="/" data-active={path === "/"} className={tabCls(path === "/")}>Dashboard</Link>
             {SHEETS.map((s) => (

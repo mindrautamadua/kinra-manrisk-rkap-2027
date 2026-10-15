@@ -62,7 +62,7 @@ export default function KesiapanPage() {
               const S = SEV[s];
               return (
                 <button key={s} onClick={() => setSev(sev === s ? "" : s)}
-                  className={clsx("relative overflow-hidden rounded-2xl border bg-white p-5 text-left transition", sev === s ? "border-brand-600 ring-2 ring-brand-500/20" : "border-line hover:border-brand-500/50")}>
+                  className={clsx("relative overflow-hidden glass rounded-2xl border p-5 text-left transition", sev === s ? "border-brand-600 ring-2 ring-brand-500/20" : "border-line hover:border-brand-500/50")}>
                   <div className={clsx("absolute inset-y-0 left-0 w-1", S.bar)} />
                   <div className="flex items-center gap-2 text-[11.5px] font-semibold tracking-wide text-slate-500 uppercase"><S.icon className="h-4 w-4" />{S.label}</div>
                   <div className="mt-2 text-[28px] leading-none font-extrabold tabnum">{hit(s)}</div>

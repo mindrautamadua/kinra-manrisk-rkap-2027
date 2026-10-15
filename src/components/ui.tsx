@@ -92,7 +92,7 @@ export function Section({ letter, title, right, children, className }: {
 }
 
 export function Card({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={clsx("rounded-2xl border border-line bg-white shadow-[0_1px_0_rgba(0,0,0,0.03)]", className)}>{children}</div>;
+  return <div className={clsx("glass rounded-2xl", className)}>{children}</div>;
 }
 
 export function TableWrap({ children, maxH }: { children: React.ReactNode; maxH?: string }) {

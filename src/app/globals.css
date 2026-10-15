@@ -25,7 +25,8 @@
 }
 
 :root { color-scheme: light; }
-html, body { background: var(--color-paper); color: var(--color-ink); }
+html { background: var(--color-paper); }
+body { color: var(--color-ink); }
 body { font-feature-settings: "ss01", "cv11"; }
 .tabnum { font-variant-numeric: tabular-nums; }
 
@@ -83,3 +84,66 @@ body { font-feature-settings: "ss01", "cv11"; }
 
 /* Mode presentasi: sembunyikan kontrol pengubah data */
 html[data-ro] [data-edit] { display: none !important; }
+
+/* ---------- Halaman login: latar animasi ---------- */
+@keyframes login-drift-a { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(8vw, 6vh) scale(1.15); } }
+@keyframes login-drift-b { 0%, 100% { transform: translate(0, 0) scale(1.1); } 50% { transform: translate(-10vw, -4vh) scale(.95); } }
+@keyframes login-drift-c { 0%, 100% { transform: translate(0, 0) scale(.9); } 50% { transform: translate(5vw, -8vh) scale(1.1); } }
+@keyframes login-grid { to { background-position: 48px 48px; } }
+@keyframes login-cell { 0%, 100% { opacity: .55; transform: scale(.92); } 50% { opacity: 1; transform: scale(1); } }
+@keyframes login-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes login-rise-dot { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: .8; } 100% { transform: translateY(-105vh); opacity: 0; } }
+@keyframes login-scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+@keyframes login-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes login-in { from { opacity: 0; transform: translateY(18px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes login-ping { 0% { transform: scale(1); opacity: .7; } 100% { transform: scale(2.6); opacity: 0; } }
+
+.login-blob { position: absolute; border-radius: 9999px; filter: blur(70px); will-change: transform; }
+.login-blob.a { animation: login-drift-a 18s ease-in-out infinite; }
+.login-blob.b { animation: login-drift-b 22s ease-in-out infinite; }
+.login-blob.c { animation: login-drift-c 26s ease-in-out infinite; }
+.login-grid {
+  background-image: linear-gradient(rgb(255 255 255 / .05) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / .05) 1px, transparent 1px);
+  background-size: 48px 48px; animation: login-grid 6s linear infinite;
+  mask-image: radial-gradient(ellipse at 40% 50%, #000 20%, transparent 75%);
+}
+.login-cell { animation: login-cell 3.2s ease-in-out infinite; }
+.login-draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: login-draw 2.4s cubic-bezier(.6,.1,.2,1) .4s forwards; }
+.login-dot { position: absolute; bottom: -10px; border-radius: 9999px; background: rgb(169 211 184 / .7); animation: login-rise-dot linear infinite; }
+.login-scan::after {
+  content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent, rgb(169 211 184 / .12), transparent);
+  animation: login-scan 4s ease-in-out infinite;
+}
+.login-float { animation: login-float 7s ease-in-out infinite; }
+.login-in { animation: login-in .7s cubic-bezier(.2,.7,.2,1) both; }
+.login-ping { animation: login-ping 2s cubic-bezier(0,0,.2,1) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .login-blob, .login-grid, .login-cell, .login-dot, .login-scan::after, .login-float, .login-ping { animation: none !important; }
+  .login-draw { animation: none; stroke-dashoffset: 0; }
+  .login-in { animation: none; }
+}
+
+/* ---------- Latar aplikasi + kartu glassmorphism ---------- */
+.app-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; background: linear-gradient(180deg, #eef3ec 0%, #f5f1e6 50%, #edf2f4 100%); }
+.app-bg::before {
+  content: ""; position: absolute; inset: 0;
+  background-image: radial-gradient(rgb(23 86 54 / .07) 1px, transparent 1px); background-size: 22px 22px;
+  mask-image: linear-gradient(180deg, #000, transparent 70%);
+}
+.app-bg .blob { position: absolute; border-radius: 9999px; filter: blur(80px); will-change: transform; }
+.app-bg .blob.a { top: -22%; left: -5%; width: 110vw; height: 55vh; background: rgb(47 138 87 / .42); animation: login-drift-a 40s ease-in-out infinite; }
+.app-bg .blob.b { top: 30%; left: -5%; width: 110vw; height: 45vh; background: rgb(201 162 39 / .30); animation: login-drift-b 48s ease-in-out infinite; }
+.app-bg .blob.c { bottom: -22%; left: -5%; width: 110vw; height: 50vh; background: rgb(56 161 205 / .26); animation: login-drift-c 56s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .app-bg .blob { animation: none; } }
+@media print { .app-bg { display: none; } }
+
+@layer components {
+.glass {
+  background: rgb(255 255 255 / .5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4);
+  border: 1px solid rgb(255 255 255 / .75);
+  box-shadow: 0 1px 0 rgb(255 255 255 / .8) inset, 0 8px 28px -12px rgb(12 42 28 / .18), 0 0 0 1px rgb(12 42 28 / .04);
+}
+@media print { .glass { background: #fff; backdrop-filter: none; box-shadow: none; border-color: var(--color-line); } }
+}

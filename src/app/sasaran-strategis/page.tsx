@@ -114,7 +114,7 @@ export default function SasaranStrategisPage() {
 
           <Section letter={String.fromCharCode(65 + PILAR_RJPP.length)} title="Risiko yang Belum Ditagging ke Sasaran Strategis">
             {risikoTanpa.length ? (
-              <div className="rounded-2xl border border-line bg-white p-4">
+              <div className="glass rounded-2xl p-4">
                 <div className="grid gap-1.5 md:grid-cols-2">{risikoTanpa.map((r) => <RisikoChip key={r.id} r={r} />)}</div>
                 <Link href="/risk-register" className="mt-3 inline-block text-[12.5px] font-semibold text-brand-700 hover:underline">Lengkapi di Risk Register →</Link>
               </div>
