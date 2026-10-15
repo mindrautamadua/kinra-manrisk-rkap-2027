@@ -6,7 +6,7 @@ import clsx from "clsx";
 import {
   LayoutDashboard, Presentation, FileText, BookOpen, Target, Gauge, Network, ListChecks, Flame, Grid3x3, Briefcase, Sigma,
   Library, Database, ChevronDown, Menu, X, PanelLeftClose, PanelLeftOpen, Table2,
-  ClipboardCheck, MessagesSquare, GitCompareArrows, Workflow, Lock, LockOpen, MessageSquarePlus, LifeBuoy, HelpCircle,
+  ClipboardCheck, MessagesSquare, GitCompareArrows, Workflow, Lock, LockOpen, MessageSquarePlus, LifeBuoy, HelpCircle, LogOut,
 } from "lucide-react";
 import { useMode } from "@/lib/mode";
 import { ChallengeModal, refFromPath } from "./ChallengeForm";
@@ -38,6 +38,11 @@ const GROUPS = Array.from(new Set(REKAP.map((r) => r.grup)));
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
+  if (path === "/login") return <>{children}</>;
+  return <AppShell path={path}>{children}</AppShell>;
+}
+
+function AppShell({ children, path }: { children: React.ReactNode; path: string }) {
   const [open, setOpen] = useState(false);
   const [paramOpen, setParamOpen] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
@@ -190,6 +195,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <span className="hidden sm:inline">Mode Presentasi</span>
             <span className={clsx("rounded px-1 text-[10px] font-bold", mode.readonly ? "bg-white/20" : "bg-slate-100 text-slate-500")}>{mode.readonly ? "ON" : "OFF"}</span>
           </button>
+          <UserMenu />
         </header>
         {mode.readonly && (
           <div className="flex items-center gap-2 bg-rose-600 px-4 py-1.5 text-[12px] font-medium text-white md:px-8 print:hidden">
@@ -239,4 +245,24 @@ function NavItem({ href, label, icon: Icon, active, mini }: { href: string; labe
 
 function Legend({ color, label }: { color: string; label: string }) {
   return <span className="flex items-center gap-1.5"><span className={clsx("h-3 w-3 rounded-sm ring-1", color)} />{label}</span>;
+}
+
+function UserMenu() {
+  const [nama, setNama] = useState<string | null>(null);
+  useEffect(() => {
+    fetch("/api/auth/me").then((r) => (r.ok ? r.json() : null)).then((u) => u && setNama(u.nama || u.username)).catch(() => {});
+  }, []);
+  const logout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+    window.location.replace("/login");
+  };
+  return (
+    <div className="flex shrink-0 items-center gap-2 border-l border-line pl-3">
+      {nama && <span className="hidden max-w-[160px] truncate text-[12px] font-semibold text-slate-600 md:inline" title={nama}>{nama}</span>}
+      <button onClick={logout} title="Keluar" aria-label="Keluar"
+        className="rounded-lg p-2 text-slate-500 transition hover:bg-rose-50 hover:text-rose-600">
+        <LogOut className="h-4.5 w-4.5" />
+      </button>
+    </div>
+  );
 }

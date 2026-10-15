@@ -1,14 +1,32 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
-export const supabaseConfigured = url.startsWith("http") && key.length > 20 && !key.startsWith("isi-");
+/** Dipakai UI untuk menampilkan pesan "belum dikonfigurasi". */
+export const supabaseConfigured = url.startsWith("http");
 
 let client: SupabaseClient | null = null;
+/**
+ * Klien browser yang diarahkan ke proxy /api/db (lihat src/app/api/db). Proxy memeriksa sesi login
+ * dan meneruskan query ke Supabase dengan secret key, sehingga browser tidak memegang akses tabel.
+ */
 export function sb(): SupabaseClient {
-  if (!supabaseConfigured) throw new Error("Supabase belum dikonfigurasi. Isi NEXT_PUBLIC_SUPABASE_URL dan NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY di .env.local");
-  if (!client) client = createClient(url, key, { auth: { persistSession: false } });
+  if (!supabaseConfigured) throw new Error("Supabase belum dikonfigurasi. Isi NEXT_PUBLIC_SUPABASE_URL di .env.local");
+  if (!client) {
+    const origin = typeof window === "undefined" ? "http://localhost" : window.location.origin;
+    client = createClient(`${origin}/api/db`, "proxy", {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: {
+        fetch: async (input, init) => {
+          const res = await fetch(input, { ...init, credentials: "same-origin" });
+          if (res.status === 401 && typeof window !== "undefined") {
+            window.location.href = `/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+          }
+          return res;
+        },
+      },
+    });
+  }
   return client;
 }
 

@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { modeApi, setReadonlyFlag } from "./data";
 import { supabaseConfigured } from "./supabase";
 
@@ -14,6 +15,7 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
   const [readonly, setReadonly] = useState(false);
   const [sejak, setSejak] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const diLogin = usePathname() === "/login";
 
   const apply = useCallback((aktif: boolean, waktu: string | null) => {
     setReadonly(aktif); setSejak(waktu); setReadonlyFlag(aktif);
@@ -21,7 +23,7 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!supabaseConfigured) return;
+    if (!supabaseConfigured || diLogin) return;
     let alive = true;
     const load = () => modeApi.get().then((m) => alive && apply(!!m.aktif, m.sejak ?? null)).catch(() => {});
     load();
@@ -29,7 +31,7 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
     const onFocus = () => load();
     window.addEventListener("focus", onFocus);
     return () => { alive = false; clearInterval(t); window.removeEventListener("focus", onFocus); };
-  }, [apply]);
+  }, [apply, diLogin]);
 
   const toggle = useCallback(async () => {
     const next = !readonly;

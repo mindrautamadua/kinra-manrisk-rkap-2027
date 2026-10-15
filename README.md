@@ -1,15 +1,18 @@
 # Perencanaan Manajemen Risiko RKAP 2027 — PT KINRA
 
-Aplikasi Next.js + Supabase yang mengikuti model **Kertas Kerja Bantu Perencanaan Manajemen Risiko RKAP 2027** (template PT DAM v.2) dengan master **Taksonomi Risiko PTPN Group**. Tanpa login.
+Aplikasi Next.js + Supabase yang mengikuti model **Kertas Kerja Bantu Perencanaan Manajemen Risiko RKAP 2027** (template PT DAM v.2) dengan master **Taksonomi Risiko PTPN Group**. Akses wajib login (tabel `app_user`).
 
 ## Menjalankan
 
-1. Jalankan `supabase/migrations/0001_init.sql` lalu `0002_challenge_session.sql` di Supabase Dashboard › SQL Editor.
+1. Jalankan `supabase/migrations/0001_init.sql`, `0002_challenge_session.sql`, lalu `0003_login.sql` di Supabase Dashboard › SQL Editor.
 2. Isi `.env.local`:
    ```
    NEXT_PUBLIC_SUPABASE_URL=https://llwikeclckwhsamenjmx.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon / publishable key>
+   SUPABASE_SECRET_KEY=<secret / service_role key — server saja>
+   AUTH_SECRET=<openssl rand -base64 48>
    ```
+   Di Vercel, isi variabel yang sama di Project Settings › Environment Variables.
+   Buat akun: `node scripts/buat-user.mjs admin "Nama Admin"`, lalu jalankan SQL yang dicetak di SQL Editor.
 3. `npm install && npm run dev`, buka http://localhost:3000/setup, klik **Isi Data Awal**.
 
 ## Isi aplikasi (mengikuti lembar Excel)
@@ -43,4 +46,4 @@ Aplikasi Next.js + Supabase yang mengikuti model **Kertas Kerja Bantu Perencanaa
   ```
 - Isian sel kuning tiap lembar parameter disimpan di tabel `parameter_sheet.inputs`; ringkasan hasil/status di `parameter_sheet.summary` (dipakai Rekap, RAM, Dashboard).
 
-> Keamanan: karena tanpa login, policy RLS membuka baca/tulis untuk siapa pun yang memegang anon key. Gunakan di jaringan internal atau tambahkan autentikasi sebelum dipublikasikan.
+> Keamanan: login memakai tabel `app_user` (password di-hash scrypt, akun terkunci 15 menit setelah 5 kali gagal, sesi cookie httpOnly bertanda tangan HMAC berlaku 8 jam). Browser tidak mengakses tabel langsung: semua query lewat `/api/db` yang memeriksa sesi lalu memakai secret key di server. Akses anon ke tabel ditutup oleh `0003_login.sql`.
