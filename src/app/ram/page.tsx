@@ -1,7 +1,7 @@
 "use client";
 import { Fragment, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Download, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Download, Info, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
 import clsx from "clsx";
 import { ArahBadge, EditCell, ErrorBox, Loading, SelectCell, SheetPage, SikapBadge, StatusBadge, TableWrap, Button, useLoad, useSaver } from "@/components/ui";
 import { api } from "@/lib/data";
@@ -11,6 +11,7 @@ import { note } from "@/lib/static";
 import { exportRam } from "@/lib/export";
 import { AiFillModal, AiRowButton } from "@/components/AiFill";
 import { ThresholdHint } from "@/components/ThresholdHint";
+import { PenjelasanStatus } from "@/components/PenjelasanStatus";
 import type { IsiRequest, IsiResponse } from "@/lib/isi-ai";
 import type { RamPengendalian, RamTambahan } from "@/lib/types";
 import { konfirmasi } from "@/components/Konfirmasi";
@@ -252,6 +253,7 @@ export default function RamPage() {
 
 /** Status pengukuran beserta arti warnanya dan alasan angka, agar mudah dipahami pembaca awam. */
 function StatusNarasi({ r }: { r: RamRow }) {
+  const [buka, setBuka] = useState(false);
   const narasi = NARASI_STATUS[r.status];
   const alasan = alasanStatus(r.status, r.hasil, r.limit, r.appetite, r.tolerance, r.satuan);
   return (
@@ -259,6 +261,12 @@ function StatusNarasi({ r }: { r: RamRow }) {
       <StatusBadge status={r.status} size="sm" />
       {narasi && <p className="mt-1.5 text-[11.5px] leading-snug text-slate-600">{narasi}</p>}
       {alasan && <p className={clsx("mt-1 text-[11px] font-medium leading-snug", r.status === "Merah" ? "text-rose-700" : r.status === "Oranye" ? "text-orange-700" : "text-amber-700")}>{alasan}.</p>}
+      {perluPengendalian(r.status) && (
+        <button onClick={() => setBuka(true)} className="mt-1.5 inline-flex items-center gap-1 text-[11.5px] font-semibold text-brand-700 hover:underline">
+          <Info className="h-3.5 w-3.5" />Lihat penjelasan detail
+        </button>
+      )}
+      {buka && <PenjelasanStatus r={r} onClose={() => setBuka(false)} />}
     </div>
   );
 }

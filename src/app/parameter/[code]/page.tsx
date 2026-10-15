@@ -49,6 +49,12 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
         wbRef.current?.destroy();
         wbRef.current = new Workbook([t], { [code]: inputsRef.current }, sampul?.nama_entitas ?? "PT KINRA");
         setTpl(t); setRow(p ?? null); setVersion((v) => v + 1);
+        // Ringkasan tersimpan bisa usang bila rumus template diperbaiki; samakan agar RAM/Rekap ikut terbarui.
+        const kini = wbRef.current.summary(code);
+        const lama = (p?.summary ?? {}) as Record<string, unknown>;
+        if (p && Object.entries(kini).some(([k, v]) => (v ?? null) !== (lama[k] ?? null))) {
+          api.update<ParameterSheet>("parameter_sheet", "code", code, { summary: kini, updated_at: new Date().toISOString() }).catch(() => {});
+        }
       } catch (e) { if (alive) setError((e as Error).message); }
     })();
     return () => { alive = false; clearTimeout(timer.current); };
