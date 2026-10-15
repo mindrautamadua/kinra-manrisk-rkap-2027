@@ -1,10 +1,12 @@
 "use client";
 import { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Grid2x2, RotateCcw } from "lucide-react";
+import { ArrowLeft, ArrowRight, Grid2x2, RotateCcw, Sparkles } from "lucide-react";
 import clsx from "clsx";
 import { Card, ErrorBox, Loading, SheetPage, StatusBadge, useSaver } from "@/components/ui";
 import { SheetGrid, buildLayout } from "@/components/SheetGrid";
+import { SheetAiModal } from "@/components/SheetAi";
+import { SHEET_AI } from "@/lib/sheet-ai";
 import { REKAP, Workbook, isInputCell, loadTemplate } from "@/lib/engine";
 import { api } from "@/lib/data";
 import { nilaiParam } from "@/lib/format";
@@ -21,6 +23,8 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
   const [error, setError] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
   const [headers, setHeaders] = useState(true);
+  const [aiOpen, setAiOpen] = useState(false);
+  const aiCfg = SHEET_AI[code];
   const wbRef = useRef<Workbook | null>(null);
   const inputsRef = useRef<Record<string, CellValue>>({});
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -135,6 +139,11 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
               </button>
             ))}
             <div className="ml-auto flex gap-2">
+              {aiCfg && (
+                <button data-edit onClick={() => setAiOpen(true)} className="flex items-center gap-1.5 rounded-lg border border-brand-500 bg-brand-700 px-2.5 py-1 text-[12px] font-semibold text-white hover:bg-brand-800">
+                  <Sparkles className="h-3.5 w-3.5" />Isi dengan AI
+                </button>
+              )}
               <button onClick={() => setHeaders((h) => !h)} className={clsx("flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[12px]", headers ? "border-brand-500 bg-brand-50 text-brand-800" : "border-line bg-white")}>
                 <Grid2x2 className="h-3.5 w-3.5" />Header baris/kolom
               </button>
@@ -147,6 +156,10 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
           <div className="scroll-thin max-h-[calc(100vh-150px)] overflow-auto rounded-xl border border-line bg-white shadow-sm">
             <SheetGrid t={tpl} layout={layout} wb={wb} version={version} onEdit={onEdit} showHeaders={headers} readonly={ro} />
           </div>
+          {aiOpen && aiCfg && (
+            <SheetAiModal cfg={aiCfg} get={(a) => wb.get(code, a)} onClose={() => setAiOpen(false)}
+              onApply={(cells) => { for (const [a, v] of Object.entries(cells)) onEdit(a, v); }} />
+          )}
           <p className="mt-2 text-[11.5px] text-slate-500">Klik sel kuning untuk mengisi. Angka boleh memakai format Indonesia (1.250,5) atau persen (12,5%). Sel biru dihitung otomatis dengan rumus yang sama dengan kertas kerja Excel.</p>
         </>
       )}
