@@ -7,6 +7,8 @@ import {
 } from "@/components/ui";
 import { TaxonomyPicker, groupT3, type T3Option } from "@/components/TaxonomyPicker";
 import { ParamPicker } from "@/components/ParamPicker";
+import { AiFillModal, AiRowButton } from "@/components/AiFill";
+import type { FieldSpec } from "@/lib/isi-ai";
 import { paramOptions } from "@/lib/trace";
 import { useReadonly } from "@/lib/mode";
 import { api } from "@/lib/data";
@@ -25,6 +27,7 @@ export default function RiskRegisterPage() {
   const saver = useSaver();
   const ro = useReadonly();
   const [picker, setPicker] = useState<RiskRegister | null>(null);
+  const [ai, setAi] = useState<RiskRegister | null>(null);
   const [filter, setFilter] = useState("");
   const [search, setSearch] = useState("");
   const d = q.data;
@@ -53,6 +56,34 @@ export default function RiskRegisterPage() {
       ...(picker.kategori !== o.kategori ? { risk_driver: null, kriteria_dampak: null } : {}) });
     setPicker(null);
   };
+
+  const bukaAi = (r: RiskRegister) => {
+    if (!r.risk_event) { alert("Pilih Risk Event dari taksonomi terlebih dahulu, agar AI punya dasar penyusunan."); return; }
+    setAi(r);
+  };
+  const aiFields = (r: RiskRegister): FieldSpec[] => {
+    const drivers = d!.drivers.filter((x) => x.kategori === r.kategori).map((x) => x.driver);
+    const krit = d!.kriteria.filter((x) => x.kategori === r.kategori).map((x) => `${x.kode}. ${x.kriteria}`);
+    return [
+      ...(drivers.length ? [{ key: "risk_driver", label: "Risk Driver", options: drivers }] : []),
+      { key: "root_cause", label: "Root Cause" },
+      { key: "deskripsi_dampak", label: "Deskripsi Dampak Risiko" },
+      ...(krit.length ? [{ key: "kriteria_dampak", label: "Kriteria Dampak Acuan", options: krit }] : []),
+      { key: "existing_control", label: "Existing Control" },
+      { key: "rencana_mitigasi", label: "Rencana Mitigasi" },
+      { key: "kategori_mitigasi", label: "Kategori Mitigasi", options: KATEGORI_MITIGASI },
+    ];
+  };
+  const aiKonteks = (r: RiskRegister) => ({
+    kategori: r.kategori, definisi_kategori: d!.kategori.find((k) => k.nama === r.kategori)?.definisi,
+    taksonomi_kode: r.taksonomi_kode, risk_event: r.risk_event, deskripsi_risk_event: r.deskripsi,
+    probabilitas: r.probabilitas, nilai_dampak_rp: r.nilai_dampak, kategori_dampak: r.kategori_dampak,
+    parameter_ram_terkait: (r.parameter_ram ?? []).map((k) => { const o = d!.popts.find((x) => x.kode === k); return o ? `${k} ${o.parameter}` : k; }),
+    contoh_baris: {
+      risk_event: "Penurunan harga CPO", root_cause: "Kelebihan pasokan minyak nabati global", deskripsi_dampak: "Penurunan marjin penjualan CPO",
+      existing_control: "Kontrak penjualan berjangka", rencana_mitigasi: "Menambah porsi kontrak penjualan berharga tetap", kategori_mitigasi: "Preventive",
+    },
+  });
 
   const total = d?.register.length ?? 0;
   const top = d?.register.filter((r) => isTopRisk(r.kategori_dampak)).length ?? 0;
@@ -89,7 +120,7 @@ export default function RiskRegisterPage() {
                   <th className="w-72">Deskripsi Risk Event</th><th className="w-60">Root Cause</th><th className="w-24">Probabilitas Kejadian (0%-100%)</th>
                   <th className="w-52">Deskripsi Dampak Risiko</th><th className="w-40">Nilai Dampak Risiko (Rp)</th><th className="w-52">Kriteria Dampak Acuan</th>
                   <th className="w-32">Kategori Dampak Risiko</th><th className="w-20">Tagging Top Risk</th><th className="w-40">Expected Loss (Rp)</th>
-                  <th className="w-56">Existing Control</th><th className="w-56">Rencana Mitigasi</th><th className="w-32">Kategori Mitigasi</th><th className="w-52">Parameter RAM Terkait</th><th className="w-10" />
+                  <th className="w-56">Existing Control</th><th className="w-56">Rencana Mitigasi</th><th className="w-32">Kategori Mitigasi</th><th className="w-52">Parameter RAM Terkait</th><th className="w-12" />
                 </tr></thead>
                 <tbody>
                   <tr className="example">
@@ -135,7 +166,7 @@ export default function RiskRegisterPage() {
                         <td className={clsx("input", !(r.parameter_ram ?? []).length && "!bg-amber-100/70")}>
                           <ParamPicker value={r.parameter_ram ?? []} options={d.popts} kategori={r.kategori} onSave={(v) => patch(r.id, { parameter_ram: v })} />
                         </td>
-                        <td><button data-edit onClick={() => del(r)} className="text-slate-400 hover:text-rose-600" title="Hapus"><Trash2 className="h-4 w-4" /></button></td>
+                        <td><div className="flex flex-col items-center gap-2"><AiRowButton onClick={() => bukaAi(r)} /><button data-edit onClick={() => del(r)} className="text-slate-400 hover:text-rose-600" title="Hapus"><Trash2 className="h-4 w-4" /></button></div></td>
                       </tr>
                     );
                   })}
@@ -144,6 +175,11 @@ export default function RiskRegisterPage() {
               </table>
             </TableWrap>
           </Section>
+          {ai && (
+            <AiFillModal jenis="risiko" subjek={`Risiko #${d.register.indexOf(ai) + 1} ${ai.risk_event}`} fields={aiFields(ai)} nilai={ai} konteks={aiKonteks(ai)}
+              onApply={(p) => patch(ai.id, p)} onClose={() => setAi(null)}
+              placeholder="Contoh: Risiko ini muncul karena pasokan TBS dari kebun plasma sering terlambat saat musim hujan. Saat ini sudah ada kontrak pasokan dan monitoring harian." />
+          )}
           {picker && <TaxonomyPicker options={d.t3} kategori={picker.kategori} current={picker.risk_event} onPick={pick} onClose={() => setPicker(null)} />}
         </>
       )}

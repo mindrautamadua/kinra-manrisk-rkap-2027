@@ -1,5 +1,5 @@
 "use client";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import Link from "next/link";
 import { Download, Plus, Trash2 } from "lucide-react";
 import clsx from "clsx";
@@ -9,14 +9,15 @@ import { angka, nilaiParam } from "@/lib/format";
 import { buildRam, KATEGORI_URUT, perluPengendalian, type RamRow } from "@/lib/ram";
 import { note } from "@/lib/static";
 import { exportRam } from "@/lib/export";
+import { AiFillModal, AiRowButton } from "@/components/AiFill";
 import type { RamPengendalian, RamTambahan } from "@/lib/types";
 
 const ARAH = ["Makin tinggi makin buruk", "Makin rendah makin buruk"];
 
 export default function RamPage() {
   const q = useLoad(async () => {
-    const [params, ras, pengendalian, tambahan] = await Promise.all([api.params(), api.ras(), api.pengendalian(), api.ramTambahan()]);
-    return { params, ras, pengendalian, tambahan };
+    const [params, ras, pengendalian, tambahan, register] = await Promise.all([api.params(), api.ras(), api.pengendalian(), api.ramTambahan(), api.register()]);
+    return { params, ras, pengendalian, tambahan, register };
   });
   const saver = useSaver();
   const d = q.data;
@@ -40,6 +41,19 @@ export default function RamPage() {
     if (!confirm("Hapus parameter unik tambahan ini?")) return;
     q.setData({ ...d!, tambahan: d!.tambahan.filter((x) => x.id !== id) });
     saver.run(() => api.remove("ram_tambahan", "id", id));
+  };
+
+  const [ai, setAi] = useState<RamRow | null>(null);
+  const aiKonteks = (r: RamRow) => ({
+    kategori_risiko: r.kategori, kode: r.kode, parameter: r.parameter, formula: r.formula, satuan: r.satuan,
+    arah: r.tambahan?.arah ?? undefined, sikap_ras: r.sikap, status: r.status,
+    limit: nilaiParam(r.limit, r.satuan), appetite: nilaiParam(r.appetite, r.satuan), tolerance: nilaiParam(r.tolerance, r.satuan), hasil_rkap_2027: nilaiParam(r.hasil, r.satuan),
+    risiko_terkait: d!.register.filter((x) => r.kode && (x.parameter_ram ?? []).includes(r.kode))
+      .map((x) => ({ risk_event: x.risk_event, root_cause: x.root_cause, rencana_mitigasi: x.rencana_mitigasi, kategori_dampak: x.kategori_dampak })),
+  });
+  const applyAi = (p: Record<string, string>) => {
+    if (!ai) return;
+    if (ai.tambahan) patchTambahan(ai.tambahan.id, p); else savePengendalian(ai.kode, p);
   };
 
   const ctl = (r: RamRow, field: "inisiatif" | "kebijakan" | "program" | "anggaran") => {
@@ -66,7 +80,7 @@ export default function RamPage() {
                 <th rowSpan={2} className="w-72">Formula</th><th rowSpan={2} className="w-20">Unit Satuan Formula</th><th rowSpan={2} className="w-28">Kategori Parameter</th>
                 <th colSpan={3} className="text-center">Risk Threshold</th><th rowSpan={2} className="w-32">Sikap Risiko Sesuai RAS</th>
                 <th rowSpan={2} className="w-32">Hasil Pengukuran Risiko pada RKAP 2027 (Risiko Inheren)</th><th rowSpan={2} className="w-36">Status Pengukuran</th>
-                <th colSpan={4} className="text-center">Rencana Pengendalian</th><th rowSpan={2} className="w-8" />
+                <th colSpan={4} className="text-center">Rencana Pengendalian</th><th rowSpan={2} className="w-10" />
               </tr>
               <tr>
                 <th className="top-[33px] w-24">Limit</th><th className="top-[33px] w-24">Appetite</th><th className="top-[33px] w-24">Tolerance</th>
@@ -112,7 +126,10 @@ export default function RamPage() {
                           )}
                           <td className="calc"><StatusBadge status={r.status} size="sm" /></td>
                           {ctl(r, "inisiatif")}{ctl(r, "kebijakan")}{ctl(r, "program")}{ctl(r, "anggaran")}
-                          <td>{t && <button data-edit onClick={() => delTambahan(t.id)} className="text-slate-400 hover:text-rose-600"><Trash2 className="h-4 w-4" /></button>}</td>
+                          <td><div className="flex flex-col items-center gap-2">
+                            {r.diterapkan && <AiRowButton title="Susun rencana pengendalian dengan AI" onClick={() => setAi(r)} />}
+                            {t && <button data-edit onClick={() => delTambahan(t.id)} className="text-slate-400 hover:text-rose-600"><Trash2 className="h-4 w-4" /></button>}
+                          </div></td>
                         </tr>
                       );
                     })}
@@ -130,6 +147,12 @@ export default function RamPage() {
             </tbody>
           </table>
         </TableWrap>
+      )}
+      {ai && (
+        <AiFillModal jenis="ram" subjek={`Parameter ${ai.kode} ${ai.parameter} · ${ai.status}`} konteks={aiKonteks(ai)}
+          fields={[{ key: "inisiatif", label: "Inisiatif Strategis" }, { key: "kebijakan", label: "Kebijakan" }, { key: "program", label: "Program Kerja" }]}
+          nilai={ai.tambahan ?? ai.pengendalian ?? {}} onApply={applyAi} onClose={() => setAi(null)}
+          placeholder="Contoh: Hasil DER naik karena rencana pinjaman pabrik baru. Kami ingin menjaganya lewat restrukturisasi tenor dan penambahan setoran modal dari Induk." />
       )}
     </SheetPage>
   );

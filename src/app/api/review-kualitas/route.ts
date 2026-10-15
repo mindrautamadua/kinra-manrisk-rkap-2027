@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import type { HasilReview, ReviewInput, TemuanAI } from "@/lib/review-ai";
+import { callStructured } from "@/lib/openai";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
-
-const MODEL = process.env.OPENAI_MODEL || "gpt-5.4-mini";
 
 const SYSTEM = `Anda reviewer senior manajemen risiko (Lini 2) di PTPN III (Persero) yang menyiapkan challenge session RKAP 2027 untuk anak perusahaan.
 Tugas: menilai KUALITAS ISI kertas kerja manajemen risiko, bukan kelengkapan kolom (kelengkapan sudah diperiksa sistem lain).
@@ -50,36 +49,14 @@ const SCHEMA = {
 };
 
 export async function POST(req: Request) {
-  const key = process.env.OPENAI_API_KEY;
-  if (!key) return NextResponse.json({ error: "OPENAI_API_KEY belum diisi di .env.local." }, { status: 500 });
-
   let input: ReviewInput;
   try { input = await req.json(); } catch { return NextResponse.json({ error: "Data tidak valid." }, { status: 400 }); }
 
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: MODEL,
-      reasoning_effort: "medium",
-      messages: [
-        { role: "system", content: SYSTEM },
-        { role: "user", content: `Entitas: ${input.entitas}\n\nData kertas kerja (JSON):\n${JSON.stringify({ ras: input.ras, risiko: input.risiko, parameter: input.parameter })}` },
-      ],
-      response_format: { type: "json_schema", json_schema: { name: "review_kualitas", strict: true, schema: SCHEMA } },
-    }),
+  const r = await callStructured<{ ringkasan: string; temuan: TemuanAI[] }>({
+    system: SYSTEM, name: "review_kualitas", schema: SCHEMA,
+    user: `Entitas: ${input.entitas}\n\nData kertas kerja (JSON):\n${JSON.stringify({ ras: input.ras, risiko: input.risiko, parameter: input.parameter })}`,
   });
-  const body = await res.json().catch(() => null);
-  if (!res.ok) {
-    return NextResponse.json({ error: `OpenAI: ${body?.error?.message ?? res.statusText}` }, { status: 502 });
-  }
-  const msg = body?.choices?.[0]?.message;
-  if (msg?.refusal) return NextResponse.json({ error: `Model menolak: ${msg.refusal}` }, { status: 502 });
-  try {
-    const parsed = JSON.parse(msg?.content ?? "") as { ringkasan: string; temuan: TemuanAI[] };
-    const out: HasilReview = { ...parsed, model: body.model ?? MODEL, waktu: new Date().toISOString() };
-    return NextResponse.json(out);
-  } catch {
-    return NextResponse.json({ error: "Respons model tidak dapat dibaca. Coba lagi." }, { status: 502 });
-  }
+  if (!r.ok) return NextResponse.json({ error: r.error }, { status: r.status });
+  const out: HasilReview = { ...r.data, model: r.model, waktu: new Date().toISOString() };
+  return NextResponse.json(out);
 }
