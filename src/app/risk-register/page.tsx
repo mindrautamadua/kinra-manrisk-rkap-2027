@@ -1,6 +1,6 @@
 "use client";
 import { Fragment, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, Check, Download, Library, Plus, Search, Trash2 } from "lucide-react";
+import { AlertTriangle, Check, Download, Library, Plus, Search, Sparkles, Trash2 } from "lucide-react";
 import clsx from "clsx";
 import {
   Button, DampakBadge, EditCell, ErrorBox, Loading, Section, SelectCell, SheetPage, Stat, TableWrap, useLoad, useSaver,
@@ -9,6 +9,9 @@ import { TaxonomyPicker, groupT3, type T3Option } from "@/components/TaxonomyPic
 import { ParamPicker } from "@/components/ParamPicker";
 import { SasaranPicker } from "@/components/SasaranPicker";
 import { MitigasiAi } from "@/components/MitigasiAi";
+import { UsulanRisikoModal } from "@/components/UsulanRisiko";
+import type { UsulanRisiko, UsulanRisikoRequest } from "@/lib/usulan-risiko";
+import { POS } from "@/lib/rkap-baca";
 import { AiFillModal, AiRowButton } from "@/components/AiFill";
 import type { FieldSpec } from "@/lib/isi-ai";
 import { ringkasRisiko } from "@/lib/kaitkan-ai";
@@ -20,6 +23,7 @@ import { note } from "@/lib/static";
 import { exportRegister } from "@/lib/export";
 import { cariKriteria, cekKualitas, ebitdaRkap, labelLevel, saranDampak, type Isu, type SaranDampak } from "@/lib/kualitas-register";
 import { KATEGORI_DAMPAK, KATEGORI_MITIGASI, type RiskRegister } from "@/lib/types";
+import { konfirmasi } from "@/components/Konfirmasi";
 
 export default function RiskRegisterPage() {
   const q = useLoad(async () => {
@@ -33,6 +37,7 @@ export default function RiskRegisterPage() {
   const ro = useReadonly();
   const [picker, setPicker] = useState<RiskRegister | null>(null);
   const [ai, setAi] = useState<RiskRegister | null>(null);
+  const [usulan, setUsulan] = useState(false);
   const [filter, setFilter] = useState("");
   const [filterSasaran, setFilterSasaran] = useState("");
   const [search, setSearch] = useState("");
@@ -64,8 +69,8 @@ export default function RiskRegisterPage() {
     const row = await api.insert<RiskRegister>("risk_register", { urutan, kategori: filter || null });
     q.setData({ ...d!, register: [...d!.register, row] });
   });
-  const del = (r: RiskRegister) => {
-    if (!confirm(`Hapus risiko "${r.risk_event ?? "tanpa nama"}"?`)) return;
+  const del = async (r: RiskRegister) => {
+    if (!(await konfirmasi({ judul: "Hapus risiko?", objek: r.risk_event ?? "Risiko tanpa nama", pesan: "Seluruh isian baris ini (dampak, kontrol, mitigasi, dan kaitan) ikut terhapus dan tidak bisa dibatalkan." }))) return;
     q.setData({ ...d!, register: d!.register.filter((x) => x.id !== r.id) });
     saver.run(() => api.remove("risk_register", "id", r.id));
   };
@@ -95,6 +100,44 @@ export default function RiskRegisterPage() {
     parameter_ram_terkait: label(r.parameter_ram, d!.popts.map((o) => ({ kode: o.kode, nama: o.parameter }))),
     sasaran_strategis_terkait: label(r.sasaran_strategis, d!.sasaran ?? []),
   });
+
+  /** Risiko korporat taksonomi yang belum ada di register: kandidat usulan AI. */
+  const kandidat = useMemo(() => {
+    if (!d) return [];
+    const ada = new Set(d.register.flatMap((r) => [r.taksonomi_kode, r.risk_event?.toLowerCase()]).filter(Boolean));
+    return d.t3.filter((o) => !ada.has(o.kode) && !ada.has(o.risiko_korporat.toLowerCase()))
+      .map((o) => ({ kode: o.kode, kategori: o.kategori, aspek: o.aspek, risiko_korporat: o.risiko_korporat, definisi: o.definisi.slice(0, 300) }));
+  }, [d]);
+  const buatUsulanRequest = async (instruksi: string): Promise<UsulanRisikoRequest> => {
+    // Konteks RKAP dimuat saat diminta saja, agar halaman tidak menunggu data yang jarang dipakai.
+    const [sampul, rkap, program] = await Promise.all([
+      api.sampul().catch(() => null), api.rkapAktif().catch(() => null), api.program().catch(() => []),
+    ]);
+    const pos = rkap ? Object.fromEntries(POS.filter((p) => rkap.data.pos[p.kode]?.tahun != null).map((p) => [p.label, rkap.data.pos[p.kode].tahun])) : null;
+    return {
+      entitas: sampul?.nama_entitas || "PT KINRA", instruksi, kandidat,
+      sasaran: (d!.sasaran ?? []).map((s) => ({ kode: s.kode, pilar: s.pilar, nama: s.nama, target: s.target })),
+      rkap: {
+        keuangan_rp_tahun_2027: pos ?? "(belum ada Data Keuangan RKAP aktif)",
+        program_strategis: program.filter((p) => p.nama).map((p) => ({ pilar: p.pilar, nama: p.nama, inisiatif_rjpp: p.inisiatif_rjpp, deskripsi: p.deskripsi })),
+      },
+      register: d!.register.filter((r) => r.risk_event).map((r) => ({ risk_event: r.risk_event, root_cause: r.root_cause })),
+    };
+  };
+  const tambahUsulan = async (list: UsulanRisiko[]) => {
+    let urutan = Math.max(0, ...d!.register.map((r) => r.urutan));
+    const baru: RiskRegister[] = [];
+    for (const u of list) {
+      const t = d!.t3.find((o) => o.kode === u.kode);
+      if (!t) continue;
+      baru.push(await api.insert<RiskRegister>("risk_register", {
+        urutan: ++urutan, kategori: t.kategori, risk_event: t.risiko_korporat, taksonomi_kode: t.kode,
+        deskripsi: u.deskripsi, root_cause: u.root_cause, deskripsi_dampak: u.deskripsi_dampak,
+        ...(d!.sasaran && u.sasaran.length ? { sasaran_strategis: u.sasaran } : {}),
+      }));
+    }
+    q.setData({ ...d!, register: [...d!.register, ...baru] });
+  };
 
   const bukaAi = (r: RiskRegister) => {
     if (!r.risk_event) { alert("Pilih Risk Event dari taksonomi terlebih dahulu, agar AI punya dasar penyusunan."); return; }
@@ -132,7 +175,7 @@ export default function RiskRegisterPage() {
 
   return (
     <SheetPage title="Risk Register RKAP 2027 - PT KINRA" code="Risk Register" note={note("Risk Register")} wide
-      actions={<>{saver.indicator}<Button variant="outline" onClick={() => d && exportRegister(d.register)}><Download className="h-4 w-4" />Excel</Button><Button edit onClick={add}><Plus className="h-4 w-4" />Tambah Risiko</Button></>}>
+      actions={<>{saver.indicator}<Button variant="outline" onClick={() => d && exportRegister(d.register)}><Download className="h-4 w-4" />Excel</Button><Button edit variant="outline" onClick={() => setUsulan(true)} disabled={!d}><Sparkles className="h-4 w-4" />Usulan Risiko AI</Button><Button edit onClick={add}><Plus className="h-4 w-4" />Tambah Risiko</Button></>}>
       {q.loading ? <Loading variant="stats-table" /> : q.error ? <ErrorBox error={q.error} /> : d && (
         <>
           <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -276,6 +319,10 @@ export default function RiskRegisterPage() {
             <AiFillModal jenis="risiko" subjek={`Risiko #${d.register.indexOf(ai) + 1} ${ai.risk_event}`} fields={aiFields(ai)} nilai={ai} konteks={aiKonteks(ai)}
               onApply={(p) => patch(ai.id, p)} onClose={() => setAi(null)}
               placeholder="Contoh: Risiko ini muncul karena pasokan TBS dari kebun plasma sering terlambat saat musim hujan. Saat ini sudah ada kontrak pasokan dan monitoring harian." />
+          )}
+          {usulan && (
+            <UsulanRisikoModal kandidat={kandidat} buatRequest={buatUsulanRequest} onTambah={tambahUsulan} onClose={() => setUsulan(false)}
+              namaSasaran={(k) => d.sasaran?.find((s) => s.kode === k)?.nama} />
           )}
           {picker && <TaxonomyPicker options={d.t3} kategori={picker.kategori} current={picker.risk_event} onPick={pick} onClose={() => setPicker(null)} />}
         </>

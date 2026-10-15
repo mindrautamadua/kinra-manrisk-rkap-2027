@@ -14,6 +14,7 @@ import { LABEL_SUMBER, TAUTAN, nilaiTautan, samaNilai } from "@/lib/rkap";
 import { supabaseConfigured } from "@/lib/supabase";
 import { useReadonly } from "@/lib/mode";
 import type { CellValue, ParameterSheet, RkapKeuangan, SheetTemplate } from "@/lib/types";
+import { konfirmasi } from "@/components/Konfirmasi";
 
 export default function ParameterPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = use(params);
@@ -79,8 +80,8 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
     saver.run(() => api.update<ParameterSheet>("parameter_sheet", "code", code, { diterapkan: v }));
   };
 
-  const resetInputs = () => {
-    if (!tpl || !confirm("Kosongkan seluruh isian (sel kuning) pada lembar ini?")) return;
+  const resetInputs = async () => {
+    if (!tpl || !(await konfirmasi({ judul: "Kosongkan isian lembar?", pesan: "Seluruh isian (sel kuning) pada lembar ini akan dikosongkan.", aksi: "Kosongkan", nada: "peringatan" }))) return;
     const empty: Record<string, CellValue> = {};
     for (const [a, c] of Object.entries(tpl.cells)) if (isInputCell(c)) empty[a] = null;
     inputsRef.current = empty;

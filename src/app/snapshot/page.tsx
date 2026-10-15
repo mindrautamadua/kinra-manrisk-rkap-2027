@@ -6,6 +6,7 @@ import { Button, Card, ErrorBox, Loading, SheetPage, useLoad, useSaver } from "@
 import { captureSnapshot, snapshotApi } from "@/lib/data";
 import { diffSnapshot, type SectionDiff } from "@/lib/diff";
 import type { Snapshot, SnapshotData } from "@/lib/types";
+import { konfirmasi } from "@/components/Konfirmasi";
 
 const KINI = "__kini__";
 const fmt = (v: unknown) => {
@@ -37,8 +38,8 @@ export default function SnapshotPage() {
     const row = await snapshotApi.add(nama.trim() || "Snapshot", catatan.trim() || null, data);
     q.setData([row, ...list]); setBase(row.id); setCatatan("");
   });
-  const hapus = (s: Snapshot) => {
-    if (!confirm(`Hapus snapshot "${s.nama}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+  const hapus = async (s: Snapshot) => {
+    if (!(await konfirmasi({ judul: "Hapus snapshot?", objek: s.nama, pesan: "Tindakan ini tidak bisa dibatalkan." }))) return;
     q.setData(list.filter((x) => x.id !== s.id));
     if (base === s.id) setBase("");
     saver.run(() => snapshotApi.remove(s.id));

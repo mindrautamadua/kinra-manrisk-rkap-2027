@@ -7,6 +7,7 @@ import { api } from "@/lib/data";
 import { hitungStatus, nilaiParam } from "@/lib/format";
 import { note } from "@/lib/static";
 import type { CatAksi } from "@/lib/types";
+import { konfirmasi } from "@/components/Konfirmasi";
 
 const TEXT: [keyof CatAksi, string, string][] = [
   ["jenis", "Jenis Aksi Korporasi", "w-40"], ["nama", "Nama Aksi Korporasi", "w-52"], ["rencana_detail", "Rencana Detail", "w-64"],
@@ -36,8 +37,8 @@ export default function CatPage() {
     const row = await api.insert<CatAksi>("cat_aksi", { urutan: rows.length + 1 });
     q.setData([...rows, row]);
   });
-  const del = (id: string) => {
-    if (!confirm("Hapus rencana aksi korporasi ini?")) return;
+  const del = async (id: string) => {
+    if (!(await konfirmasi({ judul: "Hapus rencana aksi korporasi?", pesan: "Baris ini akan dihapus dari lembar CAT." }))) return;
     q.setData(rows.filter((r) => r.id !== id));
     saver.run(() => api.remove("cat_aksi", "id", id));
   };

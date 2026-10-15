@@ -4,6 +4,7 @@ import { Button, EditCell, ErrorBox, Loading, Section, SelectCell, SheetPage, Ta
 import { api } from "@/lib/data";
 import { note } from "@/lib/static";
 import type { RiskDriver } from "@/lib/types";
+import { konfirmasi } from "@/components/Konfirmasi";
 
 export default function RiskDriverPage() {
   const q = useLoad(async () => ({ drivers: await api.drivers(), kategori: await api.kategori() }));
@@ -20,8 +21,8 @@ export default function RiskDriverPage() {
     const row = await api.insert<RiskDriver>("risk_driver", { kategori: d!.kategori[0].nama, driver: "Risk driver baru", tambahan: true });
     q.setData({ ...d!, drivers: [...d!.drivers, row] });
   });
-  const del = (id: number) => {
-    if (!confirm("Hapus risk driver tambahan ini?")) return;
+  const del = async (id: number) => {
+    if (!(await konfirmasi({ judul: "Hapus risk driver tambahan?", pesan: "Risiko yang memakai driver ini akan menampilkannya sebagai tidak dikenal." }))) return;
     q.setData({ ...d!, drivers: d!.drivers.filter((r) => r.id !== id) });
     saver.run(() => api.remove("risk_driver", "id", id));
   };

@@ -8,6 +8,7 @@ import { api } from "@/lib/data";
 import { cekSikap } from "@/lib/format";
 import { note } from "@/lib/static";
 import { SIKAP, type Ras, type RasTambahan, type KategoriRisiko } from "@/lib/types";
+import { konfirmasi } from "@/components/Konfirmasi";
 
 export default function RasPage() {
   const q = useLoad(async () => ({ ras: await api.ras(), tambahan: await api.rasTambahan(), kategori: await api.kategori() }));
@@ -26,8 +27,8 @@ export default function RasPage() {
     const row = await api.insert<RasTambahan>("ras_tambahan", { kategori: null });
     q.setData({ ...d!, tambahan: [...d!.tambahan, row] });
   });
-  const delTambahan = (id: number) => {
-    if (!confirm("Hapus pernyataan tambahan ini?")) return;
+  const delTambahan = async (id: number) => {
+    if (!(await konfirmasi({ judul: "Hapus pernyataan tambahan?" }))) return;
     q.setData({ ...d!, tambahan: d!.tambahan.filter((r) => r.id !== id) });
     saver.run(() => api.remove("ras_tambahan", "id", id));
   };

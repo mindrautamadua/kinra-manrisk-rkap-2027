@@ -10,6 +10,7 @@ import {
   BULAN, GRUP, LABEL_SUMBER, POS, TAUTAN, bacaKertasKerja, ebitda, nilaiTautan, periksa, samaNilai, terapkanKeParameter, type HasilBaca,
 } from "@/lib/rkap";
 import type { ParameterSheet, RkapKeuangan } from "@/lib/types";
+import { konfirmasi } from "@/components/Konfirmasi";
 
 const butuhMigrasi = (e: string) => /rkap_keuangan|schema cache|tidak diizinkan/i.test(e);
 const tebakNama = (f: string) => { const m = f.match(/draft\s+([ivx]+|\d+)/i); return m ? `Draft ${m[1].toUpperCase()}` : f.replace(/\.xlsx?$/i, ""); };
@@ -52,8 +53,8 @@ export default function DataKeuanganPage() {
     await api.update<RkapKeuangan>("rkap_keuangan", "id", r.id, { aktif: true });
     await q.reload();
   });
-  const hapus = (r: RkapKeuangan) => {
-    if (!confirm(`Hapus versi "${r.nama}"? Isian lembar parameter yang sudah diterapkan tidak ikut berubah.`)) return;
+  const hapus = async (r: RkapKeuangan) => {
+    if (!(await konfirmasi({ judul: "Hapus versi Data Keuangan RKAP?", objek: r.nama, pesan: "Isian lembar parameter yang sudah diterapkan tidak ikut berubah." }))) return;
     saver.run(async () => { await api.remove("rkap_keuangan", "id", r.id); if (pilih === r.id) setPilih(null); await q.reload(); });
   };
   const patchRow = (r: RkapKeuangan, p: Partial<RkapKeuangan>) => {

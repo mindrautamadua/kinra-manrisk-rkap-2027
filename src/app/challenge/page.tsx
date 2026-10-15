@@ -8,6 +8,7 @@ import { ChallengeModal } from "@/components/ChallengeForm";
 import { challengeApi } from "@/lib/data";
 import { exportChallenge } from "@/lib/export";
 import { PRIORITAS, STATUS_LOG, type ChallengeLog } from "@/lib/types";
+import { konfirmasi } from "@/components/Konfirmasi";
 
 const STATUS_CLS: Record<string, string> = {
   Terbuka: "bg-rose-50 text-rose-700 ring-rose-600/20", "Dalam proses": "bg-amber-50 text-amber-800 ring-amber-500/30", Selesai: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
@@ -39,8 +40,8 @@ export default function ChallengePage() {
     q.setData(rows.map((r) => (r.id === id ? { ...r, ...p } : r)));
     saver.run(() => challengeApi.update(id, p));
   };
-  const del = (r: ChallengeLog) => {
-    if (!confirm("Hapus catatan masukan ini?")) return;
+  const del = async (r: ChallengeLog) => {
+    if (!(await konfirmasi({ judul: "Hapus catatan masukan?" }))) return;
     q.setData(rows.filter((x) => x.id !== r.id));
     saver.run(() => challengeApi.remove(r.id));
   };

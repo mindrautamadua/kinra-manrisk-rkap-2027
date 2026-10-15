@@ -7,6 +7,7 @@ import { Button, DampakBadge, EditCell, ErrorBox, Loading, Section, SheetPage, S
 import { api } from "@/lib/data";
 import { isTopRisk } from "@/lib/format";
 import { PILAR_RJPP, type RiskRegister, type SasaranStrategis } from "@/lib/types";
+import { konfirmasi } from "@/components/Konfirmasi";
 
 const PREFIX: Record<string, string> = { "Performance Driven": "PD", "Stability and Growth": "SG", "New Business Expansion": "NB", Fondasi: "FD" };
 const KET: Record<string, string> = {
@@ -40,9 +41,9 @@ export default function SasaranStrategisPage() {
     const row = await api.insert<SasaranStrategis>("sasaran_strategis", { kode: `${pre}-${n}`, urutan, pilar, nama: "Sasaran baru" });
     q.setData({ ...d!, sasaran: [...d!.sasaran, row] });
   });
-  const del = (s: SasaranStrategis) => {
+  const del = async (s: SasaranStrategis) => {
     const n = risikoDari(s.kode).length;
-    if (!confirm(`Hapus sasaran ${s.kode}?${n ? ` ${n} risiko masih ditagging ke sasaran ini dan tagnya akan tampil merah.` : ""}`)) return;
+    if (!(await konfirmasi({ judul: "Hapus sasaran strategis?", objek: `${s.kode} ${s.nama}`, pesan: n ? `${n} risiko masih ditagging ke sasaran ini dan tagnya akan tampil merah.` : undefined }))) return;
     q.setData({ ...d!, sasaran: d!.sasaran.filter((x) => x.kode !== s.kode) });
     saver.run(() => api.remove("sasaran_strategis", "kode", s.kode));
   };

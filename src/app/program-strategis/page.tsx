@@ -7,6 +7,7 @@ import { api } from "@/lib/data";
 import { isTopRisk, rupiah } from "@/lib/format";
 import { buildRam } from "@/lib/ram";
 import { PILAR_GRCS, type ProgramStrategis } from "@/lib/types";
+import { konfirmasi } from "@/components/Konfirmasi";
 
 type Field = { key: keyof ProgramStrategis; label: string; kind?: "number"; hint?: string; span?: 2 };
 
@@ -74,8 +75,8 @@ export default function ProgramStrategisPage() {
     const row = await api.insert<ProgramStrategis>("program_strategis", { pilar: aiPilar, urutan: rows.length + 1, ...p });
     q.setData([...rows, row]);
   };
-  const del = (r: ProgramStrategis) => {
-    if (!confirm(`Hapus program "${r.nama || "(tanpa nama)"}"?`)) return;
+  const del = async (r: ProgramStrategis) => {
+    if (!(await konfirmasi({ judul: "Hapus program strategis?", objek: r.nama || "(tanpa nama)" }))) return;
     q.setData(rows.filter((x) => x.id !== r.id));
     saver.run(() => api.remove("program_strategis", "id", r.id));
   };

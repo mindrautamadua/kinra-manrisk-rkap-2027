@@ -3,6 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import { usePathname } from "next/navigation";
 import { modeApi, setReadonlyFlag } from "./data";
 import { supabaseConfigured } from "./supabase";
+import { konfirmasi } from "@/components/Konfirmasi";
 
 interface ModeCtx { readonly: boolean; sejak: string | null; toggle: () => Promise<void>; busy: boolean }
 const Ctx = createContext<ModeCtx>({ readonly: false, sejak: null, toggle: async () => {}, busy: false });
@@ -35,7 +36,7 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
 
   const toggle = useCallback(async () => {
     const next = !readonly;
-    if (!next && !confirm("Matikan mode presentasi? Data akan dapat diubah kembali dari semua layar.")) return;
+    if (!next && !(await konfirmasi({ judul: "Matikan mode presentasi?", pesan: "Data akan dapat diubah kembali dari semua layar.", aksi: "Matikan", nada: "peringatan" }))) return;
     setBusy(true);
     try {
       const waktu = next ? new Date().toISOString() : null;

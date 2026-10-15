@@ -12,6 +12,7 @@ import { exportRam } from "@/lib/export";
 import { AiFillModal, AiRowButton } from "@/components/AiFill";
 import type { IsiRequest, IsiResponse } from "@/lib/isi-ai";
 import type { RamPengendalian, RamTambahan } from "@/lib/types";
+import { konfirmasi } from "@/components/Konfirmasi";
 
 const ARAH = ["Makin tinggi makin buruk", "Makin rendah makin buruk"];
 const AI_FIELDS = [{ key: "inisiatif", label: "Inisiatif Strategis" }, { key: "kebijakan", label: "Kebijakan" }, { key: "program", label: "Program Kerja" }] as const;
@@ -43,8 +44,8 @@ export default function RamPage() {
     const row = await api.insert<RamTambahan>("ram_tambahan", { kategori, parameter: "Parameter unik baru", satuan: "%" });
     q.setData({ ...d!, tambahan: [...d!.tambahan, row] });
   });
-  const delTambahan = (id: string) => {
-    if (!confirm("Hapus parameter unik tambahan ini?")) return;
+  const delTambahan = async (id: string) => {
+    if (!(await konfirmasi({ judul: "Hapus parameter unik tambahan?" }))) return;
     q.setData({ ...d!, tambahan: d!.tambahan.filter((x) => x.id !== id) });
     saver.run(() => api.remove("ram_tambahan", "id", id));
   };
@@ -87,7 +88,7 @@ export default function RamPage() {
   const isiMassal = async () => {
     const target = targetMassal;
     if (!target.length) return;
-    if (!confirm(`AI akan menyusun draf Inisiatif Strategis, Kebijakan, dan Program Kerja untuk ${target.length} parameter berstatus Kuning/Oranye/Merah.\n\nHanya kolom yang masih kosong yang diisi; isian yang sudah ada tidak diubah. Anggaran tetap diisi manual. Lanjutkan?`)) return;
+    if (!(await konfirmasi({ judul: `Susun draf AI untuk ${target.length} parameter?`, pesan: "AI akan menyusun draf Inisiatif Strategis, Kebijakan, dan Program Kerja untuk parameter berstatus Kuning/Oranye/Merah.\n\nHanya kolom yang masih kosong yang diisi; isian yang sudah ada tidak diubah. Anggaran tetap diisi manual.", aksi: "Susun Draf", nada: "info" }))) return;
     const entitas = await api.sampul().then((s) => s.nama_entitas || "PT KINRA").catch(() => "PT KINRA");
     const gagal: string[] = [];
     let selesai = 0;
