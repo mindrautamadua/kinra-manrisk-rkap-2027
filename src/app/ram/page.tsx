@@ -3,18 +3,18 @@ import { Fragment, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Download, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
 import clsx from "clsx";
-import { EditCell, ErrorBox, Loading, SelectCell, SheetPage, SikapBadge, StatusBadge, TableWrap, Button, useLoad, useSaver } from "@/components/ui";
+import { ArahBadge, EditCell, ErrorBox, Loading, SelectCell, SheetPage, SikapBadge, StatusBadge, TableWrap, Button, useLoad, useSaver } from "@/components/ui";
 import { api } from "@/lib/data";
-import { angka, nilaiParam } from "@/lib/format";
+import { alasanStatus, angka, ARAH_PILIHAN, NARASI_STATUS, nilaiParam } from "@/lib/format";
 import { buildRam, KATEGORI_URUT, perluPengendalian, type RamRow } from "@/lib/ram";
 import { note } from "@/lib/static";
 import { exportRam } from "@/lib/export";
 import { AiFillModal, AiRowButton } from "@/components/AiFill";
+import { ThresholdHint } from "@/components/ThresholdHint";
 import type { IsiRequest, IsiResponse } from "@/lib/isi-ai";
 import type { RamPengendalian, RamTambahan } from "@/lib/types";
 import { konfirmasi } from "@/components/Konfirmasi";
 
-const ARAH = ["Makin tinggi makin buruk", "Makin rendah makin buruk"];
 const AI_FIELDS = [{ key: "inisiatif", label: "Inisiatif Strategis" }, { key: "kebijakan", label: "Kebijakan" }, { key: "program", label: "Program Kerja" }] as const;
 type AiField = (typeof AI_FIELDS)[number]["key"];
 const AI_PARALEL = 3;
@@ -165,12 +165,12 @@ export default function RamPage() {
               <tr>
                 <th rowSpan={2} className="fz fz-no w-10">No</th><th rowSpan={2} className="fz fz-tax w-36">Taksonomi Risiko</th><th rowSpan={2} colSpan={2} className="fz fz-kode fz-edge w-72">Parameter Pengukuran</th>
                 <th rowSpan={2} className="w-72">Formula</th><th rowSpan={2} className="w-20">Unit Satuan Formula</th><th rowSpan={2} className="w-28">Kategori Parameter</th>
-                <th colSpan={3} className="text-center">Risk Threshold</th><th rowSpan={2} className="w-32">Sikap Risiko Sesuai RAS</th>
-                <th rowSpan={2} className="w-32">Hasil Pengukuran Risiko pada RKAP 2027 (Risiko Inheren)</th><th rowSpan={2} className="w-36">Status Pengukuran</th>
+                <th colSpan={3} className="text-center"><ThresholdHint jenis="Risk Threshold" /></th><th rowSpan={2} className="w-32">Sikap Risiko Sesuai RAS</th>
+                <th rowSpan={2} className="w-32">Hasil Pengukuran Risiko pada RKAP 2027 (Risiko Inheren)</th><th rowSpan={2} className="min-w-[210px]">Status Pengukuran</th>
                 <th colSpan={4} className="text-center">Rencana Pengendalian</th><th rowSpan={2} className="w-10" />
               </tr>
               <tr>
-                <th className="top-[33px] w-24">Limit</th><th className="top-[33px] w-24">Appetite</th><th className="top-[33px] w-24">Tolerance</th>
+                <th className="top-[33px] w-24"><ThresholdHint jenis="Limit" /></th><th className="top-[33px] w-24"><ThresholdHint jenis="Appetite" /></th><th className="top-[33px] w-24"><ThresholdHint jenis="Tolerance" /></th>
                 <th className="top-[33px] w-56">Inisiatif Strategis</th><th className="top-[33px] w-56">Kebijakan</th><th className="top-[33px] w-56">Program Kerja</th><th className="top-[33px] w-28">Anggaran (Rp miliar)</th>
               </tr>
             </thead>
@@ -192,7 +192,7 @@ export default function RamPage() {
                               <td className="input fz fz-param fz-edge"><EditCell value={t.parameter} onSave={(v) => patchTambahan(t.id, { parameter: v as string })} /></td>
                               <td className="input text-[12px]"><EditCell value={t.formula} onSave={(v) => patchTambahan(t.id, { formula: v as string })} /></td>
                               <td className="input"><EditCell value={t.satuan} onSave={(v) => patchTambahan(t.id, { satuan: v as string })} /></td>
-                              <td className="calc text-[12px]">Parameter Unik<SelectCell className="mt-1 text-[11px]" value={t.arah} options={ARAH} onSave={(v) => patchTambahan(t.id, { arah: v })} /></td>
+                              <td className="calc text-[12px]">Parameter Unik<SelectCell className="mt-1 text-[11px]" value={t.arah} options={ARAH_PILIHAN} onSave={(v) => patchTambahan(t.id, { arah: v })} /><ArahBadge className="mt-1" arah={r.arah} /></td>
                               {(["limit_v", "appetite_v", "tolerance_v"] as const).map((f) => (
                                 <td key={f} className="input"><EditCell kind={t.satuan === "%" ? "percent" : "number"} value={t[f]} display={(v) => nilaiParam(v, t.satuan)} onSave={(v) => patchTambahan(t.id, { [f]: v })} /></td>
                               ))}
@@ -203,7 +203,7 @@ export default function RamPage() {
                             <>
                               <td className="fz fz-kode w-14 font-bold"><Link className="text-brand-700 hover:underline" href={`/parameter/${r.kode}`}>{r.kode}</Link></td>
                               <td className="fz fz-param fz-edge font-semibold"><span>{r.parameter}</span></td>
-                              <td className="text-[12px] text-slate-600">{r.formula}</td><td>{r.satuan}</td><td className="text-[12px]">{r.kategoriParameter}</td>
+                              <td className="text-[12px] text-slate-600">{r.formula}</td><td>{r.satuan}</td><td className="text-[12px]">{r.kategoriParameter}<ArahBadge className="mt-1.5" arah={r.arah} /></td>
                               <td className="calc text-right tabnum">{nilaiParam(r.limit, r.satuan)}</td>
                               <td className="calc text-right tabnum">{nilaiParam(r.appetite, r.satuan)}</td>
                               <td className="calc text-right tabnum">{nilaiParam(r.tolerance, r.satuan)}</td>
@@ -211,7 +211,7 @@ export default function RamPage() {
                               <td className="calc text-right font-semibold tabnum">{nilaiParam(r.hasil, r.satuan)}</td>
                             </>
                           )}
-                          <td className="calc"><StatusBadge status={r.status} size="sm" /></td>
+                          <td className="calc"><StatusNarasi r={r} /></td>
                           {ctl(r, "inisiatif")}{ctl(r, "kebijakan")}{ctl(r, "program")}{ctl(r, "anggaran")}
                           <td><div className="flex flex-col items-center gap-2">
                             {r.diterapkan && <AiRowButton title="Susun rencana pengendalian dengan AI" onClick={() => setAi(r)} />}
@@ -244,5 +244,18 @@ export default function RamPage() {
           placeholder="Contoh: Hasil DER naik karena rencana pinjaman pabrik baru. Kami ingin menjaganya lewat restrukturisasi tenor dan penambahan setoran modal dari Induk." />
       )}
     </SheetPage>
+  );
+}
+
+/** Status pengukuran beserta arti warnanya dan alasan angka, agar mudah dipahami pembaca awam. */
+function StatusNarasi({ r }: { r: RamRow }) {
+  const narasi = NARASI_STATUS[r.status];
+  const alasan = alasanStatus(r.status, r.hasil, r.limit, r.appetite, r.tolerance, r.satuan);
+  return (
+    <div className="min-w-[190px] max-w-[240px]">
+      <StatusBadge status={r.status} size="sm" />
+      {narasi && <p className="mt-1.5 text-[11.5px] leading-snug text-slate-600">{narasi}</p>}
+      {alasan && <p className={clsx("mt-1 text-[11px] font-medium leading-snug", r.status === "Merah" ? "text-rose-700" : r.status === "Oranye" ? "text-orange-700" : "text-amber-700")}>{alasan}.</p>}
+    </div>
   );
 }

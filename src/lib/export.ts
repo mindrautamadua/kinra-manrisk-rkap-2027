@@ -221,11 +221,11 @@ export async function exportSemua(d: SemuaData) {
     { header: "No", key: "no", width: 5 }, { header: "Jenis Aksi Korporasi", key: "jenis", width: 22 }, { header: "Nama Aksi Korporasi", key: "nama", width: 30 },
     { header: "Rencana Detail", key: "rencana_detail", width: 40 }, { header: "Dasar Kewenangan (Anggaran Dasar)", key: "dasar_kewenangan", width: 30 },
     { header: "Rencana Waktu", key: "rencana_waktu", width: 16 }, { header: "Parameter Akumulasi Transaksi", key: "parameter", width: 26 },
-    { header: "Formula", key: "formula", width: 30 }, { header: "Hasil Pengukuran (Risiko Inheren)", key: "hasil", width: 14, fmt: "0.00%" },
+    { header: "Formula", key: "formula", width: 30 }, { header: "Arah Parameter", key: "arah", width: 24 }, { header: "Hasil Pengukuran (Risiko Inheren)", key: "hasil", width: 14, fmt: "0.00%" },
     { header: "Rasionalisasi Pemilihan Parameter", key: "rasionalisasi_parameter", width: 36 }, { header: "Limit", key: "limit_v", width: 10, fmt: "0.00%" },
     { header: "Appetite", key: "appetite_v", width: 10, fmt: "0.00%" }, { header: "Tolerance", key: "tolerance_v", width: 10, fmt: "0.00%" },
     { header: "Status", key: "status", width: 14 }, { header: "Rasionalisasi Nilai Risk Threshold", key: "rasionalisasi_threshold", width: 36 },
-  ], d.cat.map((r, i) => ({ ...r, no: i + 1, status: r.hasil == null ? "" : hitungStatus(r.hasil, r.limit_v, r.appetite_v, r.tolerance_v, "Makin tinggi makin buruk") })), note("CAT"));
+  ], d.cat.map((r, i) => ({ ...r, no: i + 1, arah: r.arah || "Makin tinggi makin buruk", status: r.hasil == null ? "" : hitungStatus(r.hasil, r.limit_v, r.appetite_v, r.tolerance_v, r.arah) })), note("CAT"));
 
   addTable(wb, "Rekap", judul("Rekap Parameter RAM"), REKAP_COLS, rekapRows(d.params), note("Rekap"));
 

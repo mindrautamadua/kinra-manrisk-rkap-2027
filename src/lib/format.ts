@@ -73,6 +73,33 @@ export function hitungStatus(hasil: unknown, limit: unknown, appetite: unknown, 
   return x < l ? "Hijau" : x < a ? "Kuning" : x < t ? "Oranye" : "Merah";
 }
 
+/** Polaritas parameter untuk pembaca awam: "Makin rendah makin buruk" berarti target dimaksimalkan, sebaliknya diminimalkan. */
+export const ARAH_PILIHAN = ["Makin tinggi makin buruk", "Makin rendah makin buruk"];
+export const polaritas = (arah?: string | null) =>
+  (arah ?? "").toLowerCase().includes("rendah makin buruk")
+    ? { naik: true, label: "Makin tinggi makin baik", detail: "Hasil di bawah limit memburuk statusnya" }
+    : { naik: false, label: "Makin rendah makin baik", detail: "Hasil di atas limit memburuk statusnya" };
+
+/** Penjelasan tiap jenis risk threshold untuk hint di header tabel RAM dan CAT. */
+export const ARTI_THRESHOLD = {
+  "Risk Threshold": {
+    isi: "Tiga batas berjenjang untuk menilai hasil pengukuran, dari yang paling ketat (Limit) ke yang paling longgar (Tolerance). Risk threshold adalah expected residual risk, yaitu risiko setelah mitigasi, dan wajib didukung perhitungan kemampuan entitas menyerapnya.",
+    aksi: "Urutan angka mengikuti arah parameter: makin tinggi makin baik berarti Limit > Appetite > Tolerance; makin rendah makin baik berarti Limit < Appetite < Tolerance.",
+  },
+  Limit: {
+    isi: "Batas aman pertama, yaitu batas kinerja normal yang ingin dijaga perusahaan.",
+    aksi: "Masih dalam Limit: Hijau, cukup pemantauan rutin. Melewati Limit: minimal Kuning.",
+  },
+  Appetite: {
+    isi: "Batas risiko yang bersedia diambil perusahaan untuk mencapai sasarannya.",
+    aksi: "Melewati Limit tetapi masih dalam Appetite: Kuning, perlu tindakan perbaikan.",
+  },
+  Tolerance: {
+    isi: "Batas maksimal penyimpangan yang masih dapat ditanggung perusahaan.",
+    aksi: "Melewati Appetite tetapi masih dalam Tolerance: Oranye, eskalasi kepada PT DAM. Melampaui Tolerance: Merah, eskalasi dan intervensi PT DAM.",
+  },
+} as const;
+
 /** Arti tiap status pengukuran, ringkas untuk legenda. */
 export const ARTI_STATUS: Record<string, string> = {
   Hijau: "Dalam limit",
@@ -80,6 +107,16 @@ export const ARTI_STATUS: Record<string, string> = {
   Oranye: "Melewati appetite, masih dalam toleransi",
   Merah: "Melewati batas toleransi",
   "Data belum lengkap": "Hasil atau batas belum diisi",
+};
+
+/** Narasi status untuk pembaca awam: apa arti warnanya dan apa yang perlu dilakukan. */
+export const NARASI_STATUS: Record<string, string> = {
+  Hijau: "Aman. Kinerja masih dalam batas normal yang ditetapkan.",
+  Kuning: "Waspada. Mulai keluar dari batas normal, tetapi masih dapat diterima perusahaan. Perlu dipantau dan dikendalikan.",
+  Oranye: "Berisiko tinggi. Sudah melewati batas yang dapat diterima perusahaan, tetapi belum melewati batas toleransi. Perlu tindakan pengendalian.",
+  Merah: "Kritis. Sudah melewati batas toleransi maksimal perusahaan. Perlu tindakan pemulihan segera.",
+  "Data belum lengkap": "Status belum dapat ditentukan karena hasil pengukuran atau batasnya belum diisi.",
+  "Batas belum diisi": "Status belum dapat ditentukan karena limit, appetite, atau tolerance belum diisi.",
 };
 
 /** Kalimat penjelas kenapa sebuah parameter berstatus Kuning/Oranye/Merah, dibandingkan langsung dengan batas yang dilewati. */

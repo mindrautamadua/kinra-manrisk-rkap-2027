@@ -45,6 +45,8 @@ export interface CatAksi {
   id: string; urutan: number; jenis: string | null; nama: string | null; rencana_detail: string | null; dasar_kewenangan: string | null;
   rencana_waktu: string | null; parameter: string | null; formula: string | null; hasil: number | null; rasionalisasi_parameter: string | null;
   limit_v: number | null; appetite_v: number | null; tolerance_v: number | null; rasionalisasi_threshold: string | null;
+  /** Polaritas; null/kosong dianggap "Makin tinggi makin buruk" (kolom dari migrasi 0007). */
+  arah?: string | null;
 }
 export const PILAR_GRCS = ["Governance", "Risk Management", "Compliance", "Sustainability"] as const;
 export interface ProgramStrategis {

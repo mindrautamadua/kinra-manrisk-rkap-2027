@@ -1,10 +1,11 @@
 "use client";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import clsx from "clsx";
+import { createPortal } from "react-dom";
 import Link from "next/link";
-import { AlertTriangle, Check, ChevronDown, Info, Loader2 } from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowUp, Check, ChevronDown, Info, Loader2 } from "lucide-react";
 import { supabaseConfigured } from "@/lib/supabase";
-import { DAMPAK_STYLE, SIKAP_STYLE, statusStyle } from "@/lib/format";
+import { DAMPAK_STYLE, polaritas, SIKAP_STYLE, statusStyle } from "@/lib/format";
 import { useReadonly } from "@/lib/mode";
 
 // ---------- data loading ----------
@@ -371,6 +372,16 @@ export function StatusBadge({ status, size = "md" }: { status?: string | null; s
     </span>
   );
 }
+/** Penanda polaritas parameter: makin tinggi makin baik (maximize) atau makin rendah makin baik (minimize). */
+export function ArahBadge({ arah, className }: { arah?: string | null; className?: string }) {
+  const p = polaritas(arah);
+  const Ikon = p.naik ? ArrowUp : ArrowDown;
+  return (
+    <span title={`${p.label}. ${p.detail}.`} className={clsx("inline-flex items-center gap-1 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10.5px] font-semibold whitespace-nowrap text-slate-600", className)}>
+      <Ikon className="h-3 w-3" />{p.label}
+    </span>
+  );
+}
 export function SikapBadge({ sikap }: { sikap?: string | null }) {
   if (!sikap) return <span className="text-slate-400">–</span>;
   return <span className={clsx("inline-block rounded-md px-2 py-0.5 text-[11.5px] font-semibold whitespace-nowrap", SIKAP_STYLE[sikap] ?? "bg-slate-100")}>{sikap}</span>;
@@ -460,6 +471,38 @@ export function SelectCell({ value, options, onSave, placeholder = "Pilih…", c
       <option value="">{placeholder}</option>
       {options.map((o) => typeof o === "string" ? <option key={o} value={o}>{o}</option> : <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
+  );
+}
+
+/** Ikon info kecil (mis. di header tabel) yang menampilkan penjelasan saat disorot, diklik, atau difokus.
+ * Popover dirender ke body dengan posisi tetap agar tidak terpotong oleh tabel yang dapat digulir. */
+export function InfoHint({ title, children, className }: { title?: string; children: React.ReactNode; className?: string }) {
+  const ref = useRef<HTMLButtonElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const show = () => {
+    const r = ref.current?.getBoundingClientRect();
+    if (r) setPos({ top: r.bottom + 8, left: Math.min(Math.max(12, r.left + r.width / 2 - 150), window.innerWidth - 312) });
+  };
+  const hide = () => setPos(null);
+  useEffect(() => {
+    if (!pos) return;
+    window.addEventListener("scroll", hide, true);
+    return () => window.removeEventListener("scroll", hide, true);
+  }, [pos]);
+  return (
+    <>
+      <button ref={ref} type="button" aria-label={title ? `Info ${title}` : "Info"} onMouseEnter={show} onMouseLeave={hide} onFocus={show} onBlur={hide}
+        onClick={(e) => { e.stopPropagation(); if (pos) hide(); else show(); }}
+        className={clsx("inline-flex align-middle rounded-full opacity-70 transition hover:opacity-100 focus:opacity-100 focus:outline-none", className)}>
+        <Info className="h-3.5 w-3.5" />
+      </button>
+      {pos && createPortal(
+        <div role="tooltip" style={{ top: pos.top, left: pos.left }}
+          className="pointer-events-none fixed z-[100] w-[300px] rounded-xl border border-line bg-white p-3 text-left text-[12px] leading-relaxed font-normal tracking-normal normal-case text-slate-700 shadow-xl">
+          {title && <div className="mb-1 text-[12.5px] font-bold text-ink">{title}</div>}
+          {children}
+        </div>, document.body)}
+    </>
   );
 }
 
