@@ -134,7 +134,8 @@ export function cekKualitas(r: RiskRegister, saran: SaranDampak | null): Isu[] {
       out.push({ kolom: "Rencana Mitigasi", pesan: "Sama/mirip dengan Existing Control. Mitigasi harus tindakan baru untuk RKAP 2027." });
     }
     const kurang = [!RE_PIC.test(r.rencana_mitigasi!) && "PIC/fungsi", !RE_WAKTU.test(r.rencana_mitigasi!) && "waktu", !RE_TARGET.test(r.rencana_mitigasi!) && "target terukur"].filter(Boolean);
-    if (kurang.length) out.push({ kolom: "Rencana Mitigasi", pesan: `Belum menyebut ${kurang.join(", ")}.` });
+    // Template tidak punya kolom terpisah untuk PIC/waktu/target, jadi ketiganya diharapkan tertulis di dalam uraian mitigasi.
+    if (kurang.length) out.push({ kolom: "Rencana Mitigasi", pesan: `Uraian mitigasi belum menyebut ${kurang.join(", ")}. Tulis di dalam teks mitigasi, mis. "Divisi Keuangan …, paling lambat TW II 2027, target 100% …".` });
   }
   if ((r.probabilitas != null) !== (r.nilai_dampak != null)) {
     out.push({ kolom: "Besaran Risiko", pesan: r.probabilitas != null ? "Probabilitas terisi tetapi Nilai Dampak kosong." : "Nilai Dampak terisi tetapi Probabilitas kosong." });
