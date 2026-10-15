@@ -66,7 +66,7 @@ export default function DataKeuanganPage() {
   });
 
   return (
-    <SheetPage code="Data Pendukung" title="Data Keuangan RKAP 2027"
+    <SheetPage code="Master Data" title="Data Keuangan RKAP 2027"
       note={`Ringkasan Laba Rugi Konsolidasi dari Kertas Kerja RKAP (sheet "BD RL_REKAP KONSOLIDASI SMNT"). Satu unggahan = satu versi (Draft II, Draft III, Final). Versi aktif menjadi sumber angka EBITDA dan total pendapatan pada lembar parameter, sehingga angka kertas kerja manajemen risiko sama dengan RKAP keuangan.\n\nSemua nilai disimpan dalam rupiah penuh. Tabel menampilkan Rp juta.`}
       actions={<>
         {saver.indicator}

@@ -16,7 +16,6 @@ import { SHEETS } from "@/lib/nav";
 const MAIN = [
   { href: "/sampul", label: "Sampul", icon: FileText },
   { href: "/petunjuk", label: "Petunjuk Pengisian", icon: BookOpen },
-  { href: "/data-keuangan", label: "Data Keuangan RKAP", icon: Landmark },
   { href: "/ras", label: "Risk Appetite Statement", icon: Target },
   { href: "/kriteria-dampak", label: "Kriteria Dampak", icon: Gauge },
   { href: "/risk-driver", label: "Risk Driver", icon: Network },
@@ -27,6 +26,14 @@ const MAIN = [
   { href: "/rekap", label: "Rekap Parameter", icon: Sigma },
   { href: "/program-strategis", label: "Program Strategis GRCS", icon: Rocket },
   { href: "/executive-summary", label: "Executive Summary", icon: Presentation },
+];
+
+/** Master data bukan lembar kertas kerja, jadi halamannya tidak menampilkan tab lembar di bawah. */
+const MASTER = [
+  { href: "/taksonomi", label: "Taksonomi PTPN Group", icon: Library },
+  { href: "/data-keuangan", label: "Data Keuangan RKAP", icon: Landmark },
+  { href: "/sasaran-strategis", label: "Sasaran Strategis RJPP", icon: Flag },
+  { href: "/setup", label: "Inisialisasi Data", icon: Database },
 ];
 
 const CHALLENGE = [
@@ -74,6 +81,7 @@ function AppShell({ children, path }: { children: React.ReactNode; path: string 
   }, [path]);
 
   const active = (href: string) => path === href || (href !== "/" && path.startsWith(href + "/"));
+  const lembarMaster = MASTER.some((m) => active(m.href));
 
   const nav = (mini: boolean) => (
     <nav className="flex h-full flex-col">
@@ -138,9 +146,7 @@ function AppShell({ children, path }: { children: React.ReactNode; path: string 
         )}
         <div>
           <SectionLabel mini={mini}>Master Data</SectionLabel>
-          <NavItem href="/taksonomi" label="Taksonomi PTPN Group" icon={Library} active={active("/taksonomi")} mini={mini} />
-          <NavItem href="/sasaran-strategis" label="Sasaran Strategis RJPP" icon={Flag} active={active("/sasaran-strategis")} mini={mini} />
-          <NavItem href="/setup" label="Inisialisasi Data" icon={Database} active={active("/setup")} mini={mini} />
+          {MASTER.map((m) => <NavItem key={m.href} {...m} active={active(m.href)} mini={mini} />)}
         </div>
       </div>
       <button onClick={toggleCollapsed} title={mini ? "Perluas sidebar (Ctrl/⌘ + B)" : "Ciutkan sidebar (Ctrl/⌘ + B)"}
@@ -181,13 +187,16 @@ function AppShell({ children, path }: { children: React.ReactNode; path: string 
             <span className="font-semibold text-ink">Kertas Kerja Perencanaan Manajemen Risiko</span>
             <span className="mx-2 text-slate-300">/</span>RKAP 2027<span className="mx-2 text-slate-300">/</span>PT KINRA
           </div>
-          <div className="ml-auto hidden items-center gap-3 text-[11px] text-slate-500 xl:flex">
-            <Legend color="bg-cell-input ring-amber-300" label="Diisi entitas" />
-            <Legend color="bg-cell-calc ring-sky-300" label="Terhitung otomatis" />
-            <Legend color="bg-cell-label ring-slate-300" label="Contoh" />
-          </div>
+          {/* Legenda warna sel hanya relevan untuk lembar kertas kerja */}
+          {!lembarMaster && (
+            <div className="ml-auto hidden items-center gap-3 text-[11px] text-slate-500 xl:flex">
+              <Legend color="bg-cell-input ring-amber-300" label="Diisi entitas" />
+              <Legend color="bg-cell-calc ring-sky-300" label="Terhitung otomatis" />
+              <Legend color="bg-cell-label ring-slate-300" label="Contoh" />
+            </div>
+          )}
           <Link href="/panduan" title="Panduan Penggunaan" aria-label="Panduan Penggunaan"
-            className="ml-auto shrink-0 rounded-lg p-2 text-slate-500 transition hover:bg-black/5 hover:text-brand-700 xl:ml-2">
+            className={clsx("ml-auto shrink-0 rounded-lg p-2 text-slate-500 transition hover:bg-black/5 hover:text-brand-700", !lembarMaster && "xl:ml-2")}>
             <HelpCircle className="h-5 w-5" />
           </Link>
           <UnduhSemua />
@@ -209,19 +218,19 @@ function AppShell({ children, path }: { children: React.ReactNode; path: string 
         <main className="px-4 pt-6 pb-24 md:px-8 print:!p-0">{children}</main>
         {/* Catat masukan challenger dari halaman mana pun */}
         <button onClick={() => setCatat(true)} title="Catat masukan challenger untuk halaman ini"
-          className="fixed right-5 bottom-14 z-30 flex items-center gap-2 rounded-full bg-gold px-4 py-3 text-[13px] font-bold text-brand-900 shadow-lg ring-1 ring-black/10 transition hover:-translate-y-0.5 hover:shadow-xl print:hidden">
+          className={clsx("fixed right-5 z-30 flex items-center gap-2 rounded-full bg-gold px-4 py-3 text-[13px] font-bold text-brand-900 shadow-lg ring-1 ring-black/10 transition hover:-translate-y-0.5 hover:shadow-xl print:hidden", lembarMaster ? "bottom-5" : "bottom-14")}>
           <MessageSquarePlus className="h-4.5 w-4.5" /><span className="hidden md:inline">Catat Masukan</span>
         </button>
         {catat && <ChallengeModal initial={refFromPath(path)} onClose={() => setCatat(false)} onSaved={() => window.dispatchEvent(new Event("challenge-log-updated"))} />}
         {/* Tab lembar ala Excel */}
-        <div className={clsx("fixed right-0 bottom-0 left-0 z-20 border-t border-line bg-[#e9e8e1] transition-[left] duration-200 print:hidden", collapsed ? "lg:left-[76px]" : "lg:left-[264px]")}>
+        {!lembarMaster && <div className={clsx("fixed right-0 bottom-0 left-0 z-20 border-t border-line bg-[#e9e8e1] transition-[left] duration-200 print:hidden", collapsed ? "lg:left-[76px]" : "lg:left-[264px]")}>
           <div ref={tabsRef} className="scroll-thin flex overflow-x-auto px-2">
             <Link href="/" data-active={path === "/"} className={tabCls(path === "/")}>Dashboard</Link>
             {SHEETS.map((s) => (
               <Link key={s.href} href={s.href} data-active={active(s.href)} className={tabCls(active(s.href))}>{s.label}</Link>
             ))}
           </div>
-        </div>
+        </div>}
       </div>
     </div>
   );

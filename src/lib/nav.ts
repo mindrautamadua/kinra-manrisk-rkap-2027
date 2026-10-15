@@ -3,7 +3,6 @@ import { REKAP } from "./static";
 export const SHEETS = [
   { href: "/sampul", label: "Sampul" },
   { href: "/petunjuk", label: "Petunjuk" },
-  { href: "/data-keuangan", label: "Data Keuangan" },
   { href: "/ras", label: "RAS" },
   { href: "/kriteria-dampak", label: "Kriteria Dampak" },
   { href: "/risk-driver", label: "Risk Driver" },
