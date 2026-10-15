@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { HasilReview, ReviewInput, TemuanAI } from "@/lib/review-ai";
 import { callStructured } from "@/lib/openai";
+import { ATURAN_PIC } from "@/lib/isi-ai-prompt";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -53,7 +54,7 @@ export async function POST(req: Request) {
   try { input = await req.json(); } catch { return NextResponse.json({ error: "Data tidak valid." }, { status: 400 }); }
 
   const r = await callStructured<{ ringkasan: string; temuan: TemuanAI[] }>({
-    system: SYSTEM, name: "review_kualitas", schema: SCHEMA,
+    system: `${SYSTEM}\n\n${ATURAN_PIC}`, name: "review_kualitas", schema: SCHEMA,
     user: `Entitas: ${input.entitas}\n\nData kertas kerja (JSON):\n${JSON.stringify({ ras: input.ras, risiko: input.risiko, parameter: input.parameter })}`,
   });
   if (!r.ok) return NextResponse.json({ error: r.error }, { status: r.status });

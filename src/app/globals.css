@@ -52,6 +52,7 @@ body { font-feature-settings: "ss01", "cv11"; }
 .kk-table .fz-tax { left: var(--fz-tax, 0); }
 .kk-table .fz-kode { left: var(--fz-kode, 0); }
 .kk-table .fz-param { left: var(--fz-param, 0); }
+.kk-table .fz-event { left: var(--fz-event, 0); }
 .kk-table .fz-edge { box-shadow: 6px 0 6px -6px rgb(0 0 0 / .2); }
 /* Baris nonaktif: redupkan isi, tapi latar kolom beku tetap pekat agar kolom lain tidak tembus. */
 .kk-table tr.row-off > td:not(.group):not(.fz) { opacity: .55; }

@@ -1,5 +1,5 @@
 "use client";
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, Check, Download, Library, Plus, Search, Trash2 } from "lucide-react";
 import clsx from "clsx";
 import {
@@ -8,8 +8,10 @@ import {
 import { TaxonomyPicker, groupT3, type T3Option } from "@/components/TaxonomyPicker";
 import { ParamPicker } from "@/components/ParamPicker";
 import { SasaranPicker } from "@/components/SasaranPicker";
+import { MitigasiAi } from "@/components/MitigasiAi";
 import { AiFillModal, AiRowButton } from "@/components/AiFill";
 import type { FieldSpec } from "@/lib/isi-ai";
+import { ringkasRisiko } from "@/lib/kaitkan-ai";
 import { paramOptions } from "@/lib/trace";
 import { useReadonly } from "@/lib/mode";
 import { api } from "@/lib/data";
@@ -73,6 +75,26 @@ export default function RiskRegisterPage() {
       ...(picker.kategori !== o.kategori ? { risk_driver: null, kriteria_dampak: null } : {}) });
     setPicker(null);
   };
+
+  // Ukur lebar kolom No agar kolom Risk Event beku tepat di sebelahnya.
+  const tableRef = useRef<HTMLTableElement>(null);
+  useLayoutEffect(() => {
+    const t = tableRef.current;
+    if (!t) return;
+    const ukur = () => t.style.setProperty("--fz-event", `${t.querySelector<HTMLElement>("th.fz-no")?.offsetWidth ?? 0}px`);
+    ukur();
+    const obs = new ResizeObserver(ukur);
+    obs.observe(t);
+    return () => obs.disconnect();
+  }, [d]);
+
+  const label = (kode: string[] | null | undefined, opts: { kode: string; nama: string }[]) =>
+    (kode ?? []).map((k) => { const o = opts.find((x) => x.kode === k); return o ? `${k} ${o.nama}` : k; });
+  const risikoMitigasi = (r: RiskRegister) => ({
+    ...ringkasRisiko(r), existing_control: r.existing_control, kategori_mitigasi: r.kategori_mitigasi,
+    parameter_ram_terkait: label(r.parameter_ram, d!.popts.map((o) => ({ kode: o.kode, nama: o.parameter }))),
+    sasaran_strategis_terkait: label(r.sasaran_strategis, d!.sasaran ?? []),
+  });
 
   const bukaAi = (r: RiskRegister) => {
     if (!r.risk_event) { alert("Pilih Risk Event dari taksonomi terlebih dahulu, agar AI punya dasar penyusunan."); return; }
@@ -141,10 +163,10 @@ export default function RiskRegisterPage() {
               )}
             </div>}>
             <TableWrap>
-              <table className="kk-table min-w-[3030px]">
+              <table ref={tableRef} className="kk-table min-w-[3030px]">
                 <thead><tr>
-                  <th className="sticky left-0 z-[3] w-12">No</th>
-                  <th className="w-40">Taksonomi Risiko</th><th className="w-48">Risk Driver</th><th className="w-56">Risk Event</th>
+                  <th className="fz fz-no w-12">No</th>
+                  <th className="w-40">Taksonomi Risiko</th><th className="w-48">Risk Driver</th><th className="fz fz-event fz-edge w-56">Risk Event</th>
                   <th className="w-72">Deskripsi Risk Event</th><th className="w-60">Root Cause</th><th className="w-24">Probabilitas Kejadian (0%-100%)</th>
                   <th className="w-52">Deskripsi Dampak Risiko</th><th className="w-40">Nilai Dampak Risiko (Rp)</th><th className="w-52">Kriteria Dampak Acuan</th>
                   <th className="w-32">Kategori Dampak Risiko</th><th className="w-20">Tagging Top Risk</th><th className="w-40">Expected Loss (Rp)</th>
@@ -152,7 +174,7 @@ export default function RiskRegisterPage() {
                 </tr></thead>
                 <tbody>
                   <tr className="example">
-                    <td className="sticky left-0">Contoh</td><td>Risiko Pasar</td><td>Perubahan harga komoditas</td><td>Penurunan harga CPO</td><td>Harga CPO turun di bawah asumsi RKAP 2027.</td>
+                    <td className="fz fz-no">Contoh</td><td>Risiko Pasar</td><td>Perubahan harga komoditas</td><td className="fz fz-event fz-edge">Penurunan harga CPO</td><td>Harga CPO turun di bawah asumsi RKAP 2027.</td>
                     <td>Kelebihan pasokan minyak nabati global</td><td className="text-right">30%</td><td>Penurunan marjin penjualan CPO</td><td className="text-right">450.000.000.000</td>
                     <td>b. Dampak perubahan harga komoditas terhadap penurunan margin</td><td>Moderat</td><td>Ya</td><td className="text-right">135.000.000.000</td>
                     <td>Kontrak penjualan berjangka</td><td>Menambah porsi kontrak penjualan berharga tetap</td><td>Preventive</td><td>K1</td><td>SG-1</td><td />
@@ -168,7 +190,7 @@ export default function RiskRegisterPage() {
                     return (
                       <Fragment key={r.id}>
                       <tr>
-                        <td className="sticky left-0 z-[1] text-center font-semibold">
+                        <td className="fz fz-no text-center font-semibold">
                           {i + 1}
                           {isu.length > 0 && (
                             <button onClick={() => setBuka(buka === r.id ? null : r.id)} title={isu.map((x) => `${x.kolom}: ${x.pesan}`).join("\n")}
@@ -181,7 +203,7 @@ export default function RiskRegisterPage() {
                         <td className={clsx("input", driverUnknown && "!bg-rose-100")}>
                           <SelectCell value={r.risk_driver} options={driverUnknown ? [r.risk_driver!, ...drivers] : drivers} placeholder={r.kategori ? "Pilih driver…" : "Pilih kategori dulu"} onSave={(v) => patch(r.id, { risk_driver: v })} />
                         </td>
-                        <td className="input">
+                        <td className="input fz fz-event fz-edge">
                           <button onClick={() => !ro && setPicker(r)} disabled={ro} className="group flex w-full items-start gap-1.5 text-left">
                             <Library className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-600" />
                             <span className={clsx("font-semibold group-hover:underline", !r.risk_event && "font-normal text-slate-400 italic")}>{r.risk_event ?? "Pilih dari taksonomi…"}</span>
@@ -214,13 +236,18 @@ export default function RiskRegisterPage() {
                         <td className={clsx("calc text-center font-bold", isTopRisk(r.kategori_dampak) ? "text-orange-700" : "text-slate-500")}>{r.kategori_dampak ? (isTopRisk(r.kategori_dampak) ? "Ya" : "Tidak") : ""}</td>
                         <td className="input"><EditCell kind="number" value={r.expected_loss} placeholder={el != null ? `≈ ${rupiah(el).replace("Rp ", "")}` : "Opsional"} display={(v) => rupiah(v as number).replace("Rp ", "")} onSave={(v) => patch(r.id, { expected_loss: v as number })} /></td>
                         <td className="input"><EditCell value={r.existing_control} onSave={(v) => patch(r.id, { existing_control: v as string })} /></td>
-                        <td className="input"><EditCell value={r.rencana_mitigasi} onSave={(v) => patch(r.id, { rencana_mitigasi: v as string })} /></td>
+                        <td className="input">
+                          <EditCell value={r.rencana_mitigasi} onSave={(v) => patch(r.id, { rencana_mitigasi: v as string })} />
+                          {!ro && <MitigasiAi risiko={risikoMitigasi(r)} current={r.rencana_mitigasi} onApply={(rencana, kategori, mode) => patch(r.id, mode === "ganti"
+                            ? { rencana_mitigasi: rencana, kategori_mitigasi: kategori }
+                            : { rencana_mitigasi: `${r.rencana_mitigasi!.trim()}\n${rencana}`, kategori_mitigasi: r.kategori_mitigasi ?? kategori })} />}
+                        </td>
                         <td className="input"><SelectCell value={r.kategori_mitigasi} options={KATEGORI_MITIGASI} onSave={(v) => patch(r.id, { kategori_mitigasi: v })} /></td>
                         <td className={clsx("input", !(r.parameter_ram ?? []).length && "!bg-amber-100/70")}>
-                          <ParamPicker value={r.parameter_ram ?? []} options={d.popts} kategori={r.kategori} onSave={(v) => patch(r.id, { parameter_ram: v })} />
+                          <ParamPicker value={r.parameter_ram ?? []} options={d.popts} kategori={r.kategori} risiko={ringkasRisiko(r)} onSave={(v) => patch(r.id, { parameter_ram: v })} />
                         </td>
                         <td className={clsx("input", d.sasaran && !(r.sasaran_strategis ?? []).length && "!bg-amber-100/70")}>
-                          {d.sasaran ? <SasaranPicker value={r.sasaran_strategis ?? []} options={d.sasaran} onSave={(v) => patch(r.id, { sasaran_strategis: v })} />
+                          {d.sasaran ? <SasaranPicker value={r.sasaran_strategis ?? []} options={d.sasaran} risiko={ringkasRisiko(r)} onSave={(v) => patch(r.id, { sasaran_strategis: v })} />
                             : <span className="text-[11px] text-slate-400 italic">Jalankan migrasi 0006_sasaran_strategis.sql</span>}
                         </td>
                         <td><div className="flex flex-col items-center gap-2"><AiRowButton onClick={() => bukaAi(r)} /><button data-edit onClick={() => del(r)} className="text-slate-400 hover:text-rose-600" title="Hapus"><Trash2 className="h-4 w-4" /></button></div></td>

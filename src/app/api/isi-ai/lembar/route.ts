@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { callStructured } from "@/lib/openai";
-import { UMUM } from "@/lib/isi-ai-prompt";
+import { ATURAN_PIC, UMUM } from "@/lib/isi-ai-prompt";
 import { SHEET_AI, TIPE_ANGKA, type BarisAi, type KolomAi, type LembarRequest, type LembarResponse } from "@/lib/sheet-ai";
 
 export const runtime = "nodejs";
@@ -75,7 +75,7 @@ Nomor baris untuk baris baru: ${JSON.stringify(input.tabel[t.id]?.barisBaru ?? [
   ].join("\n\n");
 
   const r = await callStructured<Omit<LembarResponse, "model">>({
-    system: `${UMUM}\n\n${KHUSUS[cfg.code]}\n\n${BERSAMA}`, user, name: `isi_lembar_${cfg.code}`, schema, effort: "medium",
+    system: `${UMUM}\n\n${ATURAN_PIC}\n\n${KHUSUS[cfg.code]}\n\n${BERSAMA}`, user, name: `isi_lembar_${cfg.code}`, schema, effort: "medium",
   });
   if (!r.ok) return NextResponse.json({ error: r.error }, { status: r.status });
 

@@ -9,3 +9,21 @@ Aturan umum:
 - Kolom yang punya daftar pilihan wajib diisi salah satu nilai dari daftar itu.
 - Bila uraian pengguna terlalu minim untuk suatu kolom, tetap beri draf yang paling wajar dan sebutkan asumsinya di catatan.
 - catatan: 1-4 butir singkat tentang hal yang wajib diverifikasi atau dilengkapi pengguna (termasuk angka yang harus diisi manual dan asumsi yang dipakai).`;
+
+/** Daftar Bagian (unit organisasi) PT KINRA, dipakai AI saat menyebut PIC/pelaksana. */
+export const BAGIAN_KINRA = [
+  "Bagian Keuangan dan Akuntansi",
+  "Bagian Mekanikal & Elektrikal, Fasilitas & Pengamanan",
+  "Bagian Pengembangan",
+  "Bagian Produksi Kawasan",
+  "Bagian Pemasaran & Penjualan",
+  "Bagian SDM, Umum dan Pengadaan",
+  "Bagian Sekretariat Perusahaan, Hukum, Hubungan Masyarakat dan TJS Perusahaan",
+  "Bagian SPI",
+  "Bagian Manajemen Risiko & TI",
+] as const;
+
+export const ATURAN_PIC = `PIC/pelaksana:
+- Bila menyebut PIC, unit pelaksana, atau pemimpin program, WAJIB memakai nama Bagian berikut persis seperti tertulis (boleh lebih dari satu, mis. "Bagian Keuangan dan Akuntansi bersama Bagian Pengembangan"):
+${BAGIAN_KINRA.map((b) => `  - ${b}`).join("\n")}
+- Jangan memakai sebutan lain seperti "Divisi", "Fungsi", atau "Unit" untuk organisasi internal. Pihak di luar entitas (Direksi, Dewan Komisaris, Induk/PTPN III) boleh disebut sesuai namanya.`;

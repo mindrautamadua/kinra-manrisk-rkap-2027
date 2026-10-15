@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { callStructured } from "@/lib/openai";
 import type { IsiRequest, IsiResponse, JenisIsi } from "@/lib/isi-ai";
-import { UMUM } from "@/lib/isi-ai-prompt";
+import { ATURAN_PIC, UMUM } from "@/lib/isi-ai-prompt";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -21,7 +21,7 @@ const KHUSUS: Record<JenisIsi, string> = {
 - deskripsi_dampak: konsekuensi bila risiko terjadi, finansial dan/atau non-finansial, selaras dengan kriteria dampak acuan.
 - kriteria_dampak: bila diminta, pilih kriteria dampak acuan yang paling sesuai dari daftar.
 - existing_control: kontrol yang lazimnya sudah berjalan saat ini (kebijakan, SOP, kontrak, monitoring).
-- rencana_mitigasi: tindakan BARU untuk RKAP 2027 yang menyasar root cause, spesifik dan terukur (apa, PIC/fungsi, target, waktu), berbeda dari existing control.
+- rencana_mitigasi: tindakan BARU untuk RKAP 2027 yang menyasar root cause, spesifik dan terukur (apa, Bagian PIC, target, waktu), berbeda dari existing control.
 - kategori_mitigasi: Preventive bila mencegah penyebab, Detective bila mendeteksi dini, Corrective bila memulihkan dampak.`,
   ras: `Lembar: Risk Appetite Statement (RAS).
 - sikap: bila diminta, pilih dari daftar pilihan (daftar sudah dibatasi agar sama atau lebih ketat dari sikap Induk).
@@ -40,7 +40,7 @@ const KHUSUS: Record<JenisIsi, string> = {
 - inisiatif_rjpp: inisiatif strategi RJPP yang dinaungi program; nama resmi yang tidak diketahui ditulis "[...]".
 - objective_scorecard: sasaran/objective pada scorecard yang didukung, berupa kondisi yang hendak dicapai (mis. "Ketersediaan Model Risiko atas Taksonomi Risiko DAM").
 - program_kerja: nama program kerja 2027 yang konkret.
-- pemimpin: unit/divisi pelaksana di entitas. pemilik: pemilik program (entitas atau Induk/fungsi pemilik).
+- pemimpin: Bagian pelaksana di entitas. pemilik: pemilik program (entitas atau Induk/fungsi pemilik).
 - bulan_mulai dan bulan_selesai: format "Januari 2027"; dalam tahun 2027 kecuali uraian pengguna menyebut lain.
 - deskripsi: 1-2 kalimat apa yang dilakukan dan untuk apa.
 - tujuan_kualitatif dan tujuan_kuantitatif: 2-3 poin, SATU POIN PER BARIS (pisahkan dengan baris baru, tanpa penomoran). Kuantitatif wajib memuat angka/persentase terukur.
@@ -85,7 +85,7 @@ export async function POST(req: Request) {
   ].join("\n\n");
 
   const r = await callStructured<{ saran: Record<string, string>; catatan: string }>({
-    system: `${UMUM}\n\n${KHUSUS[input.jenis]}`, user, name: "isi_kertas_kerja", schema, effort: "low",
+    system: `${UMUM}\n\n${ATURAN_PIC}\n\n${KHUSUS[input.jenis]}`, user, name: "isi_kertas_kerja", schema, effort: "low",
   });
   if (!r.ok) return NextResponse.json({ error: r.error }, { status: r.status });
   const out: IsiResponse = { ...r.data, model: r.model };
