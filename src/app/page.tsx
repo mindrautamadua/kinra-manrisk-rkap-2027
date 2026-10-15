@@ -7,7 +7,7 @@ import { Card, DampakBadge, ErrorBox, Loading, SheetPage, SikapBadge, Stat, Stat
 import { RiskMatrix } from "@/components/RiskMatrix";
 import { api } from "@/lib/data";
 import { buildRam, KATEGORI_URUT } from "@/lib/ram";
-import { isTopRisk, nilaiParam, persen, rupiah, statusStyle } from "@/lib/format";
+import { alasanStatus, ARTI_STATUS, isTopRisk, nilaiParam, persen, rupiah, statusStyle } from "@/lib/format";
 import type { RiskRegister } from "@/lib/types";
 
 const STATUSES = ["Hijau", "Kuning", "Oranye", "Merah", "Data belum lengkap"];
@@ -40,7 +40,7 @@ export default function Dashboard() {
               <Stat label="Total Expected Loss" value={rupiah(el, true)} sub="Risk Register, rupiah penuh" accent="bg-amber-500" />
             </div>
 
-            <div className="grid gap-6 xl:grid-cols-[1.25fr_1fr]">
+            <div className="grid items-start gap-6 xl:grid-cols-[1.25fr_1fr]">
               <Card className="p-5">
                 <div className="mb-4 flex items-center justify-between">
                   <h2 className="font-bold">Status Pengukuran Parameter RAM</h2>
@@ -51,9 +51,10 @@ export default function Dashboard() {
                 </div>
                 <div className="mt-3 grid grid-cols-5 gap-2">
                   {STATUSES.map((s) => (
-                    <div key={s} className="rounded-lg bg-paper/70 px-3 py-2">
+                    <div key={s} className="rounded-lg bg-paper/70 px-3 py-2" title={ARTI_STATUS[s]}>
                       <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><span className={clsx("h-2 w-2 rounded-full", statusStyle(s).dot)} />{s === "Data belum lengkap" ? "Belum lengkap" : s}</div>
                       <div className="text-[20px] font-extrabold tabnum">{count(s)}</div>
+                      <div className="text-[10.5px] leading-tight text-slate-400">{ARTI_STATUS[s]}</div>
                     </div>
                   ))}
                 </div>
@@ -62,7 +63,8 @@ export default function Dashboard() {
                   {attention.map((r) => (
                     <Link key={r.key} href={r.tambahan ? "/ram" : `/parameter/${r.kode}`} className="flex items-center gap-3 py-2.5 hover:bg-paper/60">
                       <span className="w-10 font-mono text-[12px] font-bold text-brand-700">{r.kode}</span>
-                      <span className="flex-1 text-[13px]">{r.parameter}<span className="block text-[11px] text-slate-400">{r.kategori}</span></span>
+                      <span className="flex-1 text-[13px]">{r.parameter}<span className="block text-[11px] text-slate-400">{r.kategori}</span>
+                        {(() => { const why = alasanStatus(r.status, r.hasil, r.limit, r.appetite, r.tolerance, r.satuan); return why && <span className={clsx("mt-0.5 block text-[11px] font-medium", r.status === "Merah" ? "text-rose-700" : r.status === "Oranye" ? "text-orange-700" : "text-amber-700")}>{why}</span>; })()}</span>
                       <span className="text-right text-[12px] tabnum">{nilaiParam(r.hasil, r.satuan)}<span className="block text-[10.5px] text-slate-400">tol. {nilaiParam(r.tolerance, r.satuan)}</span></span>
                       <StatusBadge status={r.status} size="sm" />
                     </Link>
@@ -71,55 +73,54 @@ export default function Dashboard() {
                 </div>
               </Card>
 
-              <Card className="p-5">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="font-bold">Peta Risiko Utama</h2>
-                  <Link href="/risiko-utama" className="flex items-center gap-1 text-[12px] font-semibold text-brand-700 hover:underline">Detail<ArrowUpRight className="h-3.5 w-3.5" /></Link>
-                </div>
-                <RiskMatrix rows={d.register} onSelect={setSel} />
-                {sel && (
-                  <div className="mt-4 rounded-xl bg-paper p-4 text-[12.5px]">
-                    <div className="flex items-center gap-2"><b>#{sel.urutan} {sel.risk_event}</b><DampakBadge k={sel.kategori_dampak} /></div>
-                    <div className="mt-1 text-slate-600">{sel.kategori} · Probabilitas {persen(sel.probabilitas, 0)} · Dampak {rupiah(sel.nilai_dampak, true)}</div>
-                    {sel.rencana_mitigasi && <div className="mt-2 whitespace-pre-line text-slate-700"><b>Mitigasi:</b> {sel.rencana_mitigasi}</div>}
+              <div className="space-y-6">
+                <Card className="p-5">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h2 className="font-bold">Peta Risiko Utama</h2>
+                    <Link href="/risiko-utama" className="flex items-center gap-1 text-[12px] font-semibold text-brand-700 hover:underline">Detail<ArrowUpRight className="h-3.5 w-3.5" /></Link>
                   </div>
-                )}
-              </Card>
-            </div>
-
-            <div className="grid gap-6 xl:grid-cols-2">
-              <Card className="p-5">
-                <h2 className="mb-4 font-bold">Risiko per Kategori</h2>
-                <div className="space-y-2.5">
-                  {KATEGORI_URUT.map((k) => {
-                    const all = d.register.filter((r) => r.kategori === k).length;
-                    const top = utama.filter((r) => r.kategori === k).length;
-                    return (
-                      <div key={k} className="grid grid-cols-[180px_1fr_50px] items-center gap-3 text-[12.5px]">
-                        <span className="truncate text-slate-700">{k.replace("Risiko ", "")}</span>
-                        <div className="relative h-5 rounded bg-slate-100">
-                          <div className="absolute inset-y-0 left-0 rounded bg-brand-200" style={{ width: `${(all / maxKat) * 100}%` }} />
-                          <div className="absolute inset-y-0 left-0 rounded bg-brand-600" style={{ width: `${(top / maxKat) * 100}%` }} />
+                  <RiskMatrix rows={d.register} onSelect={setSel} />
+                  {sel && (
+                    <div className="mt-4 rounded-xl bg-paper p-4 text-[12.5px]">
+                      <div className="flex items-center gap-2"><b>#{sel.urutan} {sel.risk_event}</b><DampakBadge k={sel.kategori_dampak} /></div>
+                      <div className="mt-1 text-slate-600">{sel.kategori} · Probabilitas {persen(sel.probabilitas, 0)} · Dampak {rupiah(sel.nilai_dampak, true)}</div>
+                      {sel.rencana_mitigasi && <div className="mt-2 whitespace-pre-line text-slate-700"><b>Mitigasi:</b> {sel.rencana_mitigasi}</div>}
+                    </div>
+                  )}
+                </Card>
+                <Card className="p-5">
+                  <h2 className="mb-4 font-bold">Risiko per Kategori</h2>
+                  <div className="space-y-2.5">
+                    {KATEGORI_URUT.map((k) => {
+                      const all = d.register.filter((r) => r.kategori === k).length;
+                      const top = utama.filter((r) => r.kategori === k).length;
+                      return (
+                        <div key={k} className="grid grid-cols-[minmax(0,150px)_1fr_44px] items-center gap-3 text-[12.5px]">
+                          <span className="truncate text-slate-700">{k.replace("Risiko ", "")}</span>
+                          <div className="relative h-5 rounded bg-slate-100">
+                            <div className="absolute inset-y-0 left-0 rounded bg-brand-200" style={{ width: `${(all / maxKat) * 100}%` }} />
+                            <div className="absolute inset-y-0 left-0 rounded bg-brand-600" style={{ width: `${(top / maxKat) * 100}%` }} />
+                          </div>
+                          <span className="text-right tabnum"><b>{top}</b>/{all}</span>
                         </div>
-                        <span className="text-right tabnum"><b>{top}</b>/{all}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="mt-3 flex gap-4 text-[11px] text-slate-500"><span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded bg-brand-600" />Risiko utama</span><span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded bg-brand-200" />Risiko korporat</span></div>
-              </Card>
-              <Card className="p-5">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="font-bold">Sikap Risiko (RAS)</h2>
-                  <Link href="/ras" className="flex items-center gap-1 text-[12px] font-semibold text-brand-700 hover:underline">Buka RAS<ArrowUpRight className="h-3.5 w-3.5" /></Link>
-                </div>
-                <table className="w-full text-[12.5px]">
-                  <thead><tr className="text-left text-[11px] text-slate-500 uppercase"><th className="pb-2 font-semibold">Kategori</th><th className="pb-2 font-semibold">PTPN III</th><th className="pb-2 font-semibold">PT KINRA</th></tr></thead>
-                  <tbody className="divide-y divide-line">
-                    {d.ras.map((r) => <tr key={r.id}><td className="py-2 pr-2">{r.kategori}</td><td className="py-2"><SikapBadge sikap={r.sikap_induk} /></td><td className="py-2"><SikapBadge sikap={r.sikap} /></td></tr>)}
-                  </tbody>
-                </table>
-              </Card>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-3 flex gap-4 text-[11px] text-slate-500"><span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded bg-brand-600" />Risiko utama</span><span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded bg-brand-200" />Risiko korporat</span></div>
+                </Card>
+                <Card className="p-5">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h2 className="font-bold">Sikap Risiko (RAS)</h2>
+                    <Link href="/ras" className="flex items-center gap-1 text-[12px] font-semibold text-brand-700 hover:underline">Buka RAS<ArrowUpRight className="h-3.5 w-3.5" /></Link>
+                  </div>
+                  <table className="w-full text-[12.5px]">
+                    <thead><tr className="text-left text-[11px] text-slate-500 uppercase"><th className="pb-2 font-semibold">Kategori</th><th className="pb-2 font-semibold">PTPN III</th><th className="pb-2 font-semibold">PT KINRA</th></tr></thead>
+                    <tbody className="divide-y divide-line">
+                      {d.ras.map((r) => <tr key={r.id}><td className="py-2 pr-2">{r.kategori}</td><td className="py-2"><SikapBadge sikap={r.sikap_induk} /></td><td className="py-2"><SikapBadge sikap={r.sikap} /></td></tr>)}
+                    </tbody>
+                  </table>
+                </Card>
+              </div>
             </div>
           </div>
         );

@@ -72,3 +72,23 @@ export function hitungStatus(hasil: unknown, limit: unknown, appetite: unknown, 
   if ((arah ?? "").includes("rendah makin buruk")) return x >= l ? "Hijau" : x > a ? "Kuning" : x > t ? "Oranye" : "Merah";
   return x < l ? "Hijau" : x < a ? "Kuning" : x < t ? "Oranye" : "Merah";
 }
+
+/** Arti tiap status pengukuran, ringkas untuk legenda. */
+export const ARTI_STATUS: Record<string, string> = {
+  Hijau: "Dalam limit",
+  Kuning: "Melewati limit, masih dalam appetite",
+  Oranye: "Melewati appetite, masih dalam toleransi",
+  Merah: "Melewati batas toleransi",
+  "Data belum lengkap": "Hasil atau batas belum diisi",
+};
+
+/** Kalimat penjelas kenapa sebuah parameter berstatus Kuning/Oranye/Merah, dibandingkan langsung dengan batas yang dilewati. */
+export function alasanStatus(status: string, hasil: unknown, limit: unknown, appetite: unknown, tolerance: unknown, satuan?: string | null) {
+  if (![hasil, limit, appetite, tolerance].every((v) => typeof v === "number")) return null;
+  const x = hasil as number;
+  const [h, l, a, t] = [hasil, limit, appetite, tolerance].map((v) => nilaiParam(v, satuan));
+  if (status === "Merah") return x >= (tolerance as number) ? `Hasil ${h} ≥ toleransi ${t}` : `Hasil ${h} ≤ toleransi ${t}`;
+  if (status === "Oranye") return x >= (appetite as number) ? `Hasil ${h} melewati appetite ${a}, belum mencapai toleransi ${t}` : `Hasil ${h} di bawah appetite ${a}, masih di atas toleransi ${t}`;
+  if (status === "Kuning") return x >= (limit as number) ? `Hasil ${h} melewati limit ${l}, masih dalam appetite ${a}` : `Hasil ${h} di bawah limit ${l}, masih di atas appetite ${a}`;
+  return null;
+}
