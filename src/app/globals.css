@@ -45,6 +45,18 @@ body { font-feature-settings: "ss01", "cv11"; }
 .kk-table td.group { background: var(--color-brand-50); font-weight: 600; color: var(--color-brand-800); }
 .kk-table tbody tr:hover td:not(.group) { filter: brightness(0.985); }
 
+/* Kolom beku: tetap terlihat saat tabel digulir horizontal. Offset --fz-* diukur di halaman. */
+.kk-table .fz { position: sticky; z-index: 1; }
+.kk-table th.fz { z-index: 4; }
+.kk-table .fz-no { left: 0; }
+.kk-table .fz-tax { left: var(--fz-tax, 0); }
+.kk-table .fz-kode { left: var(--fz-kode, 0); }
+.kk-table .fz-param { left: var(--fz-param, 0); }
+.kk-table .fz-edge { box-shadow: 6px 0 6px -6px rgb(0 0 0 / .2); }
+/* Baris nonaktif: redupkan isi, tapi latar kolom beku tetap pekat agar kolom lain tidak tembus. */
+.kk-table tr.row-off > td:not(.group):not(.fz) { opacity: .55; }
+.kk-table tr.row-off > td.fz > * { opacity: .55; }
+
 /* ---------- Grid lembar parameter (render sel Excel) ---------- */
 .xl-grid { border-collapse: collapse; table-layout: fixed; font-size: 12px; }
 .xl-grid td { padding: 3px 6px; vertical-align: top; line-height: 1.35; overflow: hidden; }

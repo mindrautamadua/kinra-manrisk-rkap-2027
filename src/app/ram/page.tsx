@@ -1,7 +1,7 @@
 "use client";
-import { Fragment, useState } from "react";
+import { Fragment, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Download, Plus, Trash2 } from "lucide-react";
+import { Download, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
 import clsx from "clsx";
 import { EditCell, ErrorBox, Loading, SelectCell, SheetPage, SikapBadge, StatusBadge, TableWrap, Button, useLoad, useSaver } from "@/components/ui";
 import { api } from "@/lib/data";
@@ -10,9 +10,15 @@ import { buildRam, KATEGORI_URUT, perluPengendalian, type RamRow } from "@/lib/r
 import { note } from "@/lib/static";
 import { exportRam } from "@/lib/export";
 import { AiFillModal, AiRowButton } from "@/components/AiFill";
+import type { IsiRequest, IsiResponse } from "@/lib/isi-ai";
 import type { RamPengendalian, RamTambahan } from "@/lib/types";
 
 const ARAH = ["Makin tinggi makin buruk", "Makin rendah makin buruk"];
+const AI_FIELDS = [{ key: "inisiatif", label: "Inisiatif Strategis" }, { key: "kebijakan", label: "Kebijakan" }, { key: "program", label: "Program Kerja" }] as const;
+type AiField = (typeof AI_FIELDS)[number]["key"];
+const AI_PARALEL = 3;
+
+const nilaiCtl = (r: RamRow, f: AiField | "anggaran") => (r.tambahan ? r.tambahan[f] : r.pengendalian?.[f]) ?? null;
 
 export default function RamPage() {
   const q = useLoad(async () => {
@@ -43,6 +49,25 @@ export default function RamPage() {
     saver.run(() => api.remove("ram_tambahan", "id", id));
   };
 
+  // Ukur lebar kolom No/Taksonomi/Kode agar offset kolom beku pas dengan layout tabel.
+  const tableRef = useRef<HTMLTableElement>(null);
+  useLayoutEffect(() => {
+    const t = tableRef.current;
+    if (!t) return;
+    const ukur = () => {
+      const no = t.querySelector<HTMLElement>("th.fz-no")?.offsetWidth ?? 0;
+      const tax = t.querySelector<HTMLElement>("th.fz-tax")?.offsetWidth ?? 0;
+      const kode = t.querySelector<HTMLElement>("td.fz-kode")?.offsetWidth ?? 0;
+      t.style.setProperty("--fz-tax", `${no}px`);
+      t.style.setProperty("--fz-kode", `${no + tax}px`);
+      t.style.setProperty("--fz-param", `${no + tax + kode}px`);
+    };
+    ukur();
+    const ro = new ResizeObserver(ukur);
+    ro.observe(t);
+    return () => ro.disconnect();
+  }, [d]);
+
   const [ai, setAi] = useState<RamRow | null>(null);
   const aiKonteks = (r: RamRow) => ({
     kategori_risiko: r.kategori, kode: r.kode, parameter: r.parameter, formula: r.formula, satuan: r.satuan,
@@ -56,8 +81,59 @@ export default function RamPage() {
     if (ai.tambahan) patchTambahan(ai.tambahan.id, p); else savePengendalian(ai.kode, p);
   };
 
-  const ctl = (r: RamRow, field: "inisiatif" | "kebijakan" | "program" | "anggaran") => {
-    const val = r.tambahan ? r.tambahan[field] : r.pengendalian?.[field] ?? null;
+  /** Isi massal: susun draf AI untuk semua parameter berstatus Kuning/Oranye/Merah. Hanya kolom kosong yang diisi. */
+  const [massal, setMassal] = useState<{ selesai: number; total: number; gagal: string[] } | null>(null);
+  const targetMassal = rows.filter((r) => r.diterapkan && perluPengendalian(r.status) && AI_FIELDS.some((f) => !nilaiCtl(r, f.key)));
+  const isiMassal = async () => {
+    const target = targetMassal;
+    if (!target.length) return;
+    if (!confirm(`AI akan menyusun draf Inisiatif Strategis, Kebijakan, dan Program Kerja untuk ${target.length} parameter berstatus Kuning/Oranye/Merah.\n\nHanya kolom yang masih kosong yang diisi; isian yang sudah ada tidak diubah. Anggaran tetap diisi manual. Lanjutkan?`)) return;
+    const entitas = await api.sampul().then((s) => s.nama_entitas || "PT KINRA").catch(() => "PT KINRA");
+    const gagal: string[] = [];
+    let selesai = 0;
+    setMassal({ selesai, total: target.length, gagal });
+    const antrian = [...target];
+    const kerja = async () => {
+      for (let r = antrian.shift(); r; r = antrian.shift()) {
+        const kosong = AI_FIELDS.filter((f) => !nilaiCtl(r!, f.key));
+        try {
+          const req: IsiRequest = {
+            jenis: "ram", entitas, instruksi: "", konteks: aiKonteks(r), fields: [...kosong],
+            nilai: Object.fromEntries(kosong.map((f) => [f.key, null])),
+          };
+          const res = await fetch("/api/isi-ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req) });
+          const body = await res.json();
+          if (!res.ok) throw new Error(body?.error ?? res.statusText);
+          const patch = Object.fromEntries(kosong.map((f) => [f.key, (body as IsiResponse).saran[f.key] ?? ""]).filter(([, v]) => v)) as Partial<Record<AiField, string>>;
+          await simpanAi(r, patch);
+        } catch (e) { gagal.push(`${r.kode || r.parameter}: ${(e as Error).message}`); }
+        selesai++;
+        setMassal({ selesai, total: target.length, gagal: [...gagal] });
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(AI_PARALEL, target.length) }, kerja));
+    if (!gagal.length) setTimeout(() => setMassal(null), 2500);
+  };
+  /** Simpan hasil isi massal dengan pembaruan fungsional agar hasil paralel tidak saling menimpa. */
+  const simpanAi = async (r: RamRow, patch: Partial<Record<AiField, string>>) => {
+    if (!Object.keys(patch).length) return;
+    const t = r.tambahan;
+    if (t) {
+      q.setData((prev) => prev && { ...prev, tambahan: prev.tambahan.map((x) => (x.id === t.id ? { ...x, ...patch } : x)) });
+      await api.update<RamTambahan>("ram_tambahan", "id", t.id, patch);
+    } else {
+      q.setData((prev) => {
+        if (!prev) return prev;
+        const cur = prev.pengendalian.find((x) => x.kode === r.kode) ?? { kode: r.kode, inisiatif: null, kebijakan: null, program: null, anggaran: null };
+        return { ...prev, pengendalian: [...prev.pengendalian.filter((x) => x.kode !== r.kode), { ...cur, ...patch }] };
+      });
+      // Upsert parsial: hanya kolom yang diisi AI yang ditulis, anggaran tidak tersentuh.
+      await api.upsert<RamPengendalian>("ram_pengendalian", { kode: r.kode, ...patch });
+    }
+  };
+
+  const ctl = (r: RamRow, field: AiField | "anggaran") => {
+    const val = nilaiCtl(r, field);
     const need = perluPengendalian(r.status) && !val;
     const save = (v: string | number | null) => r.tambahan ? patchTambahan(r.tambahan.id, { [field]: v }) : savePengendalian(r.kode, { [field]: v });
     return (
@@ -70,13 +146,23 @@ export default function RamPage() {
 
   return (
     <SheetPage title="Risk Acceptance Matrix RKAP 2027 - PT KINRA" code="RAM" note={note("RAM")} wide
-      actions={<>{saver.indicator}<Button variant="outline" onClick={() => exportRam(rows)}><Download className="h-4 w-4" />Excel</Button></>}>
+      actions={<>{saver.indicator}{massal ? (
+        <span className={clsx("inline-flex items-center gap-1.5 text-[12px]", massal.gagal.length && "text-rose-600")} title={massal.gagal.join("\n")}>
+          {massal.selesai < massal.total ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 text-brand-600" />}
+          AI {massal.selesai}/{massal.total}{massal.gagal.length ? ` · ${massal.gagal.length} gagal` : ""}
+          {massal.selesai === massal.total && massal.gagal.length > 0 && <button onClick={() => setMassal(null)} className="ml-1 underline">tutup</button>}
+        </span>
+      ) : d && targetMassal.length > 0 && (
+        <Button edit variant="outline" onClick={isiMassal} title="Isi kolom Rencana Pengendalian yang masih kosong untuk semua parameter berstatus Kuning/Oranye/Merah">
+          <Sparkles className="h-4 w-4" />Isi Pengendalian dengan AI ({targetMassal.length})
+        </Button>
+      )}<Button variant="outline" onClick={() => exportRam(rows)}><Download className="h-4 w-4" />Excel</Button></>}>
       {q.loading ? <Loading /> : q.error ? <ErrorBox error={q.error} /> : d && (
         <TableWrap>
-          <table className="kk-table min-w-[2300px]">
+          <table ref={tableRef} className="kk-table min-w-[2300px]">
             <thead>
               <tr>
-                <th rowSpan={2} className="w-10">No</th><th rowSpan={2} className="w-36">Taksonomi Risiko</th><th rowSpan={2} colSpan={2} className="w-72">Parameter Pengukuran</th>
+                <th rowSpan={2} className="fz fz-no w-10">No</th><th rowSpan={2} className="fz fz-tax w-36">Taksonomi Risiko</th><th rowSpan={2} colSpan={2} className="fz fz-kode fz-edge w-72">Parameter Pengukuran</th>
                 <th rowSpan={2} className="w-72">Formula</th><th rowSpan={2} className="w-20">Unit Satuan Formula</th><th rowSpan={2} className="w-28">Kategori Parameter</th>
                 <th colSpan={3} className="text-center">Risk Threshold</th><th rowSpan={2} className="w-32">Sikap Risiko Sesuai RAS</th>
                 <th rowSpan={2} className="w-32">Hasil Pengukuran Risiko pada RKAP 2027 (Risiko Inheren)</th><th rowSpan={2} className="w-36">Status Pengukuran</th>
@@ -96,13 +182,13 @@ export default function RamPage() {
                       const t = r.tambahan;
                       const off = !r.diterapkan;
                       return (
-                        <tr key={r.key} className={clsx(off && "opacity-55")}>
-                          {i === 0 && <td rowSpan={list.length + 1} className="group text-center">{ki + 1}</td>}
-                          {i === 0 && <td rowSpan={list.length + 1} className="group">{kat}</td>}
+                        <tr key={r.key} className={clsx(off && "row-off")}>
+                          {i === 0 && <td rowSpan={list.length + 1} className="group fz fz-no text-center">{ki + 1}</td>}
+                          {i === 0 && <td rowSpan={list.length + 1} className="group fz fz-tax">{kat}</td>}
                           {t ? (
                             <>
-                              <td className="input w-14"><EditCell value={t.kode} placeholder="Kode" onSave={(v) => patchTambahan(t.id, { kode: v as string })} /></td>
-                              <td className="input"><EditCell value={t.parameter} onSave={(v) => patchTambahan(t.id, { parameter: v as string })} /></td>
+                              <td className="input fz fz-kode w-14"><EditCell value={t.kode} placeholder="Kode" onSave={(v) => patchTambahan(t.id, { kode: v as string })} /></td>
+                              <td className="input fz fz-param fz-edge"><EditCell value={t.parameter} onSave={(v) => patchTambahan(t.id, { parameter: v as string })} /></td>
                               <td className="input text-[12px]"><EditCell value={t.formula} onSave={(v) => patchTambahan(t.id, { formula: v as string })} /></td>
                               <td className="input"><EditCell value={t.satuan} onSave={(v) => patchTambahan(t.id, { satuan: v as string })} /></td>
                               <td className="calc text-[12px]">Parameter Unik<SelectCell className="mt-1 text-[11px]" value={t.arah} options={ARAH} onSave={(v) => patchTambahan(t.id, { arah: v })} /></td>
@@ -114,8 +200,8 @@ export default function RamPage() {
                             </>
                           ) : (
                             <>
-                              <td className="w-14 font-bold"><Link className="text-brand-700 hover:underline" href={`/parameter/${r.kode}`}>{r.kode}</Link></td>
-                              <td className="font-semibold">{r.parameter}</td>
+                              <td className="fz fz-kode w-14 font-bold"><Link className="text-brand-700 hover:underline" href={`/parameter/${r.kode}`}>{r.kode}</Link></td>
+                              <td className="fz fz-param fz-edge font-semibold"><span>{r.parameter}</span></td>
                               <td className="text-[12px] text-slate-600">{r.formula}</td><td>{r.satuan}</td><td className="text-[12px]">{r.kategoriParameter}</td>
                               <td className="calc text-right tabnum">{nilaiParam(r.limit, r.satuan)}</td>
                               <td className="calc text-right tabnum">{nilaiParam(r.appetite, r.satuan)}</td>
@@ -134,11 +220,13 @@ export default function RamPage() {
                       );
                     })}
                     <tr>
-                      {list.length === 0 && <><td className="group text-center">{ki + 1}</td><td className="group">{kat}</td></>}
+                      {list.length === 0 && <><td className="group fz fz-no text-center">{ki + 1}</td><td className="group fz fz-tax">{kat}</td></>}
                       <td colSpan={17} className="!bg-paper/60 py-1.5">
-                        <button data-edit onClick={() => addTambahan(kat)} className="inline-flex items-center gap-1 text-[12px] font-semibold text-brand-700 hover:underline">
-                          <Plus className="h-3.5 w-3.5" />Tambah parameter unik
-                        </button>
+                        <div className="fz fz-kode w-max">
+                          <button data-edit onClick={() => addTambahan(kat)} className="inline-flex items-center gap-1 text-[12px] font-semibold text-brand-700 hover:underline">
+                            <Plus className="h-3.5 w-3.5" />Tambah parameter unik
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   </Fragment>
@@ -150,7 +238,7 @@ export default function RamPage() {
       )}
       {ai && (
         <AiFillModal jenis="ram" subjek={`Parameter ${ai.kode} ${ai.parameter} · ${ai.status}`} konteks={aiKonteks(ai)}
-          fields={[{ key: "inisiatif", label: "Inisiatif Strategis" }, { key: "kebijakan", label: "Kebijakan" }, { key: "program", label: "Program Kerja" }]}
+          fields={[...AI_FIELDS]}
           nilai={ai.tambahan ?? ai.pengendalian ?? {}} onApply={applyAi} onClose={() => setAi(null)}
           placeholder="Contoh: Hasil DER naik karena rencana pinjaman pabrik baru. Kami ingin menjaganya lewat restrukturisasi tenor dan penambahan setoran modal dari Induk." />
       )}
