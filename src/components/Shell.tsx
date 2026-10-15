@@ -70,12 +70,21 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   const nav = (mini: boolean) => (
     <nav className="flex h-full flex-col">
-      <Link href="/" className={clsx("flex items-center gap-3 pt-6 pb-5", mini ? "justify-center px-0" : "px-5")} title="Dashboard">
-        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-gold to-amber-600 font-extrabold text-brand-900 shadow-inner">K</div>
-        <div className={clsx("leading-tight whitespace-nowrap", mini && "hidden")}>
-          <div className="text-[15px] font-extrabold tracking-tight text-white">KINRA · Risk</div>
-          <div className="text-[11px] font-medium text-brand-200/80">Perencanaan RKAP 2027</div>
-        </div>
+      <Link href="/" className={clsx("block pt-6 pb-5", mini ? "px-2" : "px-5")} title="Dashboard">
+        {mini ? (
+          <div className="mx-auto grid h-10 w-10 place-items-center rounded-xl bg-white p-1 shadow-sm">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/kinra-mark.png" alt="KINRA" className="h-full w-full object-contain" />
+          </div>
+        ) : (
+          <>
+            <div className="flex justify-center rounded-xl bg-white px-3 py-2.5 shadow-sm">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/kinra-logo.png" alt="KINRA Sei Mangkei" className="h-14 w-auto" />
+            </div>
+            <div className="mt-2.5 px-0.5 text-[11px] leading-tight font-medium whitespace-nowrap text-brand-200/80">Manajemen Risiko · RKAP 2027</div>
+          </>
+        )}
       </Link>
       <div className={clsx("scroll-thin flex-1 overflow-x-hidden overflow-y-auto pb-6", mini ? "space-y-3 px-2" : "space-y-6 px-3")}>
         <div>
@@ -154,6 +163,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
             aria-label={collapsed ? "Perluas sidebar" : "Ciutkan sidebar"} title={collapsed ? "Perluas sidebar (Ctrl/⌘ + B)" : "Ciutkan sidebar (Ctrl/⌘ + B)"}>
             {collapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
           </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/kinra-mark.png" alt="KINRA" className="h-7 w-7 shrink-0 object-contain lg:hidden" />
           <div className="min-w-0 truncate text-[13px] text-slate-500">
             <span className="font-semibold text-ink">Kertas Kerja Perencanaan Manajemen Risiko</span>
             <span className="mx-2 text-slate-300">/</span>RKAP 2027<span className="mx-2 text-slate-300">/</span>PT KINRA
