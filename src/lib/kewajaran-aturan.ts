@@ -100,11 +100,13 @@ function cek1b(get: Get): TemuanKewajaran[] {
   const lonjakan: string[] = [], selLonjak: string[] = [];
   const harga: string[] = [], selHarga: string[] = [];
   const terbuang: string[] = [], selBuang: string[] = [];
+  const tanpaDefinisi: string[] = [], selDef: string[] = [];
 
   for (const r of baris(get, 30, 44, ["C", "E", "G", "H", "J", "K", "L"])) {
     const G = num(get(`G${r}`)), H = num(get(`H${r}`)), K = num(get(`K${r}`)), L = num(get(`L${r}`));
     const E = num(get(`E${r}`)), J = num(get(`J${r}`));
     const nama = namaBaris(get, r);
+    if (!ada(get(`D${r}`))) { tanpaDefinisi.push(nama); selDef.push(`D${r}`); }
     const ms26 = G != null && H ? G / H : null;
     const ms27 = K != null && L ? K / L : null;
 
@@ -159,6 +161,11 @@ function cek1b(get: Get): TemuanKewajaran[] {
     id: "1b-terbuang", severity: "perhatian", sel: selBuang,
     judul: `${terbuang.length} produk tidak ikut dihitung dalam rata-rata`,
     detail: `${terbuang.join("; ")}. Total pasar kosong/nol atau berisi teks. Lengkapi angkanya, atau kosongkan baris bila produk tidak relevan.`,
+  });
+  if (tanpaDefinisi.length) out.push({
+    id: "1b-definisi", severity: "perhatian", sel: selDef,
+    judul: `Definisi pasar belum diisi (${tanpaDefinisi.length} produk)`,
+    detail: `${tanpaDefinisi.join(", ")}. Pasar acuan wajib ditetapkan tertulis agar Market Total Sales 2026 dan 2027 dapat diuji kesebandingannya.`,
   });
   if (monopoli.length) out.push({
     id: "1b-monopoli", severity: "info", sel: [],
