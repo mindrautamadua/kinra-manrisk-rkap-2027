@@ -1,6 +1,6 @@
 "use client";
 import clsx from "clsx";
-import { AlertTriangle, ListChecks, Plus, Scissors, Trash2, X } from "lucide-react";
+import { AlertTriangle, ExternalLink, ListChecks, Plus, Scissors, Trash2, X } from "lucide-react";
 import { Button, EditCell, SelectCell } from "./ui";
 import { rupiah } from "@/lib/format";
 import { kurangAksi, type RingkasTarget } from "@/lib/target-risiko";
@@ -32,7 +32,7 @@ export function susunMitigasi(aksi: MitigasiAksi[]) {
   }).join("\n");
 }
 
-/** Editor rencana aksi mitigasi satu risiko: uraian, kategori, PIC, biaya, jadwal triwulan, dan output. */
+/** Editor rencana aksi mitigasi satu risiko: uraian, kategori, PIC, biaya, jadwal triwulan, output, dan bukti dukung. */
 export function RencanaAksiModal({ judul, risiko, aksi, ringkas, ro, onTambah, onUbah, onHapus, onPakaiTeks, onClose }: {
   judul: string;
   risiko: RiskRegister;
@@ -49,6 +49,8 @@ export function RencanaAksiModal({ judul, risiko, aksi, ringkas, ro, onTambah, o
   const butirTeks = pecahMitigasi(risiko.rencana_mitigasi);
   const teksBaru = susunMitigasi(aksi);
   const penurunan = ringkas.elInheren != null && ringkas.elTarget != null ? ringkas.elInheren - ringkas.elTarget : null;
+  /** Kolom bukti ada bila migrasi 0009 sudah dijalankan. */
+  const adaBukti = aksi.length === 0 || aksi.some((a) => "bukti" in a);
   const baru = (aksiTeks: string | null = null): Partial<MitigasiAksi> => ({ aksi: aksiTeks, kategori: risiko.kategori_mitigasi, jadwal: [] });
 
   return (
@@ -74,16 +76,21 @@ export function RencanaAksiModal({ judul, risiko, aksi, ringkas, ro, onTambah, o
 
           {aksi.length === 0 && butirTeks.length > 0 && !ro && (
             <div className="flex flex-wrap items-center gap-3 rounded-xl border border-brand-200 bg-brand-50/50 px-4 py-3">
-              <span className="text-slate-700">Teks Rencana Mitigasi berisi {butirTeks.length} butir. Jadikan baris rencana aksi, lalu lengkapi PIC, biaya, jadwal, dan output.</span>
+              <span className="text-slate-700">Teks Rencana Mitigasi berisi {butirTeks.length} butir. Jadikan baris rencana aksi, lalu lengkapi PIC, biaya, jadwal, output, dan bukti dukung.</span>
               <Button variant="outline" onClick={() => onTambah(butirTeks.map(baru))} className="ml-auto"><Scissors className="h-3.5 w-3.5" />Pecah jadi {butirTeks.length} aksi</Button>
             </div>
           )}
 
+          {!adaBukti && (
+            <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-[12.5px] text-amber-900">
+              Kolom Bukti Dukung belum ada di database. Jalankan <code className="font-mono">supabase/migrations/0009_bukti_mitigasi.sql</code> di Supabase SQL Editor.
+            </div>
+          )}
           <div className="overflow-x-auto rounded-xl border border-line">
-            <table className="kk-table min-w-[1040px]">
+            <table className="kk-table min-w-[1280px]">
               <thead><tr>
                 <th className="w-8">No</th><th>Rencana Aksi</th><th className="w-32">Kategori</th><th className="w-44">PIC / Unit</th>
-                <th className="w-36">Biaya (Rp)</th><th className="w-44">Jadwal 2027</th><th className="w-56">Output / Target Terukur</th><th className="w-8" />
+                <th className="w-36">Biaya (Rp)</th><th className="w-44">Jadwal 2027</th><th className="w-56">Output / Target Terukur</th>{adaBukti && <th className="w-60">Bukti Dukung</th>}<th className="w-8" />
               </tr></thead>
               <tbody>
                 {aksi.map((a, i) => {
@@ -114,11 +121,17 @@ export function RencanaAksiModal({ judul, risiko, aksi, ringkas, ro, onTambah, o
                         </div>
                       </td>
                       <td className={clsx("input", !a.output?.trim() && "!bg-amber-100/60")}><EditCell value={a.output} onSave={(v) => onUbah(a.id, { output: v as string })} placeholder="Mis. 100% tenant terkontrak…" /></td>
+                      {adaBukti && (
+                        <td className={clsx("input", !a.bukti?.trim() && "!bg-amber-100/60")}>
+                          <EditCell value={a.bukti ?? null} onSave={(v) => onUbah(a.id, { bukti: (v as string) || null })} placeholder="Tautan/nama dokumen: TOR, RAB, SK, kontrak…"
+                            display={(v) => <Bukti teks={v as string} />} />
+                        </td>
+                      )}
                       <td>{!ro && <button onClick={() => onHapus(a.id)} className="text-slate-400 hover:text-rose-600" title="Hapus aksi"><Trash2 className="h-4 w-4" /></button>}</td>
                     </tr>
                   );
                 })}
-                {aksi.length === 0 && <tr><td colSpan={8} className="py-8 text-center text-slate-400">Belum ada rencana aksi.</td></tr>}
+                {aksi.length === 0 && <tr><td colSpan={adaBukti ? 9 : 8} className="py-8 text-center text-slate-400">Belum ada rencana aksi.</td></tr>}
               </tbody>
             </table>
           </div>
@@ -144,7 +157,7 @@ export function RencanaAksiModal({ judul, risiko, aksi, ringkas, ro, onTambah, o
         </div>
 
         <div className="border-t border-line px-6 py-3 text-[11.5px] text-slate-500">
-          Biaya isi 0 bila aksi tidak memerlukan anggaran tambahan. Jadwal adalah rencana pelaksanaan; realisasinya dipantau terpisah.
+          Biaya isi 0 bila aksi tidak memerlukan anggaran tambahan. Jadwal adalah rencana pelaksanaan; realisasinya dipantau terpisah. Bukti dukung: satu dokumen per baris (tautan Drive/SharePoint atau nama dokumen, mis. TOR, RAB, SK, kontrak).
         </div>
       </div>
     </div>
@@ -156,6 +169,20 @@ function Angka({ label, nilai, warn }: { label: string; nilai: number | null; wa
     <div className={clsx("rounded-xl border px-3 py-2", warn ? "border-amber-300 bg-amber-50" : "border-line")}>
       <div className="text-[11px] text-slate-500">{label}</div>
       <div className={clsx("font-bold tabnum", warn && "text-amber-800")}>{nilai == null ? "–" : rupiah(nilai, true)}</div>
+    </div>
+  );
+}
+
+/** Bukti dukung per baris; baris berupa URL ditampilkan sebagai tautan. */
+function Bukti({ teks }: { teks: string }) {
+  const baris = teks.split(/\n+/).map((x) => x.trim()).filter(Boolean);
+  return (
+    <div className="space-y-0.5">
+      {baris.map((b, i) => /^https?:\/\//i.test(b) ? (
+        <a key={i} href={b} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="flex items-start gap-1 break-all text-brand-700 hover:underline">
+          <ExternalLink className="mt-0.5 h-3 w-3 shrink-0" />{b.replace(/^https?:\/\/(www\.)?/i, "").slice(0, 60)}
+        </a>
+      ) : <div key={i}>{b}</div>)}
     </div>
   );
 }

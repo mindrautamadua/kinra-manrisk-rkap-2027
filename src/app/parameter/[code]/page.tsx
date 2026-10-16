@@ -16,9 +16,13 @@ import { useReadonly } from "@/lib/mode";
 import type { CellValue, ParameterSheet, RkapKeuangan, SheetTemplate } from "@/lib/types";
 import { konfirmasi } from "@/components/Konfirmasi";
 import { PanelKewajaran } from "@/components/Kewajaran";
-import { jejakHitungan, periksaLembar } from "@/lib/kewajaran";
+import { jejakHitungan, periksaLembar, urutKewajaran } from "@/lib/kewajaran";
+import { cekSelarasRkap } from "@/lib/kewajaran-aturan";
 import { AnalisaAiModal } from "@/components/AnalisaAi";
 import { buildAnalisaRequest, sidikIsian } from "@/lib/analisa-ai";
+
+/** Lembar yang diperiksa keselarasannya dengan Data Keuangan RKAP walau tidak punya sel tautan. */
+const RKAP_SELARAS = new Set(["3b"]);
 
 export default function ParameterPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = use(params);
@@ -41,7 +45,7 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
   const [rkap, setRkap] = useState<RkapKeuangan | null>(null);
   const tautan = TAUTAN.filter((t) => t.code === code);
   useEffect(() => {
-    if (supabaseConfigured && TAUTAN.some((t) => t.code === code)) api.rkapAktif().then(setRkap).catch(() => setRkap(null));
+    if (supabaseConfigured && (TAUTAN.some((t) => t.code === code) || RKAP_SELARAS.has(code))) api.rkapAktif().then(setRkap).catch(() => setRkap(null));
   }, [code]);
 
   useEffect(() => {
@@ -76,10 +80,10 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
     const get = (a: string) => wb.get(code, a);
     const batas = [meta.ref_limit, meta.ref_appetite, meta.ref_tolerance, meta.ref_status].filter(Boolean) as string[];
     return {
-      temuan: periksaLembar(tpl, get, meta),
+      temuan: urutKewajaran([...periksaLembar(tpl, get, meta), ...(rkap ? cekSelarasRkap(code, get, rkap) : [])]),
       jejak: meta.ref_hasil ? jejakHitungan(tpl, get, meta.ref_hasil, batas) : null,
     };
-  }, [wb, tpl, meta, version, code]);
+  }, [wb, tpl, meta, version, code, rkap]);
 
   const persist = useCallback(() => {
     clearTimeout(timer.current);

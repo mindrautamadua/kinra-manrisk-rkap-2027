@@ -1,5 +1,6 @@
 "use client";
 import { sb, must } from "./supabase";
+import type { CakupanTopRisk } from "./cakupan-top-risk";
 import type {
   ChallengeLog, MitigasiAksi, ModePresentasi, Snapshot, SnapshotData,
   CatAksi, KategoriRisiko, ProgramStrategis, KriteriaDampak, ParameterSheet, RamPengendalian, RamTambahan, Ras, RasTambahan, RiskDriver,
@@ -22,6 +23,15 @@ export const api = {
   async saveSampul(v: Sampul) {
     guard("app_settings");
     must(await sb().from("app_settings").upsert({ key: "sampul", value: v, updated_at: new Date().toISOString() }));
+  },
+  /** Keputusan manual daftar periksa cakupan Top Risk (lembar Risiko Utama). */
+  async cakupanTopRisk(): Promise<CakupanTopRisk> {
+    const rows = must(await sb().from("app_settings").select("value").eq("key", "cakupan_top_risk"));
+    return (rows[0]?.value ?? {}) as CakupanTopRisk;
+  },
+  async saveCakupanTopRisk(v: CakupanTopRisk) {
+    guard("app_settings");
+    must(await sb().from("app_settings").upsert({ key: "cakupan_top_risk", value: v, updated_at: new Date().toISOString() }));
   },
   kategori: async () => must(await sb().from("kategori_risiko").select("*").order("no")) as KategoriRisiko[],
   kriteria: async () => must(await sb().from("kriteria_dampak").select("*").order("id")) as KriteriaDampak[],

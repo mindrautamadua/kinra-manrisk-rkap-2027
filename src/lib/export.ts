@@ -109,6 +109,7 @@ const AKSI_COLS: Col[] = [
   { header: "No Risiko", key: "no", width: 8 }, { header: "Risk Event", key: "risk_event", width: 32 }, { header: "No Aksi", key: "no_aksi", width: 7 },
   { header: "Rencana Aksi", key: "aksi", width: 50 }, { header: "Kategori", key: "kategori", width: 13 }, { header: "PIC / Unit", key: "pic", width: 24 },
   { header: "Biaya (Rp)", key: "biaya", width: 18, fmt: RP }, { header: "Jadwal 2027", key: "jadwal", width: 20 }, { header: "Output / Target Terukur", key: "output", width: 40 },
+  { header: "Bukti Dukung", key: "bukti", width: 40 },
 ];
 const aksiRows = (register: RiskRegister[], aksi: MitigasiAksi[]) => register.flatMap((r, i) =>
   aksi.filter((a) => a.risk_id === r.id).map((a, j) => ({ ...a, no: i + 1, risk_event: r.risk_event, no_aksi: j + 1, jadwal: a.jadwal.join(", ") })));

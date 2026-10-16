@@ -33,9 +33,11 @@ export interface RingkasTarget {
 }
 
 const isi = (s?: string | null) => !!s && s.trim() !== "";
-/** Aksi dianggap lengkap bila uraian, PIC, jadwal, dan output terisi; biaya boleh 0 (tanpa anggaran tambahan) tetapi tidak kosong. */
+/** Aksi dianggap lengkap bila uraian, PIC, jadwal, output, dan bukti dukung terisi; biaya boleh 0 (tanpa anggaran tambahan) tetapi tidak kosong.
+ *  Bukti hanya diperiksa bila kolomnya sudah ada (migrasi 0009). */
 export const kurangAksi = (a: MitigasiAksi) =>
-  [!isi(a.aksi) && "uraian", !isi(a.pic) && "PIC", a.biaya == null && "biaya", !a.jadwal.length && "jadwal", !isi(a.output) && "output"].filter(Boolean) as string[];
+  [!isi(a.aksi) && "uraian", !isi(a.pic) && "PIC", a.biaya == null && "biaya", !a.jadwal.length && "jadwal", !isi(a.output) && "output",
+    "bukti" in a && !isi(a.bukti) && "bukti dukung"].filter(Boolean) as string[];
 
 export function ringkasTarget(r: RiskRegister, aksi: MitigasiAksi[], ras: Ras[]): RingkasTarget {
   const sikap = sikapKategori(ras, r.kategori);
@@ -61,7 +63,7 @@ export function ringkasTarget(r: RiskRegister, aksi: MitigasiAksi[], ras: Ras[])
     }
   }
 
-  if (isTopRisk(r.kategori_dampak) && aksi.length === 0) isu("Risiko utama belum punya rencana aksi terstruktur (PIC, biaya, jadwal, output).", "Rencana Aksi");
+  if (isTopRisk(r.kategori_dampak) && aksi.length === 0) isu("Risiko utama belum punya rencana aksi terstruktur (PIC, biaya, jadwal, output, bukti dukung).", "Rencana Aksi");
   const tidakLengkap = aksi.map((a, i) => ({ i, k: kurangAksi(a) })).filter((x) => x.k.length);
   if (tidakLengkap.length) isu(tidakLengkap.map((x) => `aksi ${x.i + 1} belum ada ${x.k.join(", ")}`).join("; ") + ".", "Rencana Aksi");
   if (out.biaya > 0 && out.elInheren != null && out.elTarget != null && out.biaya > out.elInheren - out.elTarget) {

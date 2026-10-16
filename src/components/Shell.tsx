@@ -6,7 +6,7 @@ import clsx from "clsx";
 import {
   LayoutDashboard, Presentation, FileText, BookOpen, Target, Gauge, Network, ListChecks, Flame, Grid3x3, Briefcase, Sigma,
   Library, Database, ChevronDown, Menu, X, PanelLeftClose, PanelLeftOpen, Table2,
-  ClipboardCheck, MessagesSquare, GitCompareArrows, Workflow, Lock, LockOpen, MessageSquarePlus, LifeBuoy, HelpCircle, LogOut, Rocket, FileSpreadsheet, Loader2, Landmark, Flag,
+  ClipboardCheck, MessagesSquare, GitCompareArrows, Workflow, Lock, LockOpen, MessageSquarePlus, LifeBuoy, HelpCircle, LogOut, Lightbulb, Rocket, FileSpreadsheet, Loader2, Landmark, Flag,
 } from "lucide-react";
 import { useMode } from "@/lib/mode";
 import { ChallengeModal, refFromPath } from "./ChallengeForm";
@@ -82,7 +82,7 @@ function AppShell({ children, path }: { children: React.ReactNode; path: string 
 
   const active = (href: string) => path === href || (href !== "/" && path.startsWith(href + "/"));
   const lembarMaster = MASTER.some((m) => active(m.href));
-  const tanpaTabLembar = lembarMaster || path === "/";
+  const tanpaTabLembar = lembarMaster || path === "/" || path === "/kerangka-berpikir";
 
   const nav = (mini: boolean) => (
     <nav className="flex h-full flex-col">
@@ -108,6 +108,7 @@ function AppShell({ children, path }: { children: React.ReactNode; path: string 
       <div className={clsx("scroll-thin flex-1 overflow-x-hidden overflow-y-auto pb-6", mini ? "space-y-3 px-2" : "space-y-6 px-3")}>
         <div>
           <NavItem href="/" label="Dashboard" icon={LayoutDashboard} active={path === "/"} mini={mini} />
+          <NavItem href="/kerangka-berpikir" label="Kerangka Berpikir" icon={Lightbulb} active={active("/kerangka-berpikir")} mini={mini} />
           <NavItem href="/panduan" label="Panduan Penggunaan" icon={LifeBuoy} active={active("/panduan")} mini={mini} />
         </div>
         <div>

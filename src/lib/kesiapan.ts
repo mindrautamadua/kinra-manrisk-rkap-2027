@@ -170,7 +170,7 @@ export function periksa(d: InputKesiapan): Pemeriksaan[] {
       })));
     add("reg-target", "Risk Register", "Risiko utama punya target residual dalam selera risiko",
       temuan("Target Residual", (r, p) => (/di atas selera|lebih tinggi dari inheren/.test(p) || (isTopRisk(r.kategori_dampak) && /wajib/.test(p)) ? "kritis" : "perhatian")));
-    add("reg-aksi", "Risk Register", "Rencana aksi mitigasi lengkap (PIC, biaya, jadwal, output)",
+    add("reg-aksi", "Risk Register", "Rencana aksi mitigasi lengkap (PIC, biaya, jadwal, output, bukti dukung)",
       temuan("Rencana Aksi", (r) => (isTopRisk(r.kategori_dampak) ? "perhatian" : "info")));
   } else {
     add("reg-target-migrasi", "Risk Register", "Target residual & rencana aksi tersedia", [{

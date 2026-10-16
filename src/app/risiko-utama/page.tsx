@@ -3,13 +3,17 @@ import { useState } from "react";
 import clsx from "clsx";
 import { Card, DampakBadge, ErrorBox, Loading, Section, SheetPage, TableWrap, useLoad } from "@/components/ui";
 import { RiskMatrix } from "@/components/RiskMatrix";
+import { CakupanTopRiskPanel } from "@/components/CakupanTopRisk";
 import { api } from "@/lib/data";
 import { isTopRisk, persen, rupiah } from "@/lib/format";
 import { note } from "@/lib/static";
 import type { RiskRegister } from "@/lib/types";
 
 export default function RisikoUtamaPage() {
-  const q = useLoad(async () => ({ register: await api.register(), kategori: await api.kategori() }));
+  const q = useLoad(async () => {
+    const [register, kategori, cakupan] = await Promise.all([api.register(), api.kategori(), api.cakupanTopRisk()]);
+    return { register, kategori, cakupan };
+  });
   const [sel, setSel] = useState<RiskRegister | null>(null);
   const [peta, setPeta] = useState<"inheren" | "target">("inheren");
   const d = q.data;
@@ -81,6 +85,9 @@ export default function RisikoUtamaPage() {
                 </tbody>
               </table>
             </TableWrap>
+          </Section>
+          <Section letter="C" title="Cakupan Topik Risiko Wajib">
+            <CakupanTopRiskPanel register={d.register} keputusan={d.cakupan} onChange={(cakupan) => q.setData({ ...d, cakupan })} />
           </Section>
         </>
       )}

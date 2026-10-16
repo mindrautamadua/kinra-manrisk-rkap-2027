@@ -26,7 +26,7 @@ const risikoRingkas = (register: RiskRegister[], aksi: MitigasiAksi[] | null) =>
   nilai_dampak: r.nilai_dampak, kategori_dampak: r.kategori_dampak, top_risk: isTopRisk(r.kategori_dampak), expected_loss: r.expected_loss,
   existing_control: r.existing_control, rencana_mitigasi: r.rencana_mitigasi, kategori_mitigasi: r.kategori_mitigasi,
   parameter_ram: r.parameter_ram ?? [], target_probabilitas: r.target_probabilitas, target_nilai_dampak: r.target_nilai_dampak,
-  aksi_mitigasi: (aksi ?? []).filter((a) => a.risk_id === r.id).map(({ aksi, kategori, pic, biaya, jadwal, output }) => ({ aksi, kategori, pic, biaya, jadwal, output })),
+  aksi_mitigasi: (aksi ?? []).filter((a) => a.risk_id === r.id).map(({ aksi, kategori, pic, biaya, jadwal, output, bukti }) => ({ aksi, kategori, pic, biaya, jadwal, output, bukti: bukti ?? null })),
 }));
 
 async function ram() {

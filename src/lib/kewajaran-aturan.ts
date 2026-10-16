@@ -1,6 +1,6 @@
 import { dateToSerial, formatCell } from "./engine";
 import { persen } from "./format";
-import type { CellValue } from "./types";
+import type { CellValue, RkapKeuangan } from "./types";
 
 /**
  * Aturan uji kewajaran khusus per lembar parameter. Setiap aturan membaca nilai sel lembar
@@ -87,6 +87,23 @@ function cek1a(get: Get) {
     if (due != null && plan != null && plan > due && L === "Tidak")
       c.add("meleset", "kritis", "Rencana penyelesaian melewati due date tetapi ditandai tidak berisiko meleset",
         "Milestone yang direncanakan selesai setelah due date seharusnya berisiko meleset (Ya). Penandaan Tidak membuat hasil terlalu baik.", `${nama}: due bulan ${due}, rencana bulan ${plan}`, [`I${r}`, `J${r}`, `L${r}`]);
+    // Challenge session RKAP 2027 (RAM-2): inisiatif harus konkret dengan milestone terukur dan keluaran 2027.
+    if (ada(get(`C${r}`)) && !ada(get(`G${r}`)))
+      c.add("milestone-kosong", "perhatian", "Planned Milestone belum diuraikan",
+        "Tuliskan keluaran terukur yang ditargetkan pada bulan due date, mis. \"Kontrak EPC ditandatangani\" atau \"WTP Tahap III beroperasi 2.700 m3/jam\". Satu inisiatif boleh punya beberapa baris milestone dengan nama inisiatif yang sama.", nama, [`G${r}`]);
+    if (ada(get(`C${r}`)) && (!ada(get(`D${r}`)) || !ada(get(`E${r}`))))
+      c.add("kategori-objective", "info", "Kategori atau Strategic Objective inisiatif belum diisi",
+        "Isi kategori inisiatif dan sasaran strategis yang didukung agar keterkaitannya dengan RKAP 2027 terlihat.", nama, [`D${r}`, `E${r}`]);
+  }
+  // Inisiatif yang hanya punya satu milestone untuk sepanjang tahun tidak dapat dipantau progresnya.
+  const perInisiatif = new Map<string, number[]>();
+  for (const r of baris(get, 31, 70, ["C"])) { const n = teks(get(`C${r}`)).toLowerCase(); perInisiatif.set(n, [...(perInisiatif.get(n) ?? []), r]); }
+  for (const rs of perInisiatif.values()) {
+    if (rs.length !== 1) continue;
+    const r = rs[0], I = get(`I${r}`), due = num(I);
+    if (due === 12 || /1\s*-\s*12/.test(teks(I)))
+      c.add("milestone-tunggal", "perhatian", "Inisiatif hanya punya satu milestone untuk setahun penuh",
+        "Pecah menjadi beberapa milestone bertahap (mis. per triwulan) dengan keluaran yang dapat diverifikasi, agar progres inisiatif dapat diukur sepanjang 2027.", namaBaris(get, r), [`G${r}`, `I${r}`]);
   }
   return c.out();
 }
@@ -438,3 +455,41 @@ export const ATURAN_KHUSUS: Record<string, (get: Get) => TemuanKewajaran[]> = {
   K1: cekK1, K2: cekK2, K3: cekK3, K4: cekK4, K5: cekK5,
   U1: cekU1, U2: cekU2, U3: cekU3, U4: cekU4, U5: cekU5, U6: cekU6, U7: cekU7, U8: cekU8, U9: cekU9, U10: cekU10,
 };
+
+// ---------- Keselarasan dengan Data Keuangan RKAP ----------
+
+/** 3b Operating Cash Flow Ratio dibandingkan dengan laba rugi RKAP 2027 aktif (challenge session: RAM-6, Top Risks-2). Satuan lembar Rp juta. */
+export function cekSelarasRkap(code: string, get: Get, rkap: RkapKeuangan): TemuanKewajaran[] {
+  if (code !== "3b") return [];
+  const c = pengumpul("3b-rkap");
+  const pos = rkap.data.pos, juta = (k: string) => (pos[k]?.tahun == null ? null : pos[k]!.tahun! / 1e6);
+  const rows = [...baris(get, 30, 44, ["C", "D"])];
+  const nilai = (re: RegExp) => rows.filter((r) => re.test(teks(get(`C${r}`)).toLowerCase())).reduce((a, r) => a + (num(get(`D${r}`)) ?? 0), 0);
+  const sel = rows.map((r) => `D${r}`);
+  const sumber = `Data Keuangan RKAP "${rkap.nama}"`;
+
+  const pendapatan = juta("total_pendapatan"), terima = nilai(/penerimaan|pelanggan/);
+  if (pendapatan && terima) {
+    const selisih = (terima - pendapatan) / pendapatan;
+    if (Math.abs(selisih) < 0.005)
+      c.add("penerimaan-sama", "perhatian", "Penerimaan kas dari pelanggan sama persis dengan total pendapatan RKAP",
+        "Artinya seluruh pendapatan 2027 diasumsikan tertagih tunai pada tahun yang sama. Sesuaikan dengan perubahan piutang usaha (selaras dengan proyeksi pada lembar 4a/4b) dan uang muka pelanggan.",
+        `penerimaan ${rp(terima)} vs pendapatan ${rp(pendapatan)} juta (${sumber})`, sel);
+    else if (Math.abs(selisih) > 0.2)
+      c.add("penerimaan-jauh", "perhatian", `Penerimaan kas dari pelanggan berbeda ${persen(selisih, 0)} dari total pendapatan RKAP`,
+        "Selisih lebih dari 20% perlu dijelaskan dengan perubahan piutang atau uang muka pelanggan yang direncanakan.", `penerimaan ${rp(terima)} vs pendapatan ${rp(pendapatan)} juta`, sel);
+  }
+
+  const ocf = rows.reduce((a, r) => a + (num(get(`D${r}`)) ?? 0), 0);
+  const eb = juta(rkap.ebitda_basis === "komite" ? "ebitda_komite" : "ebitda_holding");
+  if (eb != null && ocf > eb * 1.05)
+    c.add("ocf-ebitda", "perhatian", "Arus kas operasi melebihi EBITDA RKAP",
+      "Arus kas operasi umumnya lebih kecil dari EBITDA karena dikurangi pembayaran pajak dan kenaikan modal kerja. Periksa pos pajak, bunga, dan piutang.",
+      `arus kas operasi ${rp(ocf)} vs EBITDA ${rp(eb)} juta`, sel);
+
+  const pajak = juta("pajak");
+  if (pajak && pajak > 0 && !rows.some((r) => /pajak/.test(teks(get(`C${r}`)).toLowerCase())))
+    c.add("pajak", "perhatian", "Pembayaran pajak penghasilan belum tercantum",
+      `RKAP memuat beban pajak penghasilan badan ${rp(pajak)} juta. Cantumkan pembayaran pajak (angsuran PPh 25 dan pelunasan PPh 29) sebagai arus kas keluar operasi.`, "pos pajak tidak ditemukan", sel);
+  return c.out();
+}

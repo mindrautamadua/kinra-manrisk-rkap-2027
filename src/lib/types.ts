@@ -39,6 +39,8 @@ export const TRIWULAN = ["TW I", "TW II", "TW III", "TW IV"] as const;
 export interface MitigasiAksi {
   id: string; risk_id: string; urutan: number; aksi: string | null; kategori: string | null; pic: string | null;
   biaya: number | null; jadwal: string[]; output: string | null;
+  /** Bukti dukung: tautan/rujukan dokumen, satu per baris. Kolom dari migrasi 0009. */
+  bukti?: string | null;
 }
 export interface ParamSummary { limit?: number | string | null; appetite?: number | string | null; tolerance?: number | string | null; hasil?: number | string | null; status?: string | null }
 export interface ParameterSheet {
