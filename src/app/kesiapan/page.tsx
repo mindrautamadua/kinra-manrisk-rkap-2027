@@ -20,9 +20,9 @@ const SEV: Record<Severity, { label: string; icon: React.ElementType; chip: stri
 
 export default function KesiapanPage() {
   const q = useLoad(async () => {
-    const [sampul, ras, register, params, pengendalian, tambahan, drivers, cat, kriteria, templates] = await Promise.all([
+    const [sampul, ras, register, params, pengendalian, tambahan, drivers, cat, kriteria, templates, aksi] = await Promise.all([
       api.sampul(), api.ras(), api.register(), api.params(), api.pengendalian(), api.ramTambahan(), api.drivers(), api.cat(), api.kriteria(),
-      loadAllTemplates(),
+      loadAllTemplates(), api.mitigasiAksi(),
     ]);
     const ram = buildRam(params, ras, pengendalian, tambahan);
     const wb = new Workbook(templates, Object.fromEntries(params.map((p) => [p.code, p.inputs])), sampul.nama_entitas);
@@ -30,7 +30,7 @@ export default function KesiapanPage() {
     wb.destroy();
     const adaKeterkaitan = register.length === 0 || register.some((r) => "parameter_ram" in r);
     return {
-      checks: periksa({ sampul, ras, register, params, ram, drivers, cat, kriteria, adaKeterkaitan, kewajaran }),
+      checks: periksa({ sampul, ras, register, params, ram, drivers, cat, kriteria, adaKeterkaitan, kewajaran, aksi }),
       reviewInput: buildReviewInput(sampul.nama_entitas || "PT KINRA", ras, register, ram),
     };
   });

@@ -29,6 +29,16 @@ export interface RiskRegister {
   parameter_ram?: string[] | null;
   /** Kode Sasaran Strategis RJPP terkait (PD-1, SG-2, NB-3, FD-1, ...). Kolom dari migrasi 0006. */
   sasaran_strategis?: string[] | null;
+  /** Target residual setelah mitigasi RKAP 2027. Kolom dari migrasi 0008. */
+  target_probabilitas?: number | null;
+  target_nilai_dampak?: number | null;
+  target_kategori_dampak?: string | null;
+}
+export const TRIWULAN = ["TW I", "TW II", "TW III", "TW IV"] as const;
+/** Rencana aksi mitigasi terstruktur satu risiko (migrasi 0008). */
+export interface MitigasiAksi {
+  id: string; risk_id: string; urutan: number; aksi: string | null; kategori: string | null; pic: string | null;
+  biaya: number | null; jadwal: string[]; output: string | null;
 }
 export interface ParamSummary { limit?: number | string | null; appetite?: number | string | null; tolerance?: number | string | null; hasil?: number | string | null; status?: string | null }
 export interface ParameterSheet {
@@ -79,6 +89,8 @@ export interface SnapshotData {
   sampul: Sampul; ras: Ras[]; ras_tambahan: RasTambahan[]; register: RiskRegister[];
   params: Pick<ParameterSheet, "code" | "diterapkan" | "summary" | "inputs">[];
   pengendalian: RamPengendalian[]; ram_tambahan: RamTambahan[]; cat: CatAksi[];
+  /** Tidak ada pada snapshot sebelum migrasi 0008. */
+  mitigasi_aksi?: MitigasiAksi[];
 }
 export interface ModePresentasi { aktif: boolean; sejak?: string | null }
 

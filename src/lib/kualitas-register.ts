@@ -118,7 +118,8 @@ const RE_TARGET = /\d|%|\b(seluruh|100|minimal|maksimal|paling sedikit|nol|zero)
 
 export interface Isu { kolom: string; pesan: string }
 
-export function cekKualitas(r: RiskRegister, saran: SaranDampak | null): Isu[] {
+/** aksiTerstruktur: PIC dan jadwal sudah tercatat di Rencana Aksi, jadwal/PIC tidak perlu lagi tertulis di teks mitigasi. */
+export function cekKualitas(r: RiskRegister, saran: SaranDampak | null, aksiTerstruktur = false): Isu[] {
   const out: Isu[] = [];
   const isi = (s?: string | null) => !!s && s.trim() !== "";
 
@@ -135,7 +136,7 @@ export function cekKualitas(r: RiskRegister, saran: SaranDampak | null): Isu[] {
     }
     const kurang = [!RE_PIC.test(r.rencana_mitigasi!) && "PIC/fungsi", !RE_WAKTU.test(r.rencana_mitigasi!) && "waktu", !RE_TARGET.test(r.rencana_mitigasi!) && "target terukur"].filter(Boolean);
     // Template tidak punya kolom terpisah untuk PIC/waktu/target, jadi ketiganya diharapkan tertulis di dalam uraian mitigasi.
-    if (kurang.length) out.push({ kolom: "Rencana Mitigasi", pesan: `Uraian mitigasi belum menyebut ${kurang.join(", ")}. Tulis di dalam teks mitigasi, mis. "Divisi Keuangan …, paling lambat TW II 2027, target 100% …".` });
+    if (kurang.length && !aksiTerstruktur) out.push({ kolom: "Rencana Mitigasi", pesan: `Uraian mitigasi belum menyebut ${kurang.join(", ")}. Tulis di dalam teks mitigasi, mis. "Divisi Keuangan …, paling lambat TW II 2027, target 100% …".` });
   }
   if ((r.probabilitas != null) !== (r.nilai_dampak != null)) {
     out.push({ kolom: "Besaran Risiko", pesan: r.probabilitas != null ? "Probabilitas terisi tetapi Nilai Dampak kosong." : "Nilai Dampak terisi tetapi Probabilitas kosong." });

@@ -32,6 +32,7 @@ export function diffSnapshot(a: SnapshotData, b: SnapshotData): SectionDiff[] {
     ["probabilitas", "Probabilitas"], ["deskripsi_dampak", "Deskripsi Dampak"], ["nilai_dampak", "Nilai Dampak (Rp)"], ["kriteria_dampak", "Kriteria Dampak"],
     ["kategori_dampak", "Kategori Dampak"], ["expected_loss", "Expected Loss (Rp)"], ["existing_control", "Existing Control"],
     ["rencana_mitigasi", "Rencana Mitigasi"], ["kategori_mitigasi", "Kategori Mitigasi"], ["parameter_ram", "Parameter RAM Terkait"],
+    ["target_probabilitas", "Target Probabilitas"], ["target_nilai_dampak", "Target Nilai Dampak (Rp)"], ["target_kategori_dampak", "Target Kategori Dampak"],
   ]);
 
   // Lembar parameter: ringkasan hasil + jumlah sel isian yang berubah
@@ -61,5 +62,13 @@ export function diffSnapshot(a: SnapshotData, b: SnapshotData): SectionDiff[] {
     ["limit_v", "Limit"], ["appetite_v", "Appetite"], ["tolerance_v", "Tolerance"],
   ]);
 
-  return [sampul, ras, reg, { id: "params", title: "Lembar Parameter", items: paramItems }, peng, tamb, cat];
+  // Snapshot sebelum migrasi 0008 tidak membawa rencana aksi; bandingkan hanya bila kedua sisi punya.
+  const nama = new Map([...a.register, ...b.register].map((r) => [r.id, r.risk_event ?? "(tanpa risk event)"]));
+  const aksi = a.mitigasi_aksi && b.mitigasi_aksi
+    ? [byKey("Rencana Aksi Mitigasi", "mitigasi_aksi", a.mitigasi_aksi, b.mitigasi_aksi, (x) => x.id, (x) => `${nama.get(x.risk_id) ?? "Risiko"}: ${x.aksi ?? "(tanpa uraian)"}`, [
+      ["aksi", "Rencana Aksi"], ["kategori", "Kategori"], ["pic", "PIC"], ["biaya", "Biaya (Rp)"], ["jadwal", "Jadwal"], ["output", "Output"],
+    ])]
+    : [];
+
+  return [sampul, ras, reg, ...aksi, { id: "params", title: "Lembar Parameter", items: paramItems }, peng, tamb, cat];
 }

@@ -1,6 +1,6 @@
 "use client";
 import type ExcelJSNs from "exceljs";
-import type { CatAksi, ChallengeLog, KategoriRisiko, KriteriaDampak, ParameterSheet, ProgramStrategis, Ras, RasTambahan, RiskDriver, RiskRegister, Sampul, SheetTemplate } from "./types";
+import type { CatAksi, ChallengeLog, KategoriRisiko, KriteriaDampak, MitigasiAksi, ParameterSheet, ProgramStrategis, Ras, RasTambahan, RiskDriver, RiskRegister, Sampul, SheetTemplate } from "./types";
 import { buildRam, type RamRow } from "./ram";
 import { PETUNJUK, REKAP, note } from "./static";
 import { hitungStatus, isTopRisk } from "./format";
@@ -73,10 +73,12 @@ const REGISTER_COLS: Col[] = [
   { header: "Kategori Dampak Risiko", key: "kategori_dampak", width: 16 }, { header: "Tagging Top Risk", key: "tagging", width: 10 },
   { header: "Expected Loss (Rp)", key: "expected_loss", width: 20, fmt: RP }, { header: "Existing Control", key: "existing_control", width: 36 },
   { header: "Rencana Mitigasi", key: "rencana_mitigasi", width: 36 }, { header: "Kategori Mitigasi", key: "kategori_mitigasi", width: 14 },
+  { header: "Target Probabilitas", key: "target_probabilitas", width: 12, fmt: "0%" }, { header: "Target Nilai Dampak (Rp)", key: "target_nilai_dampak", width: 20, fmt: RP },
+  { header: "Target Kategori Dampak", key: "target_kategori_dampak", width: 16 }, { header: "Target Expected Loss (Rp)", key: "target_el", width: 20, fmt: RP },
   { header: "Parameter RAM Terkait", key: "param", width: 18 }, { header: "Sasaran Strategis RJPP Terkait", key: "sasaran", width: 18 },
 ];
 const registerRows = (rows: RiskRegister[]) => rows.map((r, i) => ({
-  ...r, no: i + 1, param: (r.parameter_ram ?? []).join(", "), sasaran: (r.sasaran_strategis ?? []).join(", "), tagging: r.kategori_dampak ? (isTopRisk(r.kategori_dampak) ? "Ya" : "Tidak") : "",
+  ...r, no: i + 1, target_el: r.target_probabilitas != null && r.target_nilai_dampak != null ? Number(r.target_probabilitas) * Number(r.target_nilai_dampak) : null, param: (r.parameter_ram ?? []).join(", "), sasaran: (r.sasaran_strategis ?? []).join(", "), tagging: r.kategori_dampak ? (isTopRisk(r.kategori_dampak) ? "Ya" : "Tidak") : "",
 }));
 
 const REKAP_COLS: Col[] = [
@@ -103,8 +105,20 @@ const ramRows = (rows: RamRow[]) => rows.map((r) => {
   return { ...r, inisiatif: src.inisiatif, kebijakan: src.kebijakan, program: src.program, anggaran: src.anggaran };
 });
 
-export const exportRegister = (rows: RiskRegister[]) =>
-  download("Risk Register RKAP 2027 - PT KINRA.xlsx", "Risk Register", "Risk Register RKAP 2027 - PT KINRA", REGISTER_COLS, registerRows(rows));
+const AKSI_COLS: Col[] = [
+  { header: "No Risiko", key: "no", width: 8 }, { header: "Risk Event", key: "risk_event", width: 32 }, { header: "No Aksi", key: "no_aksi", width: 7 },
+  { header: "Rencana Aksi", key: "aksi", width: 50 }, { header: "Kategori", key: "kategori", width: 13 }, { header: "PIC / Unit", key: "pic", width: 24 },
+  { header: "Biaya (Rp)", key: "biaya", width: 18, fmt: RP }, { header: "Jadwal 2027", key: "jadwal", width: 20 }, { header: "Output / Target Terukur", key: "output", width: 40 },
+];
+const aksiRows = (register: RiskRegister[], aksi: MitigasiAksi[]) => register.flatMap((r, i) =>
+  aksi.filter((a) => a.risk_id === r.id).map((a, j) => ({ ...a, no: i + 1, risk_event: r.risk_event, no_aksi: j + 1, jadwal: a.jadwal.join(", ") })));
+
+export async function exportRegister(rows: RiskRegister[], aksi?: MitigasiAksi[] | null) {
+  const wb = await newWorkbook();
+  addTable(wb, "Risk Register", "Risk Register RKAP 2027 - PT KINRA", REGISTER_COLS, registerRows(rows));
+  if (aksi?.length) addTable(wb, "Rencana Aksi Mitigasi", "Rencana Aksi Mitigasi RKAP 2027 - PT KINRA", AKSI_COLS, aksiRows(rows, aksi));
+  await save(wb, "Risk Register RKAP 2027 - PT KINRA.xlsx");
+}
 
 export const exportRekap = (params: ParameterSheet[]) =>
   download("Rekap Parameter RAM RKAP 2027 - PT KINRA.xlsx", "Rekap", "Rekap Parameter RAM RKAP 2027 - PT KINRA", REKAP_COLS, rekapRows(params));
@@ -124,7 +138,7 @@ export const exportChallenge = (rows: ChallengeLog[]) =>
 export interface SemuaData {
   sampul: Sampul; kategori: KategoriRisiko[]; ras: Ras[]; rasTambahan: RasTambahan[]; kriteria: KriteriaDampak[]; drivers: RiskDriver[];
   register: RiskRegister[]; params: ParameterSheet[]; pengendalian: Parameters<typeof buildRam>[2]; ramTambahan: Parameters<typeof buildRam>[3];
-  cat: CatAksi[]; program: ProgramStrategis[]; templates: SheetTemplate[];
+  cat: CatAksi[]; program: ProgramStrategis[]; templates: SheetTemplate[]; aksi?: MitigasiAksi[] | null;
 }
 
 /** Lembar Sampul. Nama entitas di E10 karena rumus lembar parameter merujuk Sampul!$E$10. */
@@ -207,6 +221,7 @@ export async function exportSemua(d: SemuaData) {
   ], d.drivers.map((r) => ({ ...r, tambahan: r.tambahan ? "Ya" : "" })), note("Risk Driver"));
 
   addTable(wb, "Risk Register", judul("Risk Register"), REGISTER_COLS, registerRows(d.register), note("Risk Register"));
+  if (d.aksi?.length) addTable(wb, "Rencana Aksi Mitigasi", judul("Rencana Aksi Mitigasi"), AKSI_COLS, aksiRows(d.register, d.aksi));
 
   addTable(wb, "Risiko Utama", judul("Risiko Utama"), [
     { header: "No", key: "no", width: 5 }, { header: "Taksonomi Risiko", key: "kategori", width: 24 }, { header: "Risk Event", key: "risk_event", width: 34 },

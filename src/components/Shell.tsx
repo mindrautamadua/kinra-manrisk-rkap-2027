@@ -253,11 +253,11 @@ function UnduhSemua() {
     setBusy(true);
     try {
       const [{ api }, { exportSemua }, { loadAllTemplates }] = await Promise.all([import("@/lib/data"), import("@/lib/export"), import("@/lib/engine")]);
-      const [sampul, kategori, ras, rasTambahan, kriteria, drivers, register, params, pengendalian, ramTambahan, cat, program, templates] = await Promise.all([
+      const [sampul, kategori, ras, rasTambahan, kriteria, drivers, register, params, pengendalian, ramTambahan, cat, program, templates, aksi] = await Promise.all([
         api.sampul(), api.kategori(), api.ras(), api.rasTambahan(), api.kriteria(), api.drivers(), api.register(), api.params(),
-        api.pengendalian(), api.ramTambahan(), api.cat(), api.program().catch(() => []), loadAllTemplates(),
+        api.pengendalian(), api.ramTambahan(), api.cat(), api.program().catch(() => []), loadAllTemplates(), api.mitigasiAksi(),
       ]);
-      await exportSemua({ sampul, kategori, ras, rasTambahan, kriteria, drivers, register, params, pengendalian, ramTambahan, cat, program, templates });
+      await exportSemua({ sampul, kategori, ras, rasTambahan, kriteria, drivers, register, params, pengendalian, ramTambahan, cat, program, templates, aksi });
     } catch (e) { alert(`Gagal mengunduh Excel: ${(e as Error).message}`); }
     setBusy(false);
   };

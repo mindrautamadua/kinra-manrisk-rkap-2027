@@ -3,7 +3,8 @@ import type { TemuanKewajaran } from "./kewajaran";
 import { cekSikap, isTopRisk, nilaiParam } from "./format";
 import { perluPengendalian, type RamRow } from "./ram";
 import { cariKriteria, ebitdaRkap, saranDampak } from "./kualitas-register";
-import type { CatAksi, KriteriaDampak, ParameterSheet, Ras, RiskDriver, RiskRegister, Sampul } from "./types";
+import { ringkasTarget } from "./target-risiko";
+import type { CatAksi, KriteriaDampak, MitigasiAksi, ParameterSheet, Ras, RiskDriver, RiskRegister, Sampul } from "./types";
 
 export type Severity = "kritis" | "perhatian" | "info";
 export interface Temuan { id: string; severity: Severity; area: string; judul: string; detail?: string; href: string; ref?: { type: string; id: string; label: string } }
@@ -26,6 +27,8 @@ export interface InputKesiapan {
   adaKeterkaitan: boolean;
   /** Hasil uji kewajaran per kode lembar (lihat kewajaran.ts); kosong bila template belum dimuat. */
   kewajaran?: Record<string, TemuanKewajaran[]>;
+  /** Rencana aksi mitigasi; null bila migrasi 0008 belum dijalankan. */
+  aksi?: MitigasiAksi[] | null;
 }
 
 /** Jalankan seluruh pemeriksaan kesiapan challenge session. */
@@ -155,6 +158,24 @@ export function periksa(d: InputKesiapan): Pemeriksaan[] {
     add("trace-migrasi", "Keterkaitan", "Keterkaitan risiko–parameter tersedia", [{
       id: "trace-migrasi", severity: "info", area: "Keterkaitan", judul: "Kolom keterkaitan belum ada di database",
       detail: "Jalankan supabase/migrations/0002_challenge_session.sql.", href: "/keterkaitan",
+    }]);
+  }
+
+  // ---------- Target residual & rencana aksi ----------
+  if (d.aksi) {
+    const t = reg.map((r, i) => ({ r, i, t: ringkasTarget(r, d.aksi!.filter((a) => a.risk_id === r.id), d.ras) }));
+    const temuan = (kolom: string, sev: (r: RiskRegister, pesan: string) => Severity) => t.flatMap(({ r, i, t }) =>
+      t.isu.filter((x) => x.kolom === kolom).map((x, j): Temuan => ({
+        id: `${kolom}-${r.id}-${j}`, severity: sev(r, x.pesan), area: "Risk Register", judul: `${nama(r, i)}: ${x.pesan}`, href: "/risk-register", ref: refR(r, i),
+      })));
+    add("reg-target", "Risk Register", "Risiko utama punya target residual dalam selera risiko",
+      temuan("Target Residual", (r, p) => (/di atas selera|lebih tinggi dari inheren/.test(p) || (isTopRisk(r.kategori_dampak) && /wajib/.test(p)) ? "kritis" : "perhatian")));
+    add("reg-aksi", "Risk Register", "Rencana aksi mitigasi lengkap (PIC, biaya, jadwal, output)",
+      temuan("Rencana Aksi", (r) => (isTopRisk(r.kategori_dampak) ? "perhatian" : "info")));
+  } else {
+    add("reg-target-migrasi", "Risk Register", "Target residual & rencana aksi tersedia", [{
+      id: "reg-target-migrasi", severity: "info", area: "Risk Register", judul: "Kolom target residual dan tabel rencana aksi belum ada di database",
+      detail: "Jalankan supabase/migrations/0008_target_mitigasi.sql.", href: "/risk-register",
     }]);
   }
 

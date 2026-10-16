@@ -1,6 +1,6 @@
 "use client";
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, Check, Compass, Copy, Download, Library, Plus, Search, Sparkles, Trash2 } from "lucide-react";
+import { AlertTriangle, Check, Compass, Copy, Download, Library, ListChecks, Plus, Search, Sparkles, Trash2 } from "lucide-react";
 import clsx from "clsx";
 import {
   Button, DampakBadge, EditCell, ErrorBox, Loading, Section, SelectCell, SheetPage, Stat, TableWrap, useLoad, useSaver,
@@ -17,6 +17,8 @@ import { RedundansiAiModal, RedundansiBadge } from "@/components/RedundansiAi";
 import {
   bacaRedundansi, isianUbah, JENIS_REDUNDAN, simpanRedundansi, type HasilRedundansi, type KelompokRedundan, type OpsiTindakan, type RedundansiRequest,
 } from "@/lib/redundansi-risiko";
+import { RencanaAksiModal } from "@/components/RencanaAksi";
+import { ringkasTarget, type RingkasTarget } from "@/lib/target-risiko";
 import { POS } from "@/lib/rkap-baca";
 import { AiFillModal, AiRowButton } from "@/components/AiFill";
 import type { FieldSpec } from "@/lib/isi-ai";
@@ -28,16 +30,17 @@ import { isTopRisk, persen, rupiah } from "@/lib/format";
 import { note } from "@/lib/static";
 import { exportRegister } from "@/lib/export";
 import { cariKriteria, cekKualitas, ebitdaRkap, labelLevel, saranDampak, type Isu, type SaranDampak } from "@/lib/kualitas-register";
-import { KATEGORI_DAMPAK, KATEGORI_MITIGASI, type RiskRegister } from "@/lib/types";
+import { KATEGORI_DAMPAK, KATEGORI_MITIGASI, type MitigasiAksi, type RiskRegister } from "@/lib/types";
 import { konfirmasi } from "@/components/Konfirmasi";
 
 export default function RiskRegisterPage() {
   const q = useLoad(async () => {
-    const [register, kategori, drivers, kriteria, tax, params, tambahan, sasaran] = await Promise.all([
+    const [register, kategori, drivers, kriteria, tax, params, tambahan, sasaran, ras, aksi] = await Promise.all([
       api.register(), api.kategori(), api.drivers(), api.kriteria(), api.taksonomi(), api.params(), api.ramTambahan(),
       api.sasaran().catch(() => null), // null = migrasi 0006 belum dijalankan
+      api.ras(), api.mitigasiAksi(), // aksi null = migrasi 0008 belum dijalankan
     ]);
-    return { register, kategori, drivers, kriteria, t3: groupT3(tax), popts: paramOptions(params, tambahan), ebitda: ebitdaRkap(params), sasaran };
+    return { register, kategori, drivers, kriteria, t3: groupT3(tax), popts: paramOptions(params, tambahan), ebitda: ebitdaRkap(params), sasaran, ras, aksi };
   });
   const saver = useSaver();
   const ro = useReadonly();
@@ -49,6 +52,8 @@ export default function RiskRegisterPage() {
   const [search, setSearch] = useState("");
   const [hanyaIsu, setHanyaIsu] = useState(false);
   const [buka, setBuka] = useState<string | null>(null);
+  /** id risiko yang rencana aksinya sedang dibuka. */
+  const [aksiBuka, setAksiBuka] = useState<string | null>(null);
   const [relevansi, setRelevansi] = useState<HasilRelevansi | null>(null);
   /** Modal Cek Relevansi: undefined = tertutup, string = dibuka terfokus pada risiko itu. */
   const [cekRelevansi, setCekRelevansi] = useState<string | null | undefined>(undefined);
@@ -58,15 +63,26 @@ export default function RiskRegisterPage() {
   useEffect(() => { setRelevansi(bacaRelevansi()); setRedundansi(bacaRedundansi()); }, []);
   const d = q.data;
 
-  /** Saran kategori dampak & isu kualitas per baris, dihitung ulang setiap data berubah. */
-  const mutu = useMemo(() => {
-    const m = new Map<string, { saran: SaranDampak | null; isu: Isu[] }>();
-    for (const r of d?.register ?? []) {
-      const saran = saranDampak(r, cariKriteria(d!.kriteria, r), d!.ebitda);
-      m.set(r.id, { saran, isu: cekKualitas(r, saran) });
-    }
+  const aksiPer = useMemo(() => {
+    const m = new Map<string, MitigasiAksi[]>();
+    for (const a of d?.aksi ?? []) m.set(a.risk_id, [...(m.get(a.risk_id) ?? []), a]);
     return m;
   }, [d]);
+  /** Saran kategori dampak, ringkasan target residual, dan isu kualitas per baris, dihitung ulang setiap data berubah. */
+  const mutu = useMemo(() => {
+    const m = new Map<string, { saran: SaranDampak | null; target: RingkasTarget | null; isu: Isu[] }>();
+    for (const r of d?.register ?? []) {
+      const kriteria = cariKriteria(d!.kriteria, r);
+      const saran = saranDampak(r, kriteria, d!.ebitda);
+      const aksi = aksiPer.get(r.id) ?? [];
+      const target = d!.aksi ? ringkasTarget(r, aksi, d!.ras) : null;
+      m.set(r.id, { saran, target, isu: [...cekKualitas(r, saran, aksi.some((a) => a.pic?.trim() && a.jadwal.length)), ...(target?.isu ?? [])] });
+    }
+    return m;
+  }, [d, aksiPer]);
+  /** Saran kategori dampak target dari kriteria berbasis EBITDA (besaran di Deskripsi Dampak hanya berlaku untuk inheren). */
+  const saranTarget = (r: RiskRegister) => r.target_nilai_dampak == null ? null
+    : saranDampak({ ...r, nilai_dampak: r.target_nilai_dampak, deskripsi_dampak: null }, cariKriteria(d!.kriteria, r), d!.ebitda);
   const jumlahIsu = [...mutu.values()].filter((x) => x.isu.length).length;
 
   const rows = useMemo(() => (d?.register ?? []).filter((r) =>
@@ -86,6 +102,20 @@ export default function RiskRegisterPage() {
     if (!(await konfirmasi({ judul: "Hapus risiko?", objek: r.risk_event ?? "Risiko tanpa nama", pesan: "Seluruh isian baris ini (dampak, kontrol, mitigasi, dan kaitan) ikut terhapus dan tidak bisa dibatalkan." }))) return;
     q.setData({ ...d!, register: d!.register.filter((x) => x.id !== r.id) });
     saver.run(() => api.remove("risk_register", "id", r.id));
+  };
+  const tambahAksi = (risk_id: string, list: Partial<MitigasiAksi>[]) => saver.run(async () => {
+    let urutan = Math.max(0, ...(aksiPer.get(risk_id) ?? []).map((a) => a.urutan));
+    const baru: MitigasiAksi[] = [];
+    for (const a of list) baru.push(await api.insert<MitigasiAksi>("mitigasi_aksi", { ...a, risk_id, urutan: ++urutan }));
+    q.setData((x) => x && { ...x, aksi: [...(x.aksi ?? []), ...baru] });
+  });
+  const ubahAksi = (id: string, p: Partial<MitigasiAksi>) => {
+    q.setData((x) => x && { ...x, aksi: (x.aksi ?? []).map((a) => (a.id === id ? { ...a, ...p } : a)) });
+    saver.run(() => api.update<MitigasiAksi>("mitigasi_aksi", "id", id, { ...p, updated_at: new Date().toISOString() } as Partial<MitigasiAksi>));
+  };
+  const hapusAksi = (id: string) => {
+    q.setData((x) => x && { ...x, aksi: (x.aksi ?? []).filter((a) => a.id !== id) });
+    saver.run(() => api.remove("mitigasi_aksi", "id", id));
   };
   const pick = (o: T3Option) => {
     if (!picker) return;
@@ -259,17 +289,21 @@ export default function RiskRegisterPage() {
   const top = d?.register.filter((r) => isTopRisk(r.kategori_dampak)).length ?? 0;
   const el = d?.register.reduce((a, r) => a + Number(r.expected_loss ?? 0), 0) ?? 0;
   const dampak = d?.register.reduce((a, r) => a + Number(r.nilai_dampak ?? 0), 0) ?? 0;
+  const elT = d?.register.reduce((a, r) => a + (mutu.get(r.id)?.target?.elTarget ?? 0), 0) ?? 0;
+  const biaya = (d?.aksi ?? []).reduce((a, x) => a + Number(x.biaya ?? 0), 0);
+  const diAtasSelera = [...mutu.values()].filter((x) => x.target?.status === "Di atas selera").length;
 
   return (
     <SheetPage title="Risk Register RKAP 2027 - PT KINRA" code="Risk Register" note={note("Risk Register")} wide
-      actions={<>{saver.indicator}<Button variant="outline" onClick={() => d && exportRegister(d.register)}><Download className="h-4 w-4" />Excel</Button><Button variant="outline" onClick={() => setCekRelevansi(null)} disabled={!d}><Compass className="h-4 w-4" />Cek Relevansi AI</Button><Button variant="outline" onClick={() => setCekRedundansi(null)} disabled={!d}><Copy className="h-4 w-4" />Cek Redundansi AI</Button><Button edit variant="outline" onClick={() => setUsulan(true)} disabled={!d}><Sparkles className="h-4 w-4" />Usulan Risiko AI</Button><Button edit onClick={add}><Plus className="h-4 w-4" />Tambah Risiko</Button></>}>
+      actions={<>{saver.indicator}<Button variant="outline" onClick={() => d && exportRegister(d.register, d.aksi)}><Download className="h-4 w-4" />Excel</Button><Button variant="outline" onClick={() => setCekRelevansi(null)} disabled={!d}><Compass className="h-4 w-4" />Cek Relevansi AI</Button><Button variant="outline" onClick={() => setCekRedundansi(null)} disabled={!d}><Copy className="h-4 w-4" />Cek Redundansi AI</Button><Button edit variant="outline" onClick={() => setUsulan(true)} disabled={!d}><Sparkles className="h-4 w-4" />Usulan Risiko AI</Button><Button edit onClick={add}><Plus className="h-4 w-4" />Tambah Risiko</Button></>}>
       {q.loading ? <Loading variant="stats-table" /> : q.error ? <ErrorBox error={q.error} /> : d && (
         <>
-          <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className={clsx("mb-6 grid grid-cols-2 gap-3", d.aksi ? "lg:grid-cols-5" : "lg:grid-cols-4")}>
             <Stat label="Risiko Korporat" value={total} accent="bg-brand-600" />
             <Stat label="Top Risk (Risiko Utama)" value={top} sub="Dampak Moderat ke atas" accent="bg-orange-500" />
             <Stat label="Total Nilai Dampak" value={rupiah(dampak, true)} accent="bg-sky-500" />
-            <Stat label="Total Expected Loss" value={rupiah(el, true)} accent="bg-rose-500" />
+            <Stat label="Total Expected Loss" value={rupiah(el, true)} sub={d.aksi ? `Target residual ${rupiah(elT, true)}` : undefined} accent="bg-rose-500" />
+            {d.aksi && <Stat label="Biaya Mitigasi RKAP 2027" value={rupiah(biaya, true)} sub={diAtasSelera ? `${diAtasSelera} target di atas selera risiko` : "Semua target dalam selera risiko"} accent="bg-violet-500" />}
           </div>
           <Section letter="A" title="Risk Register" right={
             <div className="flex flex-wrap gap-2">
@@ -293,28 +327,34 @@ export default function RiskRegisterPage() {
               )}
             </div>}>
             <TableWrap stickyHeader>
-              <table ref={tableRef} className="kk-table min-w-[3030px]">
+              <table ref={tableRef} className="kk-table min-w-[3600px]">
                 <thead><tr>
                   <th className="fz fz-no w-12">No</th>
                   <th className="w-40">Taksonomi Risiko</th><th className="w-48">Risk Driver</th><th className="fz fz-event fz-edge w-56">Risk Event</th>
                   <th className="w-72">Deskripsi Risk Event</th><th className="w-60">Root Cause</th><th className="w-24">Probabilitas Kejadian (0%-100%)</th>
                   <th className="w-52">Deskripsi Dampak Risiko</th><th className="w-40">Nilai Dampak Risiko (Rp)</th><th className="w-52">Kriteria Dampak Acuan</th>
                   <th className="w-32">Kategori Dampak Risiko</th><th className="w-20">Tagging Top Risk</th><th className="w-40">Expected Loss (Rp)</th>
-                  <th className="w-56">Existing Control</th><th className="w-56">Rencana Mitigasi</th><th className="w-32">Kategori Mitigasi</th><th className="w-52">Parameter RAM Terkait</th><th className="w-52">Sasaran Strategis RJPP Terkait</th><th className="w-12" />
+                  <th className="w-56">Existing Control</th><th className="w-56">Rencana Mitigasi</th><th className="w-32">Kategori Mitigasi</th>
+                  <th className="w-24 !bg-brand-800">Target Probabilitas</th><th className="w-40 !bg-brand-800">Target Nilai Dampak (Rp)</th>
+                  <th className="w-44 !bg-brand-800">Target Kategori Dampak</th><th className="w-40 !bg-brand-800">Target Expected Loss (Rp)</th>
+                  <th className="w-52">Parameter RAM Terkait</th><th className="w-52">Sasaran Strategis RJPP Terkait</th><th className="w-12" />
                 </tr></thead>
                 <tbody>
                   <tr className="example">
                     <td className="fz fz-no">Contoh</td><td>Risiko Pasar</td><td>Perubahan harga komoditas</td><td className="fz fz-event fz-edge">Penurunan harga CPO</td><td>Harga CPO turun di bawah asumsi RKAP 2027.</td>
                     <td>Kelebihan pasokan minyak nabati global</td><td className="text-right">30%</td><td>Penurunan marjin penjualan CPO</td><td className="text-right">450.000.000.000</td>
                     <td>b. Dampak perubahan harga komoditas terhadap penurunan margin</td><td>Moderat</td><td>Ya</td><td className="text-right">135.000.000.000</td>
-                    <td>Kontrak penjualan berjangka</td><td>Menambah porsi kontrak penjualan berharga tetap</td><td>Preventive</td><td>K1</td><td>SG-1</td><td />
+                    <td>Kontrak penjualan berjangka</td><td>Menambah porsi kontrak penjualan berharga tetap</td><td>Preventive</td>
+                    <td className="text-right">15%</td><td className="text-right">300.000.000.000</td><td>Rendah</td><td className="text-right">45.000.000.000</td><td>K1</td><td>SG-1</td><td />
                   </tr>
                   {rows.map((r, i) => {
                     const drivers = d.drivers.filter((x) => x.kategori === r.kategori).map((x) => x.driver);
                     const krit = d.kriteria.filter((x) => x.kategori === r.kategori).map((x) => `${x.kode}. ${x.kriteria}`);
                     const driverUnknown = r.risk_driver && !drivers.includes(r.risk_driver);
                     const el = r.probabilitas != null && r.nilai_dampak != null ? Number(r.probabilitas) * Number(r.nilai_dampak) : null;
-                    const { saran, isu } = mutu.get(r.id) ?? { saran: null, isu: [] };
+                    const { saran, target, isu } = mutu.get(r.id) ?? { saran: null, target: null, isu: [] };
+                    const aksi = aksiPer.get(r.id) ?? [];
+                    const sT = target && saranTarget(r);
                     const kriteria = cariKriteria(d.kriteria, r);
                     const dampakSalah = !!saran && !!r.kategori_dampak && r.kategori_dampak !== saran.level;
                     return (
@@ -375,8 +415,48 @@ export default function RiskRegisterPage() {
                           {!ro && <MitigasiAi risiko={risikoMitigasi(r)} current={r.rencana_mitigasi} onApply={(rencana, kategori, mode) => patch(r.id, mode === "ganti"
                             ? { rencana_mitigasi: rencana, kategori_mitigasi: kategori }
                             : { rencana_mitigasi: `${r.rencana_mitigasi!.trim()}\n${rencana}`, kategori_mitigasi: r.kategori_mitigasi ?? kategori })} />}
+                          {d.aksi && (
+                            <button onClick={() => setAksiBuka(r.id)}
+                              className={clsx("mt-1 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10.5px] font-semibold ring-1",
+                                aksi.length ? "bg-brand-50 text-brand-800 ring-brand-200" : "bg-white text-slate-500 ring-line hover:ring-brand-500")}>
+                              <ListChecks className="h-3 w-3" />{aksi.length ? `${aksi.length} rencana aksi · ${rupiah(target?.biaya ?? 0, true)}` : "Susun rencana aksi"}
+                            </button>
+                          )}
                         </td>
                         <td className="input"><SelectCell value={r.kategori_mitigasi} options={KATEGORI_MITIGASI} onSave={(v) => patch(r.id, { kategori_mitigasi: v })} /></td>
+                        {target ? (
+                          <>
+                            <td className="input"><EditCell kind="percent" value={r.target_probabilitas ?? null} display={(v) => persen(v as number, 0)} onSave={(v) => patch(r.id, { target_probabilitas: v as number })} /></td>
+                            <td className="input"><EditCell kind="number" value={r.target_nilai_dampak ?? null} display={(v) => rupiah(v as number).replace("Rp ", "")} onSave={(v) => patch(r.id, { target_nilai_dampak: v as number })} /></td>
+                            <td className={clsx("input", target.status === "Di atas selera" && "!bg-rose-100")}>
+                              <SelectCell value={r.target_kategori_dampak} options={kriteria ? labelLevel(kriteria) : KATEGORI_DAMPAK} onSave={(v) => patch(r.id, { target_kategori_dampak: v })} />
+                              {r.target_kategori_dampak && <div className="mt-1"><DampakBadge k={r.target_kategori_dampak} /></div>}
+                              {sT && r.target_kategori_dampak !== sT.level && (
+                                <div className="mt-1 text-[11px] text-slate-600" title={sT.sumber}>
+                                  Sesuai kriteria: {sT.level} <span className="text-slate-500">({sT.ukuran})</span>
+                                  <button data-edit onClick={() => patch(r.id, { target_kategori_dampak: sT.level })} className="ml-1 font-semibold text-brand-700 hover:underline">pakai</button>
+                                </div>
+                              )}
+                              {target.status && (
+                                <div className={clsx("mt-1 text-[11px] font-semibold", target.status === "Dalam selera" ? "text-emerald-700" : "text-rose-700")}
+                                  title={`Sikap RAS kategori ini: ${target.sikap}. Target paling tinggi yang dapat diterima: ${target.batas}.`}>
+                                  {target.status === "Dalam selera" ? <Check className="mr-0.5 inline h-3 w-3" /> : <AlertTriangle className="mr-0.5 inline h-3 w-3" />}
+                                  {target.status} ({target.sikap})
+                                </div>
+                              )}
+                            </td>
+                            <td className="calc text-right tabnum">
+                              {target.elTarget != null ? rupiah(target.elTarget).replace("Rp ", "") : ""}
+                              {target.elTarget != null && target.elInheren ? (
+                                <div className={clsx("mt-0.5 text-[11px]", target.elTarget < target.elInheren ? "text-emerald-700" : "text-rose-700")}>
+                                  {target.elTarget < target.elInheren ? "↓" : "↑"} {persen(Math.abs(1 - target.elTarget / target.elInheren), 0)} dari inheren
+                                </div>
+                              ) : null}
+                            </td>
+                          </>
+                        ) : (
+                          <td colSpan={4} className="text-[11px] text-slate-400 italic">Jalankan migrasi 0008_target_mitigasi.sql</td>
+                        )}
                         <td className={clsx("input", !(r.parameter_ram ?? []).length && "!bg-amber-100/70")}>
                           <ParamPicker value={r.parameter_ram ?? []} options={d.popts} kategori={r.kategori} risiko={ringkasRisiko(r)} onSave={(v) => patch(r.id, { parameter_ram: v })} />
                         </td>
@@ -388,7 +468,7 @@ export default function RiskRegisterPage() {
                       </tr>
                       {buka === r.id && isu.length > 0 && (
                         <tr>
-                          <td colSpan={19} className="!bg-amber-50/70 !py-2">
+                          <td colSpan={23} className="!bg-amber-50/70 !py-2">
                             <div className="sticky left-12 max-w-[900px] space-y-1 pl-2 text-[12px]">
                               {isu.map((x, j) => (
                                 <div key={j} className="flex gap-2"><span className="w-36 shrink-0 font-semibold text-amber-900">{x.kolom}</span><span className="text-slate-700">{x.pesan}</span></div>
@@ -401,7 +481,7 @@ export default function RiskRegisterPage() {
                       </Fragment>
                     );
                   })}
-                  {rows.length === 0 && <tr><td colSpan={19} className="py-10 text-center text-slate-400">Belum ada risiko. Klik “Tambah Risiko”.</td></tr>}
+                  {rows.length === 0 && <tr><td colSpan={23} className="py-10 text-center text-slate-400">Belum ada risiko. Klik “Tambah Risiko”.</td></tr>}
                 </tbody>
               </table>
             </TableWrap>
@@ -428,6 +508,15 @@ export default function RiskRegisterPage() {
               sidikKini={(id) => { const r = d.register.find((x) => x.id === id); return r ? sidikRisiko(r) : null; }}
               onHapus={(id) => { const r = d.register.find((x) => x.id === id); if (r) del(r); }} onTerapkan={terapkanRedundansi} onClose={() => setCekRedundansi(undefined)} />
           )}
+          {aksiBuka && (() => {
+            const r = d.register.find((x) => x.id === aksiBuka);
+            const t = r && mutu.get(r.id)?.target;
+            return r && t ? (
+              <RencanaAksiModal judul={`Risiko #${d.register.indexOf(r) + 1} ${r.risk_event ?? ""}`} risiko={r} aksi={aksiPer.get(r.id) ?? []} ringkas={t} ro={ro}
+                onTambah={(list) => tambahAksi(r.id, list)} onUbah={ubahAksi} onHapus={hapusAksi}
+                onPakaiTeks={(teks) => patch(r.id, { rencana_mitigasi: teks })} onClose={() => setAksiBuka(null)} />
+            ) : null;
+          })()}
           {picker && <TaxonomyPicker options={d.t3} kategori={picker.kategori} current={picker.risk_event} onPick={pick} onClose={() => setPicker(null)} />}
         </>
       )}

@@ -1,7 +1,7 @@
 "use client";
 import { sb, must } from "./supabase";
 import type {
-  ChallengeLog, ModePresentasi, Snapshot, SnapshotData,
+  ChallengeLog, MitigasiAksi, ModePresentasi, Snapshot, SnapshotData,
   CatAksi, KategoriRisiko, ProgramStrategis, KriteriaDampak, ParameterSheet, RamPengendalian, RamTambahan, Ras, RasTambahan, RiskDriver,
   RiskRegister, RkapKeuangan, Sampul, SasaranStrategis, Taksonomi,
 } from "./types";
@@ -36,6 +36,11 @@ export const api = {
   cat: async () => must(await sb().from("cat_aksi").select("*").order("urutan")) as CatAksi[],
   sasaran: async () => must(await sb().from("sasaran_strategis").select("*").order("urutan")) as SasaranStrategis[],
   program: async () => must(await sb().from("program_strategis").select("*").order("urutan")) as ProgramStrategis[],
+  /** null bila migrasi 0008 belum dijalankan. */
+  mitigasiAksi: async () => {
+    const r = await sb().from("mitigasi_aksi").select("*").order("urutan");
+    return r.error ? null : (r.data as MitigasiAksi[]);
+  },
   rkapList: async () => must(await sb().from("rkap_keuangan").select("*").order("created_at", { ascending: false })) as RkapKeuangan[],
   rkapAktif: async () => (must(await sb().from("rkap_keuangan").select("*").eq("aktif", true)) as RkapKeuangan[])[0] ?? null,
   async taksonomi(): Promise<Taksonomi[]> {
@@ -93,11 +98,11 @@ export const modeApi = {
 
 /** Seluruh data yang dibekukan pada snapshot. */
 export async function captureSnapshot(): Promise<SnapshotData> {
-  const [sampul, ras, ras_tambahan, register, params, pengendalian, ram_tambahan, cat] = await Promise.all([
-    api.sampul(), api.ras(), api.rasTambahan(), api.register(), api.params(), api.pengendalian(), api.ramTambahan(), api.cat(),
+  const [sampul, ras, ras_tambahan, register, params, pengendalian, ram_tambahan, cat, aksi] = await Promise.all([
+    api.sampul(), api.ras(), api.rasTambahan(), api.register(), api.params(), api.pengendalian(), api.ramTambahan(), api.cat(), api.mitigasiAksi(),
   ]);
   return {
-    sampul, ras, ras_tambahan, register, pengendalian, ram_tambahan, cat,
+    sampul, ras, ras_tambahan, register, pengendalian, ram_tambahan, cat, ...(aksi ? { mitigasi_aksi: aksi } : {}),
     params: params.map(({ code, diterapkan, summary, inputs }) => ({ code, diterapkan, summary, inputs })),
   };
 }
