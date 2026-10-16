@@ -46,6 +46,8 @@ export default function RiskRegisterPage() {
   const ro = useReadonly();
   const [picker, setPicker] = useState<RiskRegister | null>(null);
   const [ai, setAi] = useState<RiskRegister | null>(null);
+  /** Isu kualitas yang sedang diperbaiki dengan AI; null = mode isi biasa. */
+  const [aiIsu, setAiIsu] = useState<Isu[] | null>(null);
   const [usulan, setUsulan] = useState(false);
   const [filter, setFilter] = useState("");
   const [filterSasaran, setFilterSasaran] = useState("");
@@ -256,9 +258,20 @@ export default function RiskRegisterPage() {
     q.setData({ ...d!, register: [...d!.register, ...baru] });
   };
 
-  const bukaAi = (r: RiskRegister) => {
+  const bukaAi = (r: RiskRegister, isu: Isu[] | null = null) => {
     if (!r.risk_event) { alert("Pilih Risk Event dari taksonomi terlebih dahulu, agar AI punya dasar penyusunan."); return; }
-    setAi(r);
+    setAi(r); setAiIsu(isu);
+  };
+  /** Isu yang bisa diperbaiki AI (kolom teks); isu angka, target, dan rencana aksi tetap diisi manual. */
+  const KOLOM_AI: Record<string, string[]> = {
+    "Root Cause": ["root_cause"], "Deskripsi Dampak": ["deskripsi_dampak"], "Rencana Mitigasi": ["rencana_mitigasi", "kategori_mitigasi"],
+  };
+  const isuAi = (isu: Isu[]) => isu.filter((x) => KOLOM_AI[x.kolom]);
+  const fieldsAi = (r: RiskRegister) => {
+    const f = aiFields(r);
+    if (!aiIsu) return f;
+    const keys = new Set(aiIsu.flatMap((x) => KOLOM_AI[x.kolom] ?? []));
+    return f.filter((x) => keys.has(x.key));
   };
   const aiFields = (r: RiskRegister): FieldSpec[] => {
     const drivers = d!.drivers.filter((x) => x.kategori === r.kategori).map((x) => x.driver);
@@ -474,6 +487,14 @@ export default function RiskRegisterPage() {
                                 <div key={j} className="flex gap-2"><span className="w-36 shrink-0 font-semibold text-amber-900">{x.kolom}</span><span className="text-slate-700">{x.pesan}</span></div>
                               ))}
                               {saran && <div className="pt-1 text-[11px] text-slate-500">Dasar saran kategori dampak: {saran.sumber}.</div>}
+                              {!ro && isuAi(isu).length > 0 && (
+                                <div className="flex flex-wrap items-center gap-3 pt-1.5">
+                                  <Button variant="outline" onClick={() => bukaAi(r, isuAi(isu))} className="!py-1 !text-[12px]">
+                                    <Sparkles className="h-3.5 w-3.5" />Perbaiki dengan AI ({[...new Set(isuAi(isu).map((x) => x.kolom))].join(", ")})
+                                  </Button>
+                                  {isuAi(isu).length < isu.length && <span className="text-[11px] text-slate-500">Isu angka, target residual, dan rencana aksi diisi manual.</span>}
+                                </div>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -487,8 +508,11 @@ export default function RiskRegisterPage() {
             </TableWrap>
           </Section>
           {ai && (
-            <AiFillModal jenis="risiko" subjek={`Risiko #${d.register.indexOf(ai) + 1} ${ai.risk_event}`} fields={aiFields(ai)} nilai={ai} konteks={aiKonteks(ai)}
-              onApply={(p) => patch(ai.id, p)} onClose={() => setAi(null)}
+            <AiFillModal jenis="risiko" subjek={`Risiko #${d.register.indexOf(ai) + 1} ${ai.risk_event}`} fields={fieldsAi(ai)} nilai={ai}
+              konteks={{ ...aiKonteks(ai), ...(aiIsu && { catatan_pemeriksaan_kualitas: aiIsu.map((x) => `${x.kolom}: ${x.pesan}`), deskripsi_dampak_saat_ini: ai.deskripsi_dampak, root_cause_saat_ini: ai.root_cause, existing_control: ai.existing_control }) }}
+              judul={aiIsu ? "Perbaiki dengan AI" : undefined}
+              instruksiAwal={aiIsu ? `Perbaiki isian berikut sesuai catatan pemeriksaan kualitas, tanpa mengubah maksud risikonya:\n${aiIsu.map((x) => `- ${x.kolom}: ${x.pesan}`).join("\n")}` : undefined}
+              onApply={(p) => patch(ai.id, p)} onClose={() => { setAi(null); setAiIsu(null); }}
               placeholder="Contoh: Risiko ini muncul karena pasokan TBS dari kebun plasma sering terlambat saat musim hujan. Saat ini sudah ada kontrak pasokan dan monitoring harian." />
           )}
           {usulan && (

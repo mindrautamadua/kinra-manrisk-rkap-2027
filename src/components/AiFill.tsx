@@ -29,15 +29,19 @@ export interface AiFillProps {
   /** Hanya kolom yang dicentang pengguna yang dikirim. */
   onApply: (patch: Record<string, string>) => void | Promise<void>;
   onClose: () => void;
+  /** Instruksi awal yang sudah terisi, mis. daftar isu yang harus diperbaiki. */
+  instruksiAwal?: string;
+  /** Label kecil di kepala modal; default "Isi dengan AI". */
+  judul?: string;
 }
 
 /**
  * Formulir draf AI: pengguna menguraikan maksudnya, AI menyusun draf per kolom,
  * pengguna menyunting dan memilih kolom yang diterapkan. Tidak ada yang tersimpan tanpa klik Terapkan.
  */
-export function AiFillModal({ jenis, subjek, fields, nilai, konteks, placeholder, onApply, onClose }: AiFillProps) {
+export function AiFillModal({ jenis, subjek, fields, nilai, konteks, placeholder, onApply, onClose, instruksiAwal = "", judul = "Isi dengan AI" }: AiFillProps) {
   const [entitas, setEntitas] = useState("PT KINRA");
-  const [instruksi, setInstruksi] = useState("");
+  const [instruksi, setInstruksi] = useState(instruksiAwal);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [hasil, setHasil] = useState<IsiResponse | null>(null);
@@ -86,7 +90,7 @@ export function AiFillModal({ jenis, subjek, fields, nilai, konteks, placeholder
         <div className="flex items-center gap-3 border-b border-line px-6 py-4">
           <Sparkles className="h-5 w-5 text-brand-600" />
           <div className="min-w-0">
-            <div className="text-[11px] font-bold tracking-[0.14em] text-brand-600 uppercase">Isi dengan AI</div>
+            <div className="text-[11px] font-bold tracking-[0.14em] text-brand-600 uppercase">{judul}</div>
             <div className="truncate text-[16px] font-bold">{subjek}</div>
           </div>
           <button onClick={onClose} className="ml-auto rounded-lg p-2 hover:bg-black/5"><X className="h-5 w-5" /></button>
