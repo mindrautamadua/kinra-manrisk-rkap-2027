@@ -72,7 +72,7 @@ export default function ChallengePage() {
           <TableWrap>
             <table className="kk-table min-w-[1500px]">
               <thead><tr>
-                <th className="w-10">No</th><th className="w-28">Waktu</th><th className="w-56">Terkait</th><th>Masukan Challenger</th><th className="w-32">Challenger</th>
+                <th className="w-10">No</th><th className="w-12">Done</th><th className="w-28">Waktu</th><th className="w-56">Terkait</th><th>Masukan Challenger</th><th className="w-32">Challenger</th>
                 <th className="w-24">Prioritas</th><th className="w-64">Tanggapan / Komitmen</th><th className="w-32">PIC</th><th className="w-32">Tenggat</th><th className="w-32">Status</th><th className="w-8" />
               </tr></thead>
               <tbody>
@@ -82,11 +82,13 @@ export default function ChallengePage() {
                   return (
                     <tr key={r.id}>
                       <td className="text-center">{list.length - i}</td>
+                      <td className="text-center"><input type="checkbox" checked={r.status === "Selesai"} onChange={() => patch(r.id, { status: r.status === "Selesai" ? "Terbuka" : "Selesai" })}
+                        title={r.status === "Selesai" ? "Tandai belum selesai" : "Tandai selesai"} className="h-4 w-4 cursor-pointer accent-emerald-600" /></td>
                       <td className="text-[11.5px] text-slate-500 tabnum">{new Date(r.created_at).toLocaleString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</td>
                       <td className="text-[12px]">
                         {href ? <Link href={href} className="inline-flex items-start gap-1 font-semibold text-brand-700 hover:underline">{r.ref_label}<ExternalLink className="mt-0.5 h-3 w-3 shrink-0" /></Link> : <span className="font-semibold">{r.ref_label ?? "Umum"}</span>}
                       </td>
-                      <td className="input"><Txt value={r.masukan} onSave={(v) => v && patch(r.id, { masukan: v })} /></td>
+                      <td className={clsx("input", r.status === "Selesai" && "text-slate-400 line-through")}><Txt value={r.masukan} onSave={(v) => v && patch(r.id, { masukan: v })} /></td>
                       <td className="input"><Txt value={r.challenger} onSave={(v) => patch(r.id, { challenger: v })} /></td>
                       <td className="input"><Sel value={r.prioritas} options={PRIORITAS} className={clsx("font-semibold", PRIO_CLS[r.prioritas])} onSave={(v) => patch(r.id, { prioritas: v })} /></td>
                       <td className="input"><Txt value={r.tanggapan} onSave={(v) => patch(r.id, { tanggapan: v })} placeholder="Tanggapan…" /></td>
@@ -104,7 +106,7 @@ export default function ChallengePage() {
                     </tr>
                   );
                 })}
-                {!list.length && <tr><td colSpan={11} className="py-12 text-center text-slate-400">{rows.length ? "Tidak ada yang cocok dengan filter." : "Belum ada masukan. Klik “Catat Masukan” atau tombol kuning di kanan bawah dari halaman mana pun."}</td></tr>}
+                {!list.length && <tr><td colSpan={12} className="py-12 text-center text-slate-400">{rows.length ? "Tidak ada yang cocok dengan filter." : "Belum ada masukan. Klik “Catat Masukan” atau tombol kuning di kanan bawah dari halaman mana pun."}</td></tr>}
               </tbody>
             </table>
           </TableWrap>

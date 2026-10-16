@@ -7,6 +7,7 @@ import { AlertTriangle, ArrowDown, ArrowUp, Check, ChevronDown, Info, Loader2 } 
 import { supabaseConfigured } from "@/lib/supabase";
 import { ARTI_SIKAP, DAMPAK_STYLE, polaritas, SIKAP_STYLE, statusStyle } from "@/lib/format";
 import { useReadonly } from "@/lib/mode";
+import { ChallengePanel } from "./ChallengePanel";
 
 // ---------- data loading ----------
 export function useLoad<T>(fn: () => Promise<T>, deps: unknown[] = []) {
@@ -58,6 +59,7 @@ export function SheetPage({ code, title, note, actions, children, wide, offline 
         </div>
         {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
       </div>
+      {supabaseConfigured && !offline && <ChallengePanel />}
       {note && <Note>{note}</Note>}
       {!supabaseConfigured && !offline ? <NotConfigured /> : children}
     </div>
