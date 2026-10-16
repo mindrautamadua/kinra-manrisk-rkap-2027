@@ -10,6 +10,8 @@ export interface UsulanRisikoRequest {
   rkap: Record<string, unknown>;
   /** Risk event yang sudah ada di register, agar tidak diusulkan ulang. */
   register: { risk_event: string | null; root_cause: string | null }[];
+  /** Tema risiko material KINRA yang belum tercakup, dari hasil Cek Relevansi AI terakhir. */
+  celah: { tema: string; alasan: string }[];
 }
 export interface UsulanRisiko {
   kode: string; deskripsi: string; root_cause: string; deskripsi_dampak: string; sasaran: string[]; alasan: string;

@@ -1,17 +1,20 @@
 "use client";
 import { useState } from "react";
-import { AlertTriangle, Loader2, Plus, Sparkles, X } from "lucide-react";
+import { AlertTriangle, Compass, Loader2, Plus, Sparkles, X } from "lucide-react";
 import clsx from "clsx";
 import { Button } from "@/components/ui";
 import type { UsulanRisikoRequest, UsulanRisikoResponse, UsulanRisiko, KandidatTaksonomi } from "@/lib/usulan-risiko";
+import type { CelahRisiko } from "@/lib/relevansi-risiko";
 
 const input = "w-full rounded-lg border border-line bg-white px-3 py-2 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/15";
 
 /**
  * Modal usulan Risk Event baru: AI memilih risiko taksonomi yang belum ada di register
- * dan relevan dengan RJPP/RKAP, pengguna mencentang yang akan ditambahkan.
+ * dan relevan dengan konteks KINRA (RJPP/RKAP, celah hasil Cek Relevansi), pengguna mencentang yang akan ditambahkan.
  */
-export function UsulanRisikoModal({ buatRequest, kandidat, namaSasaran, onTambah, onClose }: {
+export function UsulanRisikoModal({ buatRequest, kandidat, namaSasaran, celah, onCekRelevansi, onTambah, onClose }: {
+  celah: CelahRisiko[];
+  onCekRelevansi: () => void;
   buatRequest: (instruksi: string) => Promise<UsulanRisikoRequest>;
   kandidat: KandidatTaksonomi[];
   namaSasaran: (kode: string) => string | undefined;
@@ -60,16 +63,32 @@ export function UsulanRisikoModal({ buatRequest, kandidat, namaSasaran, onTambah
 
         <div className="space-y-4 overflow-y-auto px-6 py-5">
           <label className="block">
-            <span className="mb-1 block text-[12px] font-semibold text-slate-600">Arahan tambahan (opsional)</span>
+            <span className="mb-1 block text-[12px] font-semibold text-slate-600">Arahan tambahan (opsional — kosongkan agar AI menentukan fokus dari konteks KINRA)</span>
             <textarea autoFocus rows={2} className={input} value={instruksi} onChange={(e) => setInstruksi(e.target.value)}
               placeholder="Contoh: Fokus pada risiko pengembangan bisnis baru SFB dan perumahan kawasan, serta risiko kepatuhan." />
           </label>
+          <div className="rounded-xl bg-paper px-4 py-3 text-[12.5px]">
+            <div className="mb-1.5 flex items-center gap-1.5 font-semibold text-slate-700"><Compass className="h-3.5 w-3.5 text-brand-600" />Celah risiko KINRA dari Cek Relevansi AI</div>
+            {celah.length ? (
+              <>
+                <p className="mb-2 text-slate-500">AI otomatis memprioritaskan celah ini. Klik untuk menjadikannya arahan khusus.</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {celah.map((c) => (
+                    <button key={c.tema} title={c.alasan} onClick={() => setInstruksi((x) => (x.includes(c.tema) ? x : x.trim() ? `${x.trim()}; ${c.tema}` : `Fokus pada ${c.tema}`))}
+                      className="rounded-full bg-white px-2.5 py-1 text-[12px] text-brand-800 ring-1 ring-brand-300 hover:bg-brand-50">+ {c.tema}</button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p className="text-slate-500">Belum ada. AI tetap menentukan fokus dari pos RKAP, sasaran RJPP, dan program strategis KINRA. Untuk usulan yang lebih tepat sasaran, <button onClick={onCekRelevansi} className="font-semibold text-brand-700 hover:underline">jalankan Cek Relevansi AI</button> lebih dulu.</p>
+            )}
+          </div>
           <div className="flex items-center gap-3">
             <Button onClick={buat} disabled={busy || !kandidat.length}>
               {busy && !hasil ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}{hasil ? "Buat Ulang Usulan" : "Buat Usulan"}
             </Button>
             <span className="text-[11.5px] text-slate-500">
-              {kandidat.length ? `AI memilih dari ${kandidat.length} risiko taksonomi yang belum ada di register, berdasarkan Sasaran Strategis RJPP, Data Keuangan dan Program Strategis RKAP 2027.` : "Semua risiko taksonomi sudah ada di register."}
+              {kandidat.length ? `AI memilih dari ${kandidat.length} risiko taksonomi yang belum ada di register, sesuai konteks bisnis KINRA: Sasaran Strategis RJPP, Data Keuangan dan Program Strategis RKAP 2027${celah.length ? ", serta celah hasil Cek Relevansi" : ""}.` : "Semua risiko taksonomi sudah ada di register."}
             </span>
           </div>
           {busy && !hasil && <div className="flex items-center gap-2 text-[12.5px] text-slate-500"><Loader2 className="h-4 w-4 animate-spin" />Menganalisis RJPP, RKAP, dan taksonomi… (±30 detik)</div>}

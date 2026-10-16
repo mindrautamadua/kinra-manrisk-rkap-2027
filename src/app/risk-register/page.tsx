@@ -1,6 +1,6 @@
 "use client";
-import { Fragment, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, Check, Download, Library, Plus, Search, Sparkles, Trash2 } from "lucide-react";
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { AlertTriangle, Check, Compass, Copy, Download, Library, Plus, Search, Sparkles, Trash2 } from "lucide-react";
 import clsx from "clsx";
 import {
   Button, DampakBadge, EditCell, ErrorBox, Loading, Section, SelectCell, SheetPage, Stat, TableWrap, useLoad, useSaver,
@@ -11,6 +11,12 @@ import { SasaranPicker } from "@/components/SasaranPicker";
 import { MitigasiAi } from "@/components/MitigasiAi";
 import { UsulanRisikoModal } from "@/components/UsulanRisiko";
 import type { UsulanRisiko, UsulanRisikoRequest } from "@/lib/usulan-risiko";
+import { RelevansiAiModal, RelevansiBadge } from "@/components/RelevansiAi";
+import { bacaRelevansi, sidikRisiko, simpanRelevansi, type HasilRelevansi, type RelevansiRequest } from "@/lib/relevansi-risiko";
+import { RedundansiAiModal, RedundansiBadge } from "@/components/RedundansiAi";
+import {
+  bacaRedundansi, isianUbah, JENIS_REDUNDAN, simpanRedundansi, type HasilRedundansi, type KelompokRedundan, type OpsiTindakan, type RedundansiRequest,
+} from "@/lib/redundansi-risiko";
 import { POS } from "@/lib/rkap-baca";
 import { AiFillModal, AiRowButton } from "@/components/AiFill";
 import type { FieldSpec } from "@/lib/isi-ai";
@@ -43,6 +49,13 @@ export default function RiskRegisterPage() {
   const [search, setSearch] = useState("");
   const [hanyaIsu, setHanyaIsu] = useState(false);
   const [buka, setBuka] = useState<string | null>(null);
+  const [relevansi, setRelevansi] = useState<HasilRelevansi | null>(null);
+  /** Modal Cek Relevansi: undefined = tertutup, string = dibuka terfokus pada risiko itu. */
+  const [cekRelevansi, setCekRelevansi] = useState<string | null | undefined>(undefined);
+  const [redundansi, setRedundansi] = useState<HasilRedundansi | null>(null);
+  /** Modal Cek Redundansi: undefined = tertutup, string = dibuka terfokus pada kelompok berisi risiko itu. */
+  const [cekRedundansi, setCekRedundansi] = useState<string | null | undefined>(undefined);
+  useEffect(() => { setRelevansi(bacaRelevansi()); setRedundansi(bacaRedundansi()); }, []);
   const d = q.data;
 
   /** Saran kategori dampak & isu kualitas per baris, dihitung ulang setiap data berubah. */
@@ -108,12 +121,85 @@ export default function RiskRegisterPage() {
     return d.t3.filter((o) => !ada.has(o.kode) && !ada.has(o.risiko_korporat.toLowerCase()))
       .map((o) => ({ kode: o.kode, kategori: o.kategori, aspek: o.aspek, risiko_korporat: o.risiko_korporat, definisi: o.definisi.slice(0, 300) }));
   }, [d]);
-  const buatUsulanRequest = async (instruksi: string): Promise<UsulanRisikoRequest> => {
-    // Konteks RKAP dimuat saat diminta saja, agar halaman tidak menunggu data yang jarang dipakai.
+  /** Konteks RKAP dimuat saat diminta saja, agar halaman tidak menunggu data yang jarang dipakai. */
+  const muatKonteks = async () => {
     const [sampul, rkap, program] = await Promise.all([
       api.sampul().catch(() => null), api.rkapAktif().catch(() => null), api.program().catch(() => []),
     ]);
-    const pos = rkap ? Object.fromEntries(POS.filter((p) => rkap.data.pos[p.kode]?.tahun != null).map((p) => [p.label, rkap.data.pos[p.kode].tahun])) : null;
+    const pos = rkap ? Object.fromEntries(POS.filter((p) => rkap.data.pos[p.kode]?.tahun != null).map((p) => [p.label, rkap.data.pos[p.kode].tahun!])) : null;
+    return { sampul, pos, program };
+  };
+  const buatRelevansiRequest = async (): Promise<RelevansiRequest> => {
+    const { sampul, pos, program } = await muatKonteks();
+    return {
+      entitas: sampul?.nama_entitas || "PT KINRA",
+      konteks: {
+        keuangan_rkap_2027: pos ?? "(belum ada Data Keuangan RKAP aktif)",
+        sasaran: (d!.sasaran ?? []).map((s) => ({ kode: s.kode, pilar: s.pilar, nama: s.nama, target: s.target })),
+        program: program.filter((p) => p.nama).map((p) => ({ pilar: p.pilar, nama: p.nama, inisiatif_rjpp: p.inisiatif_rjpp, deskripsi: p.deskripsi })),
+      },
+      risiko: d!.register.filter((r) => r.risk_event).map((r) => ({
+        id: r.id, no: d!.register.indexOf(r) + 1, kategori: r.kategori, taksonomi_kode: r.taksonomi_kode, risk_driver: r.risk_driver,
+        risk_event: r.risk_event, deskripsi: r.deskripsi, root_cause: r.root_cause, deskripsi_dampak: r.deskripsi_dampak,
+        nilai_dampak: r.nilai_dampak, kategori_dampak: r.kategori_dampak,
+        sasaran_terkait: label(r.sasaran_strategis, d!.sasaran ?? []),
+        parameter_ram_terkait: label(r.parameter_ram, d!.popts.map((o) => ({ kode: o.kode, nama: o.parameter }))),
+        sidik: sidikRisiko(r),
+      })),
+    };
+  };
+  /** Pakai usulan deskripsi AI: simpan ke register dan tandai penilaiannya sudah ditindaklanjuti (bukan usang). */
+  const pakaiDeskripsi = (id: string, deskripsi: string) => {
+    const r = d!.register.find((x) => x.id === id);
+    if (!r || !relevansi) return;
+    patch(id, { deskripsi });
+    const h = { ...relevansi, penilaian: relevansi.penilaian.map((p) => (p.id === id ? { ...p, diterapkan: true, sidik: sidikRisiko({ ...r, deskripsi }) } : p)) };
+    setRelevansi(h); simpanRelevansi(h);
+  };
+  const buatRedundansiRequest = async (): Promise<RedundansiRequest> => ({
+    entitas: (await api.sampul().catch(() => null))?.nama_entitas || "PT KINRA",
+    risiko: d!.register.filter((r) => r.risk_event).map((r) => ({
+      id: r.id, no: d!.register.indexOf(r) + 1, kategori: r.kategori, taksonomi_kode: r.taksonomi_kode, risk_driver: r.risk_driver,
+      risk_event: r.risk_event, deskripsi: r.deskripsi, root_cause: r.root_cause, deskripsi_dampak: r.deskripsi_dampak,
+      existing_control: r.existing_control, rencana_mitigasi: r.rencana_mitigasi, sidik: sidikRisiko(r),
+    })),
+  });
+  /** Eksekusi opsi tindakan redundansi sekaligus: ubah isian anggota, hapus yang digabung, lalu tandai kelompok diterapkan. */
+  const terapkanRedundansi = async (k: KelompokRedundan, o: OpsiTindakan) => {
+    const no = (id: string) => `#${d!.register.findIndex((r) => r.id === id) + 1}`;
+    const ok = await konfirmasi({
+      judul: "Terapkan saran redundansi?", objek: o.label, aksi: "Terapkan", nada: o.hapus.length ? "bahaya" : "peringatan",
+      pesan: <>
+        {o.penjelasan}
+        {o.ubah.length > 0 && <div className="mt-2">Isian diubah: {o.ubah.map((u) => no(u.id)).join(", ")}.</div>}
+        {o.hapus.length > 0 && <div className="mt-1 font-semibold text-rose-700">Dihapus permanen: {o.hapus.map(no).join(", ")}.</div>}
+      </>,
+    });
+    if (!ok) return;
+    const ubah = new Map(o.ubah.map((u) => [u.id, isianUbah(u)]));
+    const register = d!.register.filter((r) => !o.hapus.includes(r.id)).map((r) => (ubah.has(r.id) ? { ...r, ...ubah.get(r.id) } : r));
+    q.setData({ ...d!, register });
+    const now = new Date().toISOString();
+    for (const [id, p] of ubah) saver.run(() => api.update<RiskRegister>("risk_register", "id", id, { ...p, updated_at: now } as Partial<RiskRegister>));
+    for (const id of o.hapus) saver.run(() => api.remove("risk_register", "id", id));
+    const baru = new Map(register.map((r) => [r.id, r]));
+    const h = { ...redundansi!, kelompok: redundansi!.kelompok.map((x) => (x !== k ? x : {
+      ...x, diterapkan: o.label, sidik: Object.fromEntries(x.ids.map((id) => [id, baru.has(id) ? sidikRisiko(baru.get(id)!) : x.sidik[id]])),
+    })) };
+    setRedundansi(h); simpanRedundansi(h);
+  };
+  /** Kelompok redundan per risiko, urut dari jenis terberat (Duplikat lebih dulu). */
+  const kelompokRedundan = useMemo(() => {
+    const m = new Map<string, KelompokRedundan[]>();
+    for (const k of redundansi?.kelompok ?? []) for (const id of k.ids) m.set(id, [...(m.get(id) ?? []), k]);
+    const bobot = (k: KelompokRedundan) => JENIS_REDUNDAN.indexOf(k.jenis);
+    for (const l of m.values()) l.sort((x, y) => bobot(x) - bobot(y));
+    return m;
+  }, [redundansi]);
+  const nilaiRelevansi = useMemo(() => new Map((relevansi?.penilaian ?? []).map((p) => [p.id, p])), [relevansi]);
+
+  const buatUsulanRequest = async (instruksi: string): Promise<UsulanRisikoRequest> => {
+    const { sampul, pos, program } = await muatKonteks();
     return {
       entitas: sampul?.nama_entitas || "PT KINRA", instruksi, kandidat,
       sasaran: (d!.sasaran ?? []).map((s) => ({ kode: s.kode, pilar: s.pilar, nama: s.nama, target: s.target })),
@@ -122,6 +208,7 @@ export default function RiskRegisterPage() {
         program_strategis: program.filter((p) => p.nama).map((p) => ({ pilar: p.pilar, nama: p.nama, inisiatif_rjpp: p.inisiatif_rjpp, deskripsi: p.deskripsi })),
       },
       register: d!.register.filter((r) => r.risk_event).map((r) => ({ risk_event: r.risk_event, root_cause: r.root_cause })),
+      celah: relevansi?.celah ?? [],
     };
   };
   const tambahUsulan = async (list: UsulanRisiko[]) => {
@@ -175,7 +262,7 @@ export default function RiskRegisterPage() {
 
   return (
     <SheetPage title="Risk Register RKAP 2027 - PT KINRA" code="Risk Register" note={note("Risk Register")} wide
-      actions={<>{saver.indicator}<Button variant="outline" onClick={() => d && exportRegister(d.register)}><Download className="h-4 w-4" />Excel</Button><Button edit variant="outline" onClick={() => setUsulan(true)} disabled={!d}><Sparkles className="h-4 w-4" />Usulan Risiko AI</Button><Button edit onClick={add}><Plus className="h-4 w-4" />Tambah Risiko</Button></>}>
+      actions={<>{saver.indicator}<Button variant="outline" onClick={() => d && exportRegister(d.register)}><Download className="h-4 w-4" />Excel</Button><Button variant="outline" onClick={() => setCekRelevansi(null)} disabled={!d}><Compass className="h-4 w-4" />Cek Relevansi AI</Button><Button variant="outline" onClick={() => setCekRedundansi(null)} disabled={!d}><Copy className="h-4 w-4" />Cek Redundansi AI</Button><Button edit variant="outline" onClick={() => setUsulan(true)} disabled={!d}><Sparkles className="h-4 w-4" />Usulan Risiko AI</Button><Button edit onClick={add}><Plus className="h-4 w-4" />Tambah Risiko</Button></>}>
       {q.loading ? <Loading variant="stats-table" /> : q.error ? <ErrorBox error={q.error} /> : d && (
         <>
           <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -252,6 +339,10 @@ export default function RiskRegisterPage() {
                             <span className={clsx("font-semibold group-hover:underline", !r.risk_event && "font-normal text-slate-400 italic")}>{r.risk_event ?? "Pilih dari taksonomi…"}</span>
                           </button>
                           {r.taksonomi_kode && <div className="mt-1 font-mono text-[10px] text-slate-400">{r.taksonomi_kode}</div>}
+                          {nilaiRelevansi.has(r.id) && <RelevansiBadge p={nilaiRelevansi.get(r.id)!} usang={nilaiRelevansi.get(r.id)!.sidik !== sidikRisiko(r)} onClick={() => setCekRelevansi(r.id)} />}
+                          {kelompokRedundan.has(r.id) && <RedundansiBadge kelompok={kelompokRedundan.get(r.id)!} id={r.id} onClick={() => setCekRedundansi(r.id)}
+                            nomor={(id) => { const i = d.register.findIndex((x) => x.id === id); return i < 0 ? null : i + 1; }}
+                            sidikKini={(id) => { const x = d.register.find((y) => y.id === id); return x ? sidikRisiko(x) : null; }} />}
                         </td>
                         <td className="input text-[12px]"><EditCell value={r.deskripsi} onSave={(v) => patch(r.id, { deskripsi: v as string })} /></td>
                         <td className="input"><EditCell value={r.root_cause} onSave={(v) => patch(r.id, { root_cause: v as string })} /></td>
@@ -322,7 +413,20 @@ export default function RiskRegisterPage() {
           )}
           {usulan && (
             <UsulanRisikoModal kandidat={kandidat} buatRequest={buatUsulanRequest} onTambah={tambahUsulan} onClose={() => setUsulan(false)}
-              namaSasaran={(k) => d.sasaran?.find((s) => s.kode === k)?.nama} />
+              namaSasaran={(k) => d.sasaran?.find((s) => s.kode === k)?.nama} celah={relevansi?.celah ?? []}
+              onCekRelevansi={() => { setUsulan(false); setCekRelevansi(null); }} />
+          )}
+          {cekRelevansi !== undefined && (
+            <RelevansiAiModal hasil={relevansi} onHasil={setRelevansi} buildRequest={buatRelevansiRequest} fokus={cekRelevansi} ro={ro}
+              nomor={(id) => { const i = d.register.findIndex((r) => r.id === id); return i < 0 ? null : { no: i + 1, nama: d.register[i].risk_event ?? "" }; }}
+              sidikKini={(id) => { const r = d.register.find((x) => x.id === id); return r ? sidikRisiko(r) : null; }}
+              onPakaiDeskripsi={pakaiDeskripsi} onClose={() => setCekRelevansi(undefined)} />
+          )}
+          {cekRedundansi !== undefined && (
+            <RedundansiAiModal hasil={redundansi} onHasil={setRedundansi} buildRequest={buatRedundansiRequest} fokus={cekRedundansi} ro={ro}
+              nomor={(id) => { const i = d.register.findIndex((r) => r.id === id); return i < 0 ? null : { no: i + 1, nama: d.register[i].risk_event ?? "" }; }}
+              sidikKini={(id) => { const r = d.register.find((x) => x.id === id); return r ? sidikRisiko(r) : null; }}
+              onHapus={(id) => { const r = d.register.find((x) => x.id === id); if (r) del(r); }} onTerapkan={terapkanRedundansi} onClose={() => setCekRedundansi(undefined)} />
           )}
           {picker && <TaxonomyPicker options={d.t3} kategori={picker.kategori} current={picker.risk_event} onPick={pick} onClose={() => setPicker(null)} />}
         </>

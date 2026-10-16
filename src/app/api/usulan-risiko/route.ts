@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { callStructured } from "@/lib/openai";
-import { ATURAN_PIC } from "@/lib/isi-ai-prompt";
+import { ATURAN_PIC, PROFIL_KINRA } from "@/lib/isi-ai-prompt";
 import type { UsulanRisikoRequest, UsulanRisikoResponse } from "@/lib/usulan-risiko";
 
 export const runtime = "nodejs";
@@ -9,6 +9,14 @@ export const maxDuration = 120;
 const SYSTEM = `Anda analis manajemen risiko untuk Kertas Kerja Perencanaan Manajemen Risiko RKAP 2027 (template PT DAM v.2, Taksonomi Risiko PTPN Group) entitas anak perusahaan di lingkungan PTPN III (Persero).
 Tugas: mengusulkan Risk Event BARU untuk Risk Register yang relevan dengan model bisnis entitas, Sasaran Strategis RJPP 2026-2030, serta target dan program RKAP 2027.
 
+${PROFIL_KINRA}
+
+Penentuan fokus:
+- Bila arahan pengguna kosong, tentukan sendiri fokus usulan dari konteks KINRA: segmen pendapatan terbesar, sasaran RJPP, dan program strategis yang belum terlindungi risiko di register.
+- Bila ada "celah hasil Cek Relevansi", prioritaskan usulan yang menutup celah tersebut.
+- Bila arahan pengguna ada, ikuti arahan itu tanpa meninggalkan konteks KINRA.
+- Tolak kandidat yang tidak punya jalur masuk akal ke bisnis kawasan industri KINRA (mis. budidaya, TBS, CPO, PKS), walaupun ada di taksonomi.
+
 Aturan:
 - Pilih risiko HANYA dari daftar kandidat taksonomi (kode). Jangan mengusulkan risiko yang sudah ada di register.
 - Usulkan 5-8 risiko yang paling material, diurutkan dari yang paling penting. Utamakan risiko yang mengancam pos pendapatan/laba RKAP terbesar, sasaran strategis RJPP, dan program strategis 2027. Sebarkan ke beberapa kategori bila relevan.
@@ -16,7 +24,7 @@ Aturan:
 - root_cause: penyebab mendasar yang wajar untuk entitas, boleh 2 penyebab bernomor "1) ... 2) ...".
 - deskripsi_dampak: konsekuensi finansial dan/atau non-finansial; sebut pos RKAP yang terdampak bila ada. JANGAN mengarang angka; gunakan "[...]" bila perlu.
 - sasaran: kode Sasaran Strategis RJPP yang terancam (1-3 kode dari daftar), atau [] bila tidak ada.
-- alasan: 1 kalimat mengapa risiko ini relevan bagi entitas berdasarkan RJPP/RKAP pada konteks.
+- alasan: 1 kalimat mengapa risiko ini relevan bagi KINRA, sebut dasar konkret (pos RKAP beserta nilainya, kode sasaran, nama program, atau tema celah).
 - catatan: 1-2 kalimat asumsi atau hal yang perlu diverifikasi pengguna.`;
 
 const MAX = 60_000;
@@ -54,7 +62,8 @@ export async function POST(req: Request) {
 
   const user = [
     `Entitas: ${input.entitas}`,
-    `Arahan pengguna: ${input.instruksi?.trim() || "(tidak ada)"}`,
+    `Arahan pengguna: ${input.instruksi?.trim() || "(kosong: tentukan fokus sendiri dari konteks KINRA)"}`,
+    `Celah hasil Cek Relevansi (JSON): ${input.celah?.length ? JSON.stringify(input.celah) : "(belum ada)"}`,
     `Sasaran Strategis RJPP 2026-2030 (JSON): ${JSON.stringify(input.sasaran ?? [])}`,
     `Ringkasan RKAP 2027 (JSON): ${JSON.stringify(input.rkap ?? {}).slice(0, 15_000)}`,
     `Risk event yang sudah ada di register (JSON): ${JSON.stringify(input.register ?? [])}`,
