@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { AlertTriangle, ArrowDown, ArrowUp, Check, ChevronDown, Info, Loader2 } from "lucide-react";
 import { supabaseConfigured } from "@/lib/supabase";
-import { DAMPAK_STYLE, polaritas, SIKAP_STYLE, statusStyle } from "@/lib/format";
+import { ARTI_SIKAP, DAMPAK_STYLE, polaritas, SIKAP_STYLE, statusStyle } from "@/lib/format";
 import { useReadonly } from "@/lib/mode";
 
 // ---------- data loading ----------
@@ -386,7 +386,7 @@ export function ArahBadge({ arah, className }: { arah?: string | null; className
 }
 export function SikapBadge({ sikap }: { sikap?: string | null }) {
   if (!sikap) return <span className="text-slate-400">–</span>;
-  return <span className={clsx("inline-block rounded-md px-2 py-0.5 text-[11.5px] font-semibold whitespace-nowrap", SIKAP_STYLE[sikap] ?? "bg-slate-100")}>{sikap}</span>;
+  return <span title={ARTI_SIKAP[sikap] ? `${sikap}: ${ARTI_SIKAP[sikap].isi}` : undefined} className={clsx("inline-block cursor-help rounded-md px-2 py-0.5 text-[11.5px] font-semibold whitespace-nowrap", SIKAP_STYLE[sikap] ?? "bg-slate-100")}>{sikap}</span>;
 }
 export function DampakBadge({ k }: { k?: string | null }) {
   if (!k) return <span className="text-slate-400">–</span>;

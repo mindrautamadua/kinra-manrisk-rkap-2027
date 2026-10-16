@@ -50,6 +50,25 @@ export const SIKAP_STYLE: Record<string, string> = {
   Aggressive: "bg-rose-100 text-rose-900",
 };
 const SIKAP_RANK: Record<string, number> = { "Zero Tolerance": 0, Conservative: 1, Moderate: 2, Aggressive: 3 };
+/** Definisi sikap risiko menurut template PT DAM v.2 (sama dengan catatan lembar RAS), urut dari yang paling ketat. */
+export const ARTI_SIKAP: Record<string, { ringkas: string; isi: string }> = {
+  "Zero Tolerance": {
+    ringkas: "Tidak menerima risiko maupun penyimpangan.",
+    isi: "Tidak bersedia mengambil risiko dan tidak memperkenankan adanya pelanggaran atau penyimpangan serta mengutamakan keberlangsungan operasi dengan kepatuhan mutlak dan pengendalian yang ketat.",
+  },
+  Conservative: {
+    ringkas: "Risiko rendah dan terkontrol.",
+    isi: "Bersedia mengambil risiko pada tingkat yang rendah dan terkontrol dengan prioritas pada keberlangsungan usaha, perlindungan aset, dan pencapaian target yang berkelanjutan.",
+  },
+  Moderate: {
+    ringkas: "Risiko seimbang dengan manfaat.",
+    isi: "Bersedia mengambil risiko dengan tingkat risiko yang seimbang dengan manfaat atau nilai yang diharapkan sepanjang masih berada dalam kapasitas risiko perusahaan dan dijalankan sebagai bagian dari proses penciptaan nilai perusahaan.",
+  },
+  Aggressive: {
+    ringkas: "Risiko relatif tinggi demi pertumbuhan.",
+    isi: "Bersedia mengambil risiko dengan tingkat yang relatif tinggi untuk mencapai pertumbuhan, transformasi atau penciptaan nilai yang lebih besar sepanjang masih berada dalam kapasitas risiko perusahaan dan mendukung tujuan strategis yang signifikan.",
+  },
+};
 /** Sikap entitas harus sama atau lebih konservatif dari induk. */
 export function cekSikap(entitas?: string | null, induk?: string | null) {
   if (!entitas || !induk) return "";
