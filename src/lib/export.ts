@@ -1,5 +1,6 @@
 "use client";
 import type ExcelJSNs from "exceljs";
+import { labelPos } from "./keterkaitan-rkap";
 import type { CatAksi, ChallengeLog, KategoriRisiko, KriteriaDampak, MitigasiAksi, ParameterSheet, ProgramStrategis, Ras, RasTambahan, RiskDriver, RiskRegister, Sampul, SheetTemplate } from "./types";
 import { buildRam, type RamRow } from "./ram";
 import { PETUNJUK, REKAP, note } from "./static";
@@ -71,14 +72,15 @@ const REGISTER_COLS: Col[] = [
   { header: "Probabilitas Kejadian (0%-100%)", key: "probabilitas", width: 14, fmt: "0%" }, { header: "Deskripsi Dampak Risiko", key: "deskripsi_dampak", width: 36 },
   { header: "Nilai Dampak Risiko (Rp)", key: "nilai_dampak", width: 20, fmt: RP }, { header: "Kriteria Dampak Acuan", key: "kriteria_dampak", width: 34 },
   { header: "Kategori Dampak Risiko", key: "kategori_dampak", width: 16 }, { header: "Tagging Top Risk", key: "tagging", width: 10 },
-  { header: "Expected Loss (Rp)", key: "expected_loss", width: 20, fmt: RP }, { header: "Dasar Penilaian Probabilitas & Dampak", key: "dasar_penilaian", width: 36 }, { header: "Existing Control", key: "existing_control", width: 36 },
+  { header: "Expected Loss (Rp)", key: "expected_loss", width: 20, fmt: RP }, { header: "Dasar Penilaian Probabilitas & Dampak", key: "dasar_penilaian", width: 36 }, { header: "Proses Bisnis", key: "proses_bisnis_teks", width: 28 }, { header: "Pos RKAP 2027 Terdampak", key: "pos_rkap_teks", width: 30 }, { header: "Program Kerja / Asumsi RKAP 2027", key: "program_kerja_rkap", width: 40 }, { header: "Existing Control", key: "existing_control", width: 36 },
   { header: "Rencana Mitigasi", key: "rencana_mitigasi", width: 36 }, { header: "Kategori Mitigasi", key: "kategori_mitigasi", width: 14 },
   { header: "Target Probabilitas", key: "target_probabilitas", width: 12, fmt: "0%" }, { header: "Target Nilai Dampak (Rp)", key: "target_nilai_dampak", width: 20, fmt: RP },
   { header: "Target Kategori Dampak", key: "target_kategori_dampak", width: 16 }, { header: "Target Expected Loss (Rp)", key: "target_el", width: 20, fmt: RP },
   { header: "Parameter RAM Terkait", key: "param", width: 18 }, { header: "Sasaran Strategis RJPP Terkait", key: "sasaran", width: 18 },
 ];
 const registerRows = (rows: RiskRegister[]) => rows.map((r, i) => ({
-  ...r, no: i + 1, target_el: r.target_probabilitas != null && r.target_nilai_dampak != null ? Number(r.target_probabilitas) * Number(r.target_nilai_dampak) : null, param: (r.parameter_ram ?? []).join(", "), sasaran: (r.sasaran_strategis ?? []).join(", "), tagging: r.kategori_dampak ? (isTopRisk(r.kategori_dampak) ? "Ya" : "Tidak") : "",
+  ...r, no: i + 1, target_el: r.target_probabilitas != null && r.target_nilai_dampak != null ? Number(r.target_probabilitas) * Number(r.target_nilai_dampak) : null, param: (r.parameter_ram ?? []).join(", "), sasaran: (r.sasaran_strategis ?? []).join(", "),
+  proses_bisnis_teks: (r.proses_bisnis ?? []).join("; "), pos_rkap_teks: (r.pos_rkap ?? []).map((k) => labelPos(k)).join("; "), tagging: r.kategori_dampak ? (isTopRisk(r.kategori_dampak) ? "Ya" : "Tidak") : "",
 }));
 
 const REKAP_COLS: Col[] = [

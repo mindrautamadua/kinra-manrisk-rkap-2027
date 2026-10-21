@@ -1,7 +1,8 @@
 import { api } from "./data";
 import { isTopRisk } from "./format";
 import { buildRam, type RamRow } from "./ram";
-import type { ChallengeLog, MitigasiAksi, RiskRegister } from "./types";
+import { labelPos } from "./keterkaitan-rkap";
+import type { ChallengeLog, MitigasiAksi, RiskRegister, RkapKeuangan } from "./types";
 
 /** Masukan yang dikirim ke /api/validasi-challenge. */
 export interface ValidasiInput {
@@ -20,12 +21,14 @@ const ramRingkas = (rows: RamRow[]) => rows.map((r) => ({
   program: (r.tambahan ?? r.pengendalian)?.program ?? null, anggaran: (r.tambahan ?? r.pengendalian)?.anggaran ?? null,
 }));
 
-const risikoRingkas = (register: RiskRegister[], aksi: MitigasiAksi[] | null) => register.filter((r) => r.risk_event).map((r, i) => ({
+const risikoRingkas = (register: RiskRegister[], aksi: MitigasiAksi[] | null, rkapAktif: RkapKeuangan | null = null) => register.filter((r) => r.risk_event).map((r, i) => ({
   no: i + 1, id: r.id, kategori: r.kategori, taksonomi: r.taksonomi_kode, risk_driver: r.risk_driver, risk_event: r.risk_event,
   deskripsi: r.deskripsi, root_cause: r.root_cause, probabilitas: r.probabilitas, deskripsi_dampak: r.deskripsi_dampak,
   nilai_dampak: r.nilai_dampak, kategori_dampak: r.kategori_dampak, top_risk: isTopRisk(r.kategori_dampak), expected_loss: r.expected_loss,
   existing_control: r.existing_control, rencana_mitigasi: r.rencana_mitigasi, kategori_mitigasi: r.kategori_mitigasi,
-  parameter_ram: r.parameter_ram ?? [], target_probabilitas: r.target_probabilitas, target_nilai_dampak: r.target_nilai_dampak,
+  parameter_ram: r.parameter_ram ?? [], sasaran_strategis: r.sasaran_strategis ?? [], dasar_penilaian: r.dasar_penilaian ?? null,
+  proses_bisnis: r.proses_bisnis ?? [], pos_rkap_2027: (r.pos_rkap ?? []).map((k) => labelPos(k, rkapAktif)), program_kerja_asumsi_rkap: r.program_kerja_rkap ?? null,
+  target_probabilitas: r.target_probabilitas, target_nilai_dampak: r.target_nilai_dampak,
   aksi_mitigasi: (aksi ?? []).filter((a) => a.risk_id === r.id).map(({ aksi, kategori, pic, biaya, jadwal, output, bukti }) => ({ aksi, kategori, pic, biaya, jadwal, output, bukti: bukti ?? null })),
 }));
 
@@ -49,9 +52,12 @@ export async function dataLembar(path: string): Promise<Record<string, unknown>>
     case "/ram": return { ram: await ram() };
     case "/risk-register":
     case "/risiko-utama": {
-      const [register, aksi, rows] = await Promise.all([api.register(), api.mitigasiAksi(), ram()]);
-      const risiko = risikoRingkas(register, aksi);
-      return { risiko: path === "/risiko-utama" ? risiko.filter((r) => r.top_risk) : risiko, ram: rows };
+      const [register, aksi, rows, sasaran, rkap] = await Promise.all([api.register(), api.mitigasiAksi(), ram(), api.sasaran().catch(() => []), api.rkapAktif().catch(() => null)]);
+      const risiko = risikoRingkas(register, aksi, rkap);
+      return {
+        risiko: path === "/risiko-utama" ? risiko.filter((r) => r.top_risk) : risiko, ram: rows,
+        sasaran_strategis_rjpp: sasaran.map((s) => ({ kode: s.kode, pilar: s.pilar, nama: s.nama, target: s.target })),
+      };
     }
     case "/program-strategis": return { program_strategis: await api.program() };
     case "/cat": return { cat: await api.cat() };

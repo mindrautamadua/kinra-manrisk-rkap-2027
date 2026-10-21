@@ -8,6 +8,8 @@ import {
 import { TaxonomyPicker, groupT3, type T3Option } from "@/components/TaxonomyPicker";
 import { ParamPicker } from "@/components/ParamPicker";
 import { SasaranPicker } from "@/components/SasaranPicker";
+import { PilihBanyak } from "@/components/PilihBanyak";
+import { labelPos, POS_PILIHAN, PROSES_BISNIS, type KeterkaitanRequest, type KeterkaitanResponse } from "@/lib/keterkaitan-rkap";
 import { MitigasiAi } from "@/components/MitigasiAi";
 import { UsulanRisikoModal } from "@/components/UsulanRisiko";
 import type { UsulanRisiko, UsulanRisikoRequest } from "@/lib/usulan-risiko";
@@ -35,12 +37,13 @@ import { konfirmasi } from "@/components/Konfirmasi";
 
 export default function RiskRegisterPage() {
   const q = useLoad(async () => {
-    const [register, kategori, drivers, kriteria, tax, params, tambahan, sasaran, ras, aksi] = await Promise.all([
+    const [register, kategori, drivers, kriteria, tax, params, tambahan, sasaran, ras, aksi, rkap] = await Promise.all([
       api.register(), api.kategori(), api.drivers(), api.kriteria(), api.taksonomi(), api.params(), api.ramTambahan(),
       api.sasaran().catch(() => null), // null = migrasi 0006 belum dijalankan
       api.ras(), api.mitigasiAksi(), // aksi null = migrasi 0008 belum dijalankan
+      api.rkapAktif().catch(() => null),
     ]);
-    return { register, kategori, drivers, kriteria, t3: groupT3(tax), popts: paramOptions(params, tambahan), ebitda: ebitdaRkap(params), sasaran, ras, aksi };
+    return { register, kategori, drivers, kriteria, t3: groupT3(tax), popts: paramOptions(params, tambahan), ebitda: ebitdaRkap(params), sasaran, ras, aksi, rkap };
   });
   const saver = useSaver();
   const ro = useReadonly();
@@ -220,6 +223,31 @@ export default function RiskRegisterPage() {
     })) };
     setRedundansi(h); simpanRedundansi(h);
   };
+  /** Keterkaitan RKAP 2027 (arahan 2a): AI mengusulkan proses bisnis, pos RKAP, dan program kerja untuk risiko yang belum terisi. */
+  const [isiRkap, setIsiRkap] = useState(false);
+  const belumRkap = (d?.register ?? []).filter((r) => r.risk_event && !(r.proses_bisnis ?? []).length && !(r.pos_rkap ?? []).length && !r.program_kerja_rkap?.trim());
+  const isiKeterkaitan = async () => {
+    const target = belumRkap;
+    if (!target.length) return;
+    if (!(await konfirmasi({ judul: `Isi Keterkaitan RKAP untuk ${target.length} risiko?`, aksi: "Susun Draf", nada: "info",
+      pesan: "AI mengusulkan Proses Bisnis, Pos/Target RKAP 2027, dan Program Kerja/Asumsi RKAP dari data risiko, Data Keuangan RKAP, dan asumsi pada Presentasi DKMR. Hanya risiko yang ketiga kolomnya masih kosong yang diisi. Periksa hasilnya di tabel." }))) return;
+    setIsiRkap(true);
+    try {
+      const req: KeterkaitanRequest = {
+        risiko: target.map((r) => ({ id: r.id, kategori: r.kategori, risk_event: r.risk_event, deskripsi: r.deskripsi, root_cause: r.root_cause, deskripsi_dampak: r.deskripsi_dampak,
+          sasaran: (r.sasaran_strategis ?? []).map((k) => { const o = d!.sasaran?.find((x) => x.kode === k); return o ? `${k} ${o.nama}` : k; }) })),
+        pos: POS_PILIHAN.map((p) => ({ kode: p.kode, label: labelPos(p.kode, d!.rkap) })),
+      };
+      const res = await fetch("/api/keterkaitan-rkap", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req) });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body?.error ?? res.statusText);
+      const now = new Date().toISOString();
+      const saran = new Map((body as KeterkaitanResponse).hasil.map((h) => [h.id, { proses_bisnis: h.proses_bisnis, pos_rkap: h.pos_rkap, program_kerja_rkap: h.program_kerja_rkap }]));
+      q.setData((prev) => prev && { ...prev, register: prev.register.map((r) => (saran.has(r.id) ? { ...r, ...saran.get(r.id) } : r)) });
+      for (const [id, p] of saran) saver.run(() => api.update<RiskRegister>("risk_register", "id", id, { ...p, updated_at: now } as Partial<RiskRegister>));
+    } catch (e) { alert(`Gagal menyusun keterkaitan RKAP: ${(e as Error).message}`); }
+    setIsiRkap(false);
+  };
   /** Kelompok redundan per risiko, urut dari jenis terberat (Duplikat lebih dulu). */
   const kelompokRedundan = useMemo(() => {
     const m = new Map<string, KelompokRedundan[]>();
@@ -320,6 +348,12 @@ export default function RiskRegisterPage() {
           </div>
           <Section letter="A" title="Risk Register" right={
             <div className="flex flex-wrap gap-2">
+              {!ro && belumRkap.length > 0 && (
+                <button onClick={isiKeterkaitan} disabled={isiRkap} title="Isi Proses Bisnis, Pos/Target RKAP, dan Program Kerja RKAP yang masih kosong dengan AI"
+                  className="flex items-center gap-1.5 rounded-lg border border-sky-300 bg-sky-50 px-2.5 py-1.5 text-[12.5px] text-sky-900 disabled:opacity-60">
+                  <Sparkles className="h-3.5 w-3.5" />{isiRkap ? "Menyusun keterkaitan RKAP…" : `Isi Keterkaitan RKAP (${belumRkap.length})`}
+                </button>
+              )}
               <button onClick={() => setHanyaIsu((x) => !x)} disabled={!jumlahIsu && !hanyaIsu}
                 className={clsx("flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[12.5px] disabled:opacity-50", hanyaIsu ? "border-amber-400 bg-amber-50 text-amber-900" : "border-line bg-white")}>
                 <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />Perlu perbaikan ({jumlahIsu})
@@ -351,7 +385,8 @@ export default function RiskRegisterPage() {
                   <th className="w-56">Existing Control</th><th className="w-56">Rencana Mitigasi</th><th className="w-32">Kategori Mitigasi</th>
                   <th className="w-24 !bg-brand-800">Target Probabilitas</th><th className="w-40 !bg-brand-800">Target Nilai Dampak (Rp)</th>
                   <th className="w-44 !bg-brand-800">Target Kategori Dampak</th><th className="w-40 !bg-brand-800">Target Expected Loss (Rp)</th>
-                  <th className="w-52">Parameter RAM Terkait</th><th className="w-52">Sasaran Strategis RJPP Terkait</th><th className="w-12" />
+                  <th className="w-52">Parameter RAM Terkait</th><th className="w-52">Sasaran Strategis RJPP Terkait</th>
+                  <th className="w-52 !bg-sky-800">Proses Bisnis</th><th className="w-60 !bg-sky-800">Pos / Target RKAP 2027 Terdampak</th><th className="w-64 !bg-sky-800">Program Kerja / Asumsi RKAP 2027</th><th className="w-12" />
                 </tr></thead>
                 <tbody>
                   <tr className="example">
@@ -487,11 +522,21 @@ export default function RiskRegisterPage() {
                           {d.sasaran ? <SasaranPicker value={r.sasaran_strategis ?? []} options={d.sasaran} risiko={ringkasRisiko(r)} onSave={(v) => patch(r.id, { sasaran_strategis: v })} />
                             : <span className="text-[11px] text-slate-400 italic">Jalankan migrasi 0006_sasaran_strategis.sql</span>}
                         </td>
+                        <td className={clsx("input", r.risk_event && !(r.proses_bisnis ?? []).length && "!bg-amber-100/70")}>
+                          <PilihBanyak value={r.proses_bisnis ?? []} options={PROSES_BISNIS.map((p) => ({ value: p, label: p }))} kosong="Proses bisnis" onSave={(v) => patch(r.id, { proses_bisnis: v })} />
+                        </td>
+                        <td className={clsx("input", r.risk_event && !(r.pos_rkap ?? []).length && "!bg-amber-100/70")}>
+                          <PilihBanyak value={r.pos_rkap ?? []} options={POS_PILIHAN.map((p) => ({ value: p.kode, label: labelPos(p.kode, d.rkap) }))} kosong="Pos RKAP"
+                            label={(k) => labelPos(k, d.rkap)} onSave={(v) => patch(r.id, { pos_rkap: v })} />
+                        </td>
+                        <td className={clsx("input", r.risk_event && !r.program_kerja_rkap?.trim() && "!bg-amber-100/70")}>
+                          <EditCell value={r.program_kerja_rkap ?? null} placeholder="Program kerja / asumsi RKAP 2027 terkait…" onSave={(v) => patch(r.id, { program_kerja_rkap: v as string })} />
+                        </td>
                         <td><div className="flex flex-col items-center gap-2"><AiRowButton onClick={() => bukaAi(r)} /><button data-edit onClick={() => del(r)} className="text-slate-400 hover:text-rose-600" title="Hapus"><Trash2 className="h-4 w-4" /></button></div></td>
                       </tr>
                       {buka === r.id && isu.length > 0 && (
                         <tr>
-                          <td colSpan={24} className="!bg-amber-50/70 !py-2">
+                          <td colSpan={27} className="!bg-amber-50/70 !py-2">
                             <div className="sticky left-12 max-w-[900px] space-y-1 pl-2 text-[12px]">
                               {isu.map((x, j) => (
                                 <div key={j} className="flex gap-2"><span className="w-36 shrink-0 font-semibold text-amber-900">{x.kolom}</span><span className="text-slate-700">{x.pesan}</span></div>
@@ -512,7 +557,7 @@ export default function RiskRegisterPage() {
                       </Fragment>
                     );
                   })}
-                  {rows.length === 0 && <tr><td colSpan={24} className="py-10 text-center text-slate-400">Belum ada risiko. Klik “Tambah Risiko”.</td></tr>}
+                  {rows.length === 0 && <tr><td colSpan={27} className="py-10 text-center text-slate-400">Belum ada risiko. Klik “Tambah Risiko”.</td></tr>}
                 </tbody>
               </table>
             </TableWrap>

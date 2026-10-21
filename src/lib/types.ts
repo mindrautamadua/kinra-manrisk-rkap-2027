@@ -35,6 +35,10 @@ export interface RiskRegister {
   target_kategori_dampak?: string | null;
   /** Dasar penetapan probabilitas dan dampak (data historis, proyeksi RKAP, skenario). Kolom dari migrasi 0010. */
   dasar_penilaian?: string | null;
+  /** Keterkaitan RKAP 2027 (migrasi 0012): proses bisnis, kode pos Data Keuangan RKAP, program kerja/asumsi. */
+  proses_bisnis?: string[] | null;
+  pos_rkap?: string[] | null;
+  program_kerja_rkap?: string | null;
 }
 export const TRIWULAN = ["TW I", "TW II", "TW III", "TW IV"] as const;
 /** Rencana aksi mitigasi terstruktur satu risiko (migrasi 0008). */
