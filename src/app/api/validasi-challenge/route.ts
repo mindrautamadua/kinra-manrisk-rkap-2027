@@ -19,6 +19,7 @@ Aturan:
 - Bersikap ketat. Bila ragu antara "terpenuhi" dan "belum", pilih "belum". Masukan bersifat "menelaah/menilai apakah perlu" dianggap terpenuhi bila hasil telaahnya tercermin di data (mis. risiko sudah ditambahkan) atau kolom tanggapan menjelaskan keputusan tidak menambahkan beserta alasan yang wajar.
 - Kolom "tanggapan" adalah komitmen/penjelasan entitas; pakai sebagai konteks, tetapi klaim di tanggapan tetap harus terlihat di data bila menyangkut isi kertas kerja.
 - Jangan mengarang fakta di luar data.
+- Sebut parameter dengan kode dan nama persis seperti di data beserta namanya; jangan menyingkat atau mengubah kode. Untuk setiap parameter yang dinilai kurang, sebut kolom mana yang kosong atau kaitan apa yang belum ada.
 - alasan: 1-3 kalimat bukti atau dasar putusan. kekurangan: hal konkret yang masih perlu dilengkapi; string kosong bila terpenuhi.
 - id WAJIB persis id masukan. Kembalikan satu hasil untuk setiap masukan.
 - Bahasa Indonesia formal.

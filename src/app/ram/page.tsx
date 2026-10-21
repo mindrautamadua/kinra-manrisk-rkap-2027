@@ -13,7 +13,7 @@ import { AiFillModal, AiRowButton } from "@/components/AiFill";
 import { ThresholdHint } from "@/components/ThresholdHint";
 import { PenjelasanStatus } from "@/components/PenjelasanStatus";
 import type { IsiRequest, IsiResponse } from "@/lib/isi-ai";
-import type { ParameterSheet, RamPengendalian, RamTambahan } from "@/lib/types";
+import type { ParameterSheet, RamPengendalian, RamTambahan, RiskRegister } from "@/lib/types";
 import { konfirmasi } from "@/components/Konfirmasi";
 
 const AI_FIELDS = [
@@ -190,13 +190,13 @@ export default function RamPage() {
       {q.loading ? <Loading /> : q.error ? <ErrorBox error={q.error} /> : d && (<>
         <Section letter="A" title={`Parameter yang Diukur (${diukur.length})`}>
         <TableWrap stickyHeader>
-          <table ref={tableRef} className="kk-table min-w-[2810px]">
+          <table ref={tableRef} className="kk-table min-w-[3070px]">
             <thead>
               <tr>
                 <th rowSpan={2} className="fz fz-no w-10">No</th><th rowSpan={2} className="fz fz-tax w-36">Taksonomi Risiko</th><th rowSpan={2} colSpan={2} className="fz fz-kode fz-edge w-72">Parameter Pengukuran</th>
                 <th rowSpan={2} className="w-72">Formula</th><th rowSpan={2} className="w-20">Unit Satuan Formula</th><th rowSpan={2} className="w-28">Kategori Parameter</th>
                 <th colSpan={3} className="text-center"><ThresholdHint jenis="Risk Threshold" /></th><th rowSpan={2} className="w-72">Rasionalisasi &amp; Dasar Perhitungan Threshold</th><th rowSpan={2} className="w-32">Sikap Risiko Sesuai RAS</th>
-                <th rowSpan={2} className="w-32">Hasil Pengukuran Risiko pada RKAP 2027 (Risiko Inheren)</th><th rowSpan={2} className="min-w-[210px]">Status Pengukuran</th>
+                <th rowSpan={2} className="w-32">Hasil Pengukuran Risiko pada RKAP 2027 (Risiko Inheren)</th><th rowSpan={2} className="min-w-[210px]">Status Pengukuran</th><th rowSpan={2} className="w-64">Risk Event yang Dipantau</th>
                 <th colSpan={5} className="text-center">Rencana Pengendalian</th><th rowSpan={2} className="w-10" />
               </tr>
               <tr>
@@ -243,6 +243,7 @@ export default function RamPage() {
                             </>
                           )}
                           <td className="calc"><StatusNarasi r={r} /></td>
+                          <RiskEventCell r={r} register={d.register} />
                           {ctl(r, "inisiatif")}{ctl(r, "kebijakan")}{ctl(r, "program")}{ctl(r, "anggaran")}{ctl(r, "indikator")}
                           <td><div className="flex flex-col items-center gap-2">
                             {r.diterapkan && <AiRowButton title="Susun rencana pengendalian dengan AI" onClick={() => setAi(r)} />}
@@ -253,7 +254,7 @@ export default function RamPage() {
                     })}
                     <tr>
                       {list.length === 0 && <><td className="group fz fz-no text-center">{ki + 1}</td><td className="group fz fz-tax">{kat}</td></>}
-                      <td colSpan={19} className="!bg-paper/60 py-1.5">
+                      <td colSpan={20} className="!bg-paper/60 py-1.5">
                         <div className="fz fz-kode w-max">
                           <button data-edit onClick={() => addTambahan(kat)} className="inline-flex items-center gap-1 text-[12px] font-semibold text-brand-700 hover:underline">
                             <Plus className="h-3.5 w-3.5" />Tambah parameter unik
@@ -328,5 +329,19 @@ function StatusNarasi({ r }: { r: RamRow }) {
       )}
       {buka && <PenjelasanStatus r={r} onClose={() => setBuka(false)} />}
     </div>
+  );
+}
+
+/** Risk event yang memakai parameter ini (dari kolom Parameter RAM Terkait di Risk Register); kosong berarti parameter belum memantau risiko apa pun. */
+function RiskEventCell({ r, register }: { r: RamRow; register: RiskRegister[] }) {
+  const list = r.kode ? register.filter((x) => x.risk_event && (x.parameter_ram ?? []).includes(r.kode)) : [];
+  return (
+    <td className={clsx("calc text-[12px]", !list.length && "!bg-amber-100/70")}>
+      {list.length ? (
+        <ul className="list-disc space-y-0.5 pl-4">{list.map((x) => <li key={x.id}>{x.risk_event}</li>)}</ul>
+      ) : (
+        <span className="text-amber-800">{r.kode ? "Belum dikaitkan." : "Isi kode parameter dulu."} Kaitkan di <Link className="font-semibold text-brand-700 hover:underline" href="/risk-register">Risk Register</Link> (kolom Parameter RAM Terkait).</span>
+      )}
+    </td>
   );
 }

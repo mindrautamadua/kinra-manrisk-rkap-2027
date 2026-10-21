@@ -59,7 +59,17 @@ export async function dataLembar(path: string): Promise<Record<string, unknown>>
         cat_eskalasi_aksi_korporasi: cat,
       };
     }
-    case "/ram": return { ram: await ram() };
+    case "/ram": {
+      // Arahan 2-RAM: setiap parameter harus memantau risk event yang relevan, sehingga kaitan parameter–risiko ikut dinilai.
+      const [rows, register] = await Promise.all([ram(), api.register()]);
+      const risiko = register.filter((r) => r.risk_event);
+      const ringkas = (r: RiskRegister) => ({ risk_event: r.risk_event, kategori: r.kategori, kategori_dampak: r.kategori_dampak, top_risk: isTopRisk(r.kategori_dampak) });
+      return {
+        ram: rows.map((r) => ({ ...r, risk_event_dipantau: r.diterapkan && r.kode ? risiko.filter((x) => (x.parameter_ram ?? []).includes(r.kode)).map(ringkas) : [] })),
+        parameter_diukur_tanpa_risk_event: rows.filter((r) => r.diterapkan && !risiko.some((x) => r.kode && (x.parameter_ram ?? []).includes(r.kode))).map((r) => `${r.kode || "(tanpa kode)"} ${r.parameter}`),
+        risk_event_tanpa_parameter_ram: risiko.filter((r) => !(r.parameter_ram ?? []).length).map(ringkas),
+      };
+    }
     case "/risk-register":
     case "/risiko-utama": {
       const [register, aksi, rows, sasaran, rkap, cakupan, tax] = await Promise.all([
