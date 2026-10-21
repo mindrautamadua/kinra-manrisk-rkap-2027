@@ -33,12 +33,15 @@ export function buildRam(params: ParameterSheet[], ras: Ras[], pengendalian: Ram
     const p = params.find((x) => x.code === l.kode);
     const diterapkan = meta.grup === "Parameter Standar" || p?.diterapkan === "Ya";
     const s = p?.summary ?? {};
+    const arah = arahParameter(l.kode);
+    // Ringkasan tersimpan bisa berasal dari rumus lama; hasil angka dihitung ulang dengan aturan dua warna. K1 dinilai per sub-item di kertas kerja.
+    const status = typeof s.hasil === "number" && l.kode !== "K1" ? hitungStatus(s.hasil, s.limit, s.appetite, s.tolerance, arah) : statusBiner(String(s.status ?? "Data belum lengkap"));
     out.push({
       key: l.kode, kategoriNo: katNo, kategori: kat, kode: l.kode, parameter: l.parameter ?? "", formula: l.formula ?? "", satuan: l.satuan ?? "",
       kategoriParameter: l.kategori_parameter ?? "", diterapkan,
       limit: diterapkan ? s.limit : null, appetite: diterapkan ? s.appetite : null, tolerance: diterapkan ? s.tolerance : null,
       sikap: sikapUntuk(l.kode, kat, ras), hasil: diterapkan ? s.hasil : null,
-      status: diterapkan ? statusBiner(String(s.status ?? "Data belum lengkap")) : "Tidak diterapkan", arah: arahParameter(l.kode),
+      status: diterapkan ? status : "Tidak diterapkan", arah,
       pengendalian: pengendalian.find((x) => x.kode === l.kode) ?? null,
     });
   }

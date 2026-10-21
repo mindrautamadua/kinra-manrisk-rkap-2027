@@ -64,7 +64,7 @@ export default function Dashboard() {
                     <Link key={r.key} href={r.tambahan ? "/ram" : `/parameter/${r.kode}`} className="flex items-center gap-3 py-2.5 hover:bg-paper/60">
                       <span className="w-10 font-mono text-[12px] font-bold text-brand-700">{r.kode}</span>
                       <span className="flex-1 text-[13px]">{r.parameter}<span className="block text-[11px] text-slate-400">{r.kategori}</span>
-                        {(() => { const why = alasanStatus(r.status, r.hasil, r.limit, r.appetite, r.tolerance, r.satuan); return why && <span className="mt-0.5 block text-[11px] font-medium text-rose-700">{why}</span>; })()}</span>
+                        {(() => { const why = alasanStatus(r.status, r.hasil, r.limit, r.appetite, r.tolerance, r.satuan, r.arah, r.tambahan ? null : r.kode); return why && <span className="mt-0.5 block text-[11px] font-medium text-rose-700">{why}</span>; })()}</span>
                       <span className="text-right text-[12px] tabnum">{nilaiParam(r.hasil, r.satuan)}<span className="block text-[10.5px] text-slate-400">tol. {nilaiParam(r.tolerance, r.satuan)}</span></span>
                       <StatusBadge status={r.status} size="sm" />
                     </Link>

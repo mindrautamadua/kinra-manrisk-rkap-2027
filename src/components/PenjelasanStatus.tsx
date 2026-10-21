@@ -5,7 +5,7 @@ import Link from "next/link";
 import clsx from "clsx";
 import { ArrowUpRight, CheckCircle2, CircleAlert, X } from "lucide-react";
 import { ArahBadge, StatusBadge } from "@/components/ui";
-import { alasanStatus, NARASI_STATUS, nilaiParam, polaritas } from "@/lib/format";
+import { alasanStatus, ATURAN_KHUSUS, cekUrutanBatas, NARASI_STATUS, nilaiParam, polaritas } from "@/lib/format";
 import type { RamRow } from "@/lib/ram";
 
 /** Risk threshold PTPN III hanya dua warna: Hijau sampai Tolerance, Merah setelahnya. Limit dan Appetite tetap ditandai sebagai acuan. */
@@ -37,7 +37,7 @@ function posisi(x: number, l: number, a: number, t: number, naik: boolean) {
   const clamp = (v: number) => Math.min(0.92, Math.max(0.08, v));
   if (b < bl) return (clamp(1 - (bl - b) / span)) * 25;
   if (b < ba) return (1 + frac(b, bl, ba)) * 25;
-  if (b < bt) return (2 + frac(b, ba, bt)) * 25;
+  if (b <= bt) return (2 + frac(b, ba, bt)) * 25;
   return (3 + clamp((b - bt) / span)) * 25;
 }
 
@@ -55,7 +55,9 @@ export function PenjelasanStatus({ r, onClose }: { r: RamRow; onClose: () => voi
   const x = r.hasil as number;
   const v = (n: unknown) => nilaiParam(n, r.satuan);
   const selisih = (d: number) => `${v(Math.abs(d))}${r.satuan === "%" ? " (poin persentase)" : ""}`;
-  const alasan = alasanStatus(r.status, r.hasil, r.limit, r.appetite, r.tolerance, r.satuan);
+  const alasan = alasanStatus(r.status, r.hasil, r.limit, r.appetite, r.tolerance, r.satuan, r.arah, r.tambahan ? null : r.kode);
+  const urutan = cekUrutanBatas(r.limit, r.appetite, r.tolerance, r.arah);
+  const khusus = r.tambahan ? null : ATURAN_KHUSUS[r.kode];
   const tindakan = TINDAKAN[r.status];
   const src = r.tambahan ?? r.pengendalian;
   const isiCtl = [
@@ -64,11 +66,11 @@ export function PenjelasanStatus({ r, onClose }: { r: RamRow; onClose: () => voi
     { label: "Program Kerja", ok: !!src?.program?.trim() },
   ];
 
-  // Target perbaikan: hanya Tolerance yang menentukan warna; syarat lolos mengikuti hitungStatus (maximize > Tolerance, minimize < Tolerance).
+  // Target perbaikan: hanya Tolerance yang menentukan warna; syarat lolos mengikuti hitungStatus (maximize ≥ Tolerance, minimize ≤ Tolerance).
   const target = lengkap ? BATAS.filter((t) => t.key === "tolerance").map((t) => {
     const b = nilai[t.key] as number;
-    const syarat = p.naik ? ">" : "<";
-    const lolos = p.naik ? x > b : x < b;
+    const syarat = p.naik ? "≥" : "≤";
+    const lolos = p.naik ? x >= b : x <= b;
     return { ...t, jadi: "Hijau", b, syarat, lolos, d: b - x };
   }).filter((t) => !t.lolos) : [];
 
@@ -90,6 +92,7 @@ export function PenjelasanStatus({ r, onClose }: { r: RamRow; onClose: () => voi
             <h3 className="mb-1.5 text-[13px] font-bold text-ink">Kenapa {r.status}?</h3>
             <p>{NARASI_STATUS[r.status]}</p>
             {alasan && <p className="mt-1 font-semibold text-rose-700">{alasan}.</p>}
+            {urutan && <p className="mt-1 font-semibold text-amber-700">{urutan}. Periksa kembali isian batas agar status terbaca benar.</p>}
             <p className="mt-2 text-slate-600">
               Parameter ini dibaca <b>{p.label.toLowerCase()}</b>, sehingga status memburuk ketika hasil {p.naik ? "turun di bawah" : "naik melewati"} batas.
               Hasil pengukuran RKAP 2027 adalah <b>{v(r.hasil)}</b>, sedangkan batasnya Limit {v(r.limit)}, Appetite {v(r.appetite)}, dan Tolerance {v(r.tolerance)}.
@@ -152,6 +155,7 @@ export function PenjelasanStatus({ r, onClose }: { r: RamRow; onClose: () => voi
           <section className="rounded-xl border border-line bg-paper/50 px-4 py-3">
             <h3 className="mb-1 text-[12.5px] font-bold text-ink">Dari mana angka hasil?</h3>
             <p className="text-[12.5px] text-slate-600">Formula: {r.formula || "–"}</p>
+            {khusus && <p className="mt-1 text-[12.5px] text-slate-600">Kasus khusus kertas kerja: Merah bila {khusus.replace(/^./, (c) => c.toLowerCase())}.</p>}
             {r.tambahan ? (
               <p className="mt-1 text-[12.5px] text-slate-600">Parameter unik tambahan: hasil pengukuran diisi langsung pada tabel RAM.</p>
             ) : (

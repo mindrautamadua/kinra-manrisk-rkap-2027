@@ -4,7 +4,7 @@ import { Plus, Sparkles, Trash2 } from "lucide-react";
 import { AiFillModal, AiRowButton } from "@/components/AiFill";
 import { ArahBadge, Button, EditCell, ErrorBox, Loading, Section, SelectCell, SheetPage, StatusBadge, TableWrap, useLoad, useSaver } from "@/components/ui";
 import { api } from "@/lib/data";
-import { ARAH_PILIHAN, hitungStatus, nilaiParam } from "@/lib/format";
+import { ARAH_PILIHAN, cekUrutanBatas, hitungStatus, nilaiParam } from "@/lib/format";
 import { note } from "@/lib/static";
 import type { CatAksi } from "@/lib/types";
 import { konfirmasi } from "@/components/Konfirmasi";
@@ -84,7 +84,8 @@ export default function CatPage() {
                     {(["limit_v", "appetite_v", "tolerance_v"] as const).map((f) => (
                       <td key={f} className="input"><EditCell kind="percent" value={r[f]} display={(v) => nilaiParam(v, "%")} onSave={(v) => patch(r.id, { [f]: v as number })} /></td>
                     ))}
-                    <td className="calc"><StatusBadge size="sm" status={r.hasil == null ? "" : hitungStatus(r.hasil, r.limit_v, r.appetite_v, r.tolerance_v, r.arah)} /></td>
+                    <td className="calc"><StatusBadge size="sm" status={r.hasil == null ? "" : hitungStatus(r.hasil, r.limit_v, r.appetite_v, r.tolerance_v, r.arah)} />
+                      {(() => { const u = cekUrutanBatas(r.limit_v, r.appetite_v, r.tolerance_v, r.arah); return u && <p className="mt-1 max-w-[200px] text-[11px] font-medium leading-snug text-amber-700">{u}.</p>; })()}</td>
                     <td className="input"><EditCell value={r.rasionalisasi_threshold} onSave={(v) => patch(r.id, { rasionalisasi_threshold: v as string })} /></td>
                     <td><div className="flex flex-col items-center gap-2"><AiRowButton onClick={() => setAi(r.id)} /><button data-edit onClick={() => del(r.id)} className="text-slate-400 hover:text-rose-600"><Trash2 className="h-4 w-4" /></button></div></td>
                   </tr>

@@ -79,20 +79,20 @@ export const isTopRisk = (k?: string | null) => k === "Moderat" || k === "Tinggi
 
 /**
  * Status pengukuran mengikuti risk threshold PTPN III yang hanya mengenal dua warna:
- * Merah bila hasil melampaui Tolerance, selain itu Hijau.
- * - makin tinggi makin buruk: < Tolerance Hijau, selain itu Merah
- * - makin rendah makin buruk: > Tolerance Hijau, selain itu Merah
+ * Merah hanya bila hasil sudah melewati Tolerance, selain itu (termasuk tepat di Tolerance) Hijau.
+ * - makin tinggi makin buruk: > Tolerance Merah, selain itu Hijau
+ * - makin rendah makin buruk: < Tolerance Merah, selain itu Hijau
  */
 export function hitungStatus(hasil: unknown, limit: unknown, appetite: unknown, tolerance: unknown, arah: string | null | undefined): StatusUkur {
   if (typeof hasil !== "number") return "Data belum lengkap";
   if ([limit, appetite, tolerance].some((x) => typeof x !== "number")) return "Batas belum diisi";
   const x = Math.round(hasil * 1e10) / 1e10;
   const t = tolerance as number;
-  if ((arah ?? "").includes("rendah makin buruk")) return x > t ? "Hijau" : "Merah";
-  return x < t ? "Hijau" : "Merah";
+  if ((arah ?? "").includes("rendah makin buruk")) return x < t ? "Merah" : "Hijau";
+  return x > t ? "Merah" : "Hijau";
 }
 
-/** Rumus kertas kerja masih menghasilkan Kuning/Oranye; keduanya masih dalam Tolerance sehingga dibaca Hijau. */
+/** Data lama yang tersimpan dari rumus empat warna bisa masih berisi Kuning/Oranye; keduanya masih dalam Tolerance sehingga dibaca Hijau. */
 export const statusBiner = <T,>(s: T): T => (s === "Kuning" || s === "Oranye" ? ("Hijau" as T) : s);
 
 /** Polaritas parameter untuk pembaca awam: "Makin rendah makin buruk" berarti target dimaksimalkan, sebaliknya diminimalkan. */
@@ -118,7 +118,7 @@ export const ARTI_THRESHOLD = {
   },
   Tolerance: {
     isi: "Batas maksimal penyimpangan yang masih dapat ditanggung perusahaan.",
-    aksi: "Masih dalam Tolerance: Hijau. Melampaui Tolerance: Merah, eskalasi dan intervensi PT DAM.",
+    aksi: "Masih dalam Tolerance, termasuk tepat di Tolerance: Hijau. Sudah melewati Tolerance: Merah, eskalasi dan intervensi PT DAM.",
   },
 } as const;
 
@@ -137,11 +137,41 @@ export const NARASI_STATUS: Record<string, string> = {
   "Batas belum diisi": "Status belum dapat ditentukan karena limit, appetite, atau tolerance belum diisi.",
 };
 
-/** Kalimat penjelas kenapa sebuah parameter berstatus Merah, dibandingkan langsung dengan batas yang dilewati. */
-export function alasanStatus(status: string, hasil: unknown, limit: unknown, appetite: unknown, tolerance: unknown, satuan?: string | null) {
-  if (![hasil, limit, appetite, tolerance].every((v) => typeof v === "number")) return null;
+/**
+ * Kasus kertas kerja yang hasilnya tidak berupa satu angka tetapi tetap dibaca sudah melewati Tolerance:
+ * - rasio terhadap EBITDA: EBITDA ≤ 0 membuat rasio tidak terhingga sehingga pasti melewati Tolerance;
+ * - K1: Merah bila minimal satu sub-item melewati Tolerance-nya sendiri.
+ */
+export const ATURAN_KHUSUS: Record<string, string> = Object.fromEntries([
+  ...["2a", "2b", "5a", "5b", "5c", "5d", "8a", "8b"].map((k) => [k, "EBITDA RKAP 2027 bernilai ≤ 0 sehingga rasio tidak terhingga dan pasti melewati Tolerance"]),
+  ["K1", "Minimal satu sub-item sudah melewati Tolerance-nya"],
+]);
+
+/**
+ * Urutan risk threshold harus mengikuti arah parameter:
+ * makin tinggi makin buruk: Limit ≤ Appetite ≤ Tolerance; makin rendah makin buruk: Limit ≥ Appetite ≥ Tolerance (sama dengan uji kewajaran lembar parameter).
+ * Mengembalikan pesan bila urutan salah, null bila benar atau batas belum lengkap.
+ */
+export function cekUrutanBatas(limit: unknown, appetite: unknown, tolerance: unknown, arah: string | null | undefined) {
+  if (![limit, appetite, tolerance].every((v) => typeof v === "number")) return null;
+  const [l, a, t] = [limit, appetite, tolerance] as number[];
+  const naik = (arah ?? "").includes("rendah makin buruk");
+  const ok = naik ? l >= a && a >= t : l <= a && a <= t;
+  if (ok) return null;
+  return naik
+    ? "Urutan batas tidak sesuai arah: untuk parameter makin rendah makin buruk seharusnya Limit ≥ Appetite ≥ Tolerance"
+    : "Urutan batas tidak sesuai arah: untuk parameter makin tinggi makin buruk seharusnya Limit ≤ Appetite ≤ Tolerance";
+}
+
+/** Kalimat penjelas kenapa sebuah parameter berstatus Merah, dibandingkan langsung dengan batas yang dilewati sesuai arah parameter. */
+export function alasanStatus(status: string, hasil: unknown, limit: unknown, appetite: unknown, tolerance: unknown, satuan?: string | null, arah?: string | null, kode?: string | null) {
+  if (status !== "Merah") return null;
+  if (![hasil, limit, appetite, tolerance].every((v) => typeof v === "number")) return kode ? ATURAN_KHUSUS[kode] ?? null : null;
   const x = hasil as number;
-  const [h, t] = [hasil, tolerance].map((v) => nilaiParam(v, satuan));
-  if (status === "Merah") return x >= (tolerance as number) ? `Hasil ${h} ≥ toleransi ${t}` : `Hasil ${h} ≤ toleransi ${t}`;
-  return null;
+  const t = tolerance as number;
+  const naik = (arah ?? "").includes("rendah makin buruk");
+  const lewat = naik ? x < t : x > t;
+  if (!lewat) return (kode && ATURAN_KHUSUS[kode]) ?? null;
+  const [h, tt] = [hasil, tolerance].map((v) => nilaiParam(v, satuan));
+  return `Hasil ${h} ${naik ? "di bawah" : "di atas"} toleransi ${tt}`;
 }
