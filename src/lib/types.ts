@@ -83,6 +83,8 @@ export interface ProgramStrategis {
   opex: number | null; capex: number | null; risiko_implementasi: string | null; mitigasi: string | null;
   /** Milestone 2027. Kolom dari migrasi 0010. */
   milestone?: Milestone[] | null;
+  /** Deskripsi ringkas untuk slide 7.4 Executive Summary. Kolom dari migrasi 0014. */
+  deskripsi_ringkas?: string | null;
 }
 export interface Milestone { bulan: string; uraian: string }
 /** Induk Sasaran Strategis RJPP 2026-2030: 3 pilar strategis + Sasaran Korporasi sebagai Fondasi. */

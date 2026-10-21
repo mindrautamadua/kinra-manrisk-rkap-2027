@@ -9,7 +9,7 @@ import { buildRam } from "@/lib/ram";
 import { PILAR_GRCS, type Milestone, type ProgramStrategis } from "@/lib/types";
 import { konfirmasi } from "@/components/Konfirmasi";
 
-type Field = { key: keyof ProgramStrategis; label: string; kind?: "number"; hint?: string; span?: 2 };
+type Field = { key: keyof ProgramStrategis; label: string; kind?: "number"; hint?: string; span?: 2 | 4 };
 
 /** Urutan blok mengikuti kartu 7.4 pada PPT Executive Summary. */
 const BLOK: Field[][] = [
@@ -19,6 +19,7 @@ const BLOK: Field[][] = [
     { key: "tujuan_kuantitatif", label: "Tujuan & Hasil Kerja – Kuantitatif", hint: "Satu poin per baris" }, { key: "target", label: "Target Program" }],
   [{ key: "opex", label: "Anggaran OPEX (Rp)", kind: "number" }, { key: "capex", label: "Anggaran CAPEX (Rp)", kind: "number" },
     { key: "risiko_implementasi", label: "Risiko Implementasi", hint: "Satu poin per baris" }, { key: "mitigasi", label: "Mitigasi Risiko", hint: "Satu poin per baris" }],
+  [{ key: "deskripsi_ringkas", label: "Deskripsi Ringkas (Slide Executive Summary)", hint: "±600–900 karakter; kosong = slide memakai Deskripsi Program", span: 4 }],
 ];
 
 /** Kolom teks yang dibantu AI; anggaran OPEX/CAPEX tetap diisi pengguna. Milestone dipertukarkan dengan AI sebagai teks satu baris per milestone. */
@@ -148,7 +149,7 @@ function ProgramCard({ r, patch, onDelete, onAi }: { r: ProgramStrategis; patch:
       </div>
       <div className="grid grid-cols-1 md:grid-cols-4">
         {BLOK.flat().map((f) => (
-          <div key={f.key} className={`border-b border-line px-4 py-3 md:border-r ${f.span === 2 ? "md:col-span-2" : ""}`}>
+          <div key={f.key} className={`border-b border-line px-4 py-3 md:border-r ${f.span === 2 ? "md:col-span-2" : f.span === 4 ? "md:col-span-4" : ""}`}>
             <div className="mb-1 text-[11px] font-bold tracking-wide text-brand-700 uppercase">{f.label}</div>
             <div className="rounded bg-cell-input px-1.5 py-1 text-[13px]">
               <EditCell value={r[f.key] as string | number | null} kind={f.kind ?? "text"} placeholder={f.hint ?? "Isi…"}

@@ -1,5 +1,5 @@
 "use client";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { Printer } from "lucide-react";
 import { Button, ErrorBox, Loading, SheetPage, useLoad } from "@/components/ui";
@@ -498,6 +498,19 @@ function Poin({ text }: { text?: string | null }) {
 }
 
 function ProgramKartu({ p }: { p: ProgramStrategis | null }) {
+  const isi = p ? [p.inisiatif_rjpp, p.objective_scorecard, p.program_kerja, p.deskripsi_ringkas || p.deskripsi, p.tujuan_kualitatif, p.tujuan_kuantitatif, p.target, p.risiko_implementasi, p.mitigasi] : [];
+  const panjang = isi.reduce((a, t) => a + (t?.length ?? 0), 0);
+  const awal = panjang > 1800 ? 11 : panjang > 1200 ? 12 : 13.5;
+  // Ukuran awal dari total panjang teks; bila satu kolom tetap meluap, font diperkecil 0,5 px hingga muat (min 8 px).
+  const box = useRef<HTMLDivElement>(null);
+  const [fs, setFs] = useState(awal);
+  const [cek, setCek] = useState(0);
+  useEffect(() => { setFs(awal); }, [p, awal]);
+  useEffect(() => { document.fonts?.ready.then(() => setCek((c) => c + 1)); }, []);
+  useLayoutEffect(() => {
+    const el = box.current;
+    if (el && fs > 8 && el.scrollHeight > el.clientHeight + 1) setFs((f) => Math.max(8, f - 0.5));
+  }, [fs, p, cek]);
   if (!p) {
     return (
       <div className="flex h-full items-center justify-center rounded-lg border-2 border-dashed border-[#D9C4C4] text-[15px] text-[#9A9A9A] italic">
@@ -505,14 +518,12 @@ function ProgramKartu({ p }: { p: ProgramStrategis | null }) {
       </div>
     );
   }
-  const isi = [p.inisiatif_rjpp, p.objective_scorecard, p.program_kerja, p.deskripsi, p.tujuan_kualitatif, p.tujuan_kuantitatif, p.target, p.risiko_implementasi, p.mitigasi];
-  const panjang = isi.reduce((a, t) => a + (t?.length ?? 0), 0);
-  const fs = panjang > 1800 ? 11 : panjang > 1200 ? 12 : 13.5;
   const hd = "bg-[#600000] px-3 py-1.5 text-[13px] font-bold text-white";
   const cl = "border border-[#CFCFCF] px-3 py-2 align-top";
   const k = (t?: string | null) => <Poin text={t} />;
   const kosong = (...t: (string | number | null | undefined)[]) => t.every((x) => x == null || x === "");
   return (
+    <div ref={box} className="h-full overflow-hidden">
     <table className="h-full w-full table-fixed border-collapse leading-snug" style={{ fontSize: fs }}>
       <colgroup><col style={{ width: "34%" }} /><col style={{ width: "30%" }} /><col style={{ width: "18%" }} /><col style={{ width: "18%" }} /></colgroup>
       <tbody>
@@ -528,7 +539,7 @@ function ProgramKartu({ p }: { p: ProgramStrategis | null }) {
         </tr>
         <tr><th className={hd + " text-left"}>Deskripsi Program</th><th className={hd + " text-left"}>Tujuan &amp; Hasil Kerja</th><th colSpan={2} className={hd + " text-left"}>Target Program</th></tr>
         <tr>
-          <td className={cl}>{kosong(p.deskripsi) ? <Kosong /> : k(p.deskripsi)}</td>
+          <td className={cl}>{kosong(p.deskripsi_ringkas, p.deskripsi) ? <Kosong /> : k(p.deskripsi_ringkas || p.deskripsi)}</td>
           <td className={cl}>
             {kosong(p.tujuan_kualitatif, p.tujuan_kuantitatif) ? <Kosong /> : (
               <div className="space-y-1.5">
@@ -550,5 +561,6 @@ function ProgramKartu({ p }: { p: ProgramStrategis | null }) {
         </tr>
       </tbody>
     </table>
+    </div>
   );
 }
