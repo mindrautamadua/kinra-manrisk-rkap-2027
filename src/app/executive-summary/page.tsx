@@ -539,8 +539,8 @@ function ProgramKartu({ p }: { p: ProgramStrategis | null }) {
         <tr><th className={hd + " text-left"}>Rencana Anggaran Belanja</th><th className={hd + " text-left"}>Risiko Implementasi</th><th colSpan={2} className={hd + " text-left"}>Mitigasi Risiko</th></tr>
         <tr className="h-[22%]">
           <td className={cl}>
-            <div>OPEX : <b className="tabnum">{p.opex ? rupiah(p.opex) : "-"}</b></div>
-            <div>CAPEX : <b className="tabnum">{p.capex ? rupiah(p.capex) : "-"}</b></div>
+            <div>OPEX : <b className="tabnum">{p.opex != null ? rupiah(p.opex) : "-"}</b></div>
+            <div>CAPEX : <b className="tabnum">{p.capex != null ? rupiah(p.capex) : "-"}</b></div>
           </td>
           <td className={cl}>{kosong(p.risiko_implementasi) ? <Kosong /> : k(p.risiko_implementasi)}</td>
           <td colSpan={2} className={cl}>{kosong(p.mitigasi) ? <Kosong /> : k(p.mitigasi)}</td>
