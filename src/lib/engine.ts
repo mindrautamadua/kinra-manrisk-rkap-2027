@@ -60,6 +60,8 @@ export class Workbook {
         if (isInputCell(c) && a in inp) v = inp[a];
         // Tanggal yang tersimpan sebagai teks (diketik sebelum format nama bulan dikenali) dibaca ulang sebagai tanggal agar rumus durasi tidak #VALUE!.
         if (isInputCell(c) && typeof v === "string" && isDateFmt(c.nf)) v = parseInput(v, c.nf);
+        // Angka yang tersimpan sebagai teks (mis. ditempel dengan pemisah ribuan) dibaca ulang agar ikut terhitung.
+        else if (isInputCell(c) && typeof v === "string" && /^[\s\d.,()%Rp-]+$/i.test(v)) { const n = parseInput(v, c.nf); if (typeof n === "number") v = n; }
         rows[row - 1][col - 1] = v as HfValue;
       }
       this.hf.setSheetContent(sheet, rows as (string | number | boolean | null)[][]);
@@ -128,7 +130,9 @@ export function parseInput(raw: string, nf?: string): CellValue {
     const neg = t.startsWith("(") || t.startsWith("-");
     t = t.replace(/[()-]/g, "");
     // Format Indonesia: titik ribuan, koma desimal. Tanpa koma & satu titik -> titik dianggap desimal.
-    if (t.includes(",")) t = t.replace(/\./g, "").replace(",", ".");
+    // Lebih dari satu koma tanpa titik ("51,230,128,320") berarti koma dipakai sebagai pemisah ribuan gaya Inggris.
+    if ((t.match(/,/g) || []).length > 1 && !t.includes(".")) t = t.replace(/,/g, "");
+    else if (t.includes(",")) t = t.replace(/\./g, "").replace(",", ".");
     else if ((t.match(/\./g) || []).length > 1) t = t.replace(/\./g, "");
     let n = Number(t);
     if (isNaN(n)) return s;
