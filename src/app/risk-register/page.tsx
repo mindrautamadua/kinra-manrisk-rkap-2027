@@ -10,6 +10,7 @@ import { ParamPicker } from "@/components/ParamPicker";
 import { SasaranPicker } from "@/components/SasaranPicker";
 import { PilihBanyak } from "@/components/PilihBanyak";
 import { labelPos, POS_PILIHAN, PROSES_BISNIS, type KeterkaitanRequest, type KeterkaitanResponse } from "@/lib/keterkaitan-rkap";
+import type { DasarPenilaianRequest, DasarPenilaianResponse } from "@/lib/dasar-penilaian";
 import { MitigasiAi } from "@/components/MitigasiAi";
 import { UsulanRisikoModal } from "@/components/UsulanRisiko";
 import type { UsulanRisiko, UsulanRisikoRequest } from "@/lib/usulan-risiko";
@@ -21,7 +22,7 @@ import {
 } from "@/lib/redundansi-risiko";
 import { RencanaAksiModal } from "@/components/RencanaAksi";
 import { elInheren, ringkasTarget, type RingkasTarget } from "@/lib/target-risiko";
-import { POS } from "@/lib/rkap-baca";
+import { angkaKas, POS } from "@/lib/rkap-baca";
 import { AiFillModal, AiRowButton } from "@/components/AiFill";
 import type { FieldSpec } from "@/lib/isi-ai";
 import { ringkasRisiko } from "@/lib/kaitkan-ai";
@@ -248,6 +249,38 @@ export default function RiskRegisterPage() {
     } catch (e) { alert(`Gagal menyusun keterkaitan RKAP: ${(e as Error).message}`); }
     setIsiRkap(false);
   };
+  /** Dasar penilaian probabilitas & dampak (arahan 2f): AI menyusun historis, proyeksi RKAP, dan skenario untuk baris yang masih kosong. */
+  const [isiDasar, setIsiDasar] = useState(false);
+  const belumDasar = (d?.register ?? []).filter((r) => r.risk_event && r.probabilitas != null && !r.dasar_penilaian?.trim());
+  const isiDasarPenilaian = async () => {
+    const target = belumDasar;
+    if (!target.length) return;
+    if (!(await konfirmasi({ judul: `Isi Dasar Penilaian untuk ${target.length} risiko?`, aksi: "Susun Draf", nada: "info",
+      pesan: "AI menyusun dasar probabilitas dan dampak (historis, proyeksi RKAP 2027, skenario ringan/dasar/berat) dari Renstra, Presentasi DKMR, dan Data Keuangan RKAP. Angka yang tercatat tidak diubah; selisih besar ditandai ⚠. Histori yang tidak tersedia ditulis sebagai [perlu dilengkapi]." }))) return;
+    setIsiDasar(true);
+    try {
+      const rp = (v: number | null | undefined) => (v == null ? null : `Rp${(v / 1e9).toLocaleString("id-ID", { maximumFractionDigits: 2 })} M`);
+      const rkap: Record<string, string> = {};
+      if (d!.rkap) {
+        for (const p of POS) { const v = d!.rkap.data.pos[p.kode]?.tahun; if (v != null) rkap[p.label] = rp(v)!; }
+        for (const [k, v] of Object.entries(angkaKas(d!.rkap.data))) if (v != null) rkap[k] = rp(v)!;
+      }
+      const req: DasarPenilaianRequest = {
+        rkap,
+        risiko: target.map((r) => ({ id: r.id, no: d!.register.indexOf(r) + 1, kategori: r.kategori, risk_event: r.risk_event, deskripsi: r.deskripsi, root_cause: r.root_cause,
+          probabilitas: r.probabilitas, nilai_dampak: r.nilai_dampak, deskripsi_dampak: r.deskripsi_dampak, kriteria_dampak: r.kriteria_dampak, kategori_dampak: r.kategori_dampak,
+          pos_rkap: (r.pos_rkap ?? []).map((k) => labelPos(k, d!.rkap)), program_kerja_rkap: r.program_kerja_rkap ?? null })),
+      };
+      const res = await fetch("/api/dasar-penilaian", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req) });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body?.error ?? res.statusText);
+      const now = new Date().toISOString();
+      const saran = new Map((body as DasarPenilaianResponse).hasil.map((h) => [h.id, h.dasar_penilaian]));
+      q.setData((prev) => prev && { ...prev, register: prev.register.map((r) => (saran.has(r.id) ? { ...r, dasar_penilaian: saran.get(r.id) } : r)) });
+      for (const [id, v] of saran) saver.run(() => api.update<RiskRegister>("risk_register", "id", id, { dasar_penilaian: v, updated_at: now } as Partial<RiskRegister>));
+    } catch (e) { alert(`Gagal menyusun dasar penilaian: ${(e as Error).message}`); }
+    setIsiDasar(false);
+  };
   /** Kelompok redundan per risiko, urut dari jenis terberat (Duplikat lebih dulu). */
   const kelompokRedundan = useMemo(() => {
     const m = new Map<string, KelompokRedundan[]>();
@@ -348,6 +381,12 @@ export default function RiskRegisterPage() {
           </div>
           <Section letter="A" title="Risk Register" right={
             <div className="flex flex-wrap gap-2">
+              {!ro && belumDasar.length > 0 && (
+                <button onClick={isiDasarPenilaian} disabled={isiDasar} title="Isi Dasar Penilaian Probabilitas & Dampak yang masih kosong dengan AI"
+                  className="flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[12.5px] text-amber-900 disabled:opacity-60">
+                  <Sparkles className="h-3.5 w-3.5" />{isiDasar ? "Menyusun dasar penilaian…" : `Isi Dasar Penilaian (${belumDasar.length})`}
+                </button>
+              )}
               {!ro && belumRkap.length > 0 && (
                 <button onClick={isiKeterkaitan} disabled={isiRkap} title="Isi Proses Bisnis, Pos/Target RKAP, dan Program Kerja RKAP yang masih kosong dengan AI"
                   className="flex items-center gap-1.5 rounded-lg border border-sky-300 bg-sky-50 px-2.5 py-1.5 text-[12.5px] text-sky-900 disabled:opacity-60">
