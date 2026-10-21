@@ -114,6 +114,15 @@ export async function dataLembar(path: string): Promise<Record<string, unknown>>
         })),
       };
     }
+    case "/rekap": {
+      // Arahan 6f: parameter tidak diterapkan disajikan terpisah dari parameter yang diukur, masing-masing dengan justifikasinya.
+      const rows = await ram();
+      return {
+        penyajian: "Lembar Rekap dan RAM memisahkan parameter yang diukur (bagian A) dari parameter tidak diterapkan (bagian B, dengan kolom Dasar Pertimbangan/Justifikasi); Executive Summary slide 7.2 dan ekspor Excel juga menyajikannya terpisah.",
+        parameter_diukur: rows.filter((r) => r.diterapkan),
+        parameter_tidak_diterapkan: rows.filter((r) => !r.diterapkan).map((r) => ({ kode: r.kode, parameter: r.parameter, kategori: r.kategori, alasan_tidak_diterapkan: r.alasan_tidak_diterapkan })),
+      };
+    }
     case "/program-strategis": return { program_strategis: await api.program() };
     case "/cat": return { cat: await api.cat() };
     case "/risk-driver": return { risk_driver: await api.drivers() };
