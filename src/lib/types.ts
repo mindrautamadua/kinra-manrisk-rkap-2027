@@ -55,13 +55,18 @@ export interface ParameterSheet {
   /** Justifikasi bila parameter tidak diterapkan. Kolom dari migrasi 0010. */
   alasan_tidak_diterapkan?: string | null;
 }
-export interface RamPengendalian { kode: string; inisiatif: string | null; kebijakan: string | null; program: string | null; anggaran: number | null; indikator?: string | null }
+export interface RamPengendalian { kode: string; inisiatif: string | null; kebijakan: string | null; program: string | null; anggaran: number | null; indikator?: string | null;
+  /** Rasionalisasi dan dasar perhitungan risk threshold. Kolom dari migrasi 0013. */
+  rasionalisasi?: string | null;
+}
 export interface RamTambahan {
   id: string; kategori: string; kode: string | null; parameter: string | null; formula: string | null; satuan: string | null;
   limit_v: number | null; appetite_v: number | null; tolerance_v: number | null; arah: string | null; hasil: number | null;
   inisiatif: string | null; kebijakan: string | null; program: string | null; anggaran: number | null;
   /** Indikator keberhasilan pengendalian. Kolom dari migrasi 0010. */
   indikator?: string | null;
+  /** Rasionalisasi dan dasar perhitungan risk threshold. Kolom dari migrasi 0013. */
+  rasionalisasi?: string | null;
 }
 export interface CatAksi {
   id: string; urutan: number; jenis: string | null; nama: string | null; rencana_detail: string | null; dasar_kewenangan: string | null;

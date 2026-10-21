@@ -21,6 +21,8 @@ const ramRingkas = (rows: RamRow[]) => rows.map((r) => ({
   limit: r.limit, appetite: r.appetite, tolerance: r.tolerance, hasil: r.hasil, status: r.status, arah: r.arah,
   inisiatif: (r.tambahan ?? r.pengendalian)?.inisiatif ?? null, kebijakan: (r.tambahan ?? r.pengendalian)?.kebijakan ?? null,
   program: (r.tambahan ?? r.pengendalian)?.program ?? null, anggaran: (r.tambahan ?? r.pengendalian)?.anggaran ?? null,
+  indikator: (r.tambahan ?? r.pengendalian)?.indikator ?? null,
+  rasionalisasi_threshold: (r.tambahan ?? r.pengendalian)?.rasionalisasi ?? null, alasan_tidak_diterapkan: r.alasanTidak ?? null,
 }));
 
 const risikoRingkas = (register: RiskRegister[], aksi: MitigasiAksi[] | null, rkapAktif: RkapKeuangan | null = null) => register.filter((r) => r.risk_event).map((r, i) => ({
@@ -45,7 +47,7 @@ export async function dataLembar(path: string): Promise<Record<string, unknown>>
   const p = path.match(/^\/parameter\/(.+)$/);
   if (p) {
     const [sheet, rows] = await Promise.all([api.param(p[1]), ram()]);
-    return { parameter: sheet ? { code: sheet.code, title: sheet.title, diterapkan: sheet.diterapkan, summary: sheet.summary, inputs: sheet.inputs } : null, ram: rows.find((r) => r.kode === p[1]) ?? null };
+    return { parameter: sheet ? { code: sheet.code, title: sheet.title, diterapkan: sheet.diterapkan, alasan_tidak_diterapkan: sheet.alasan_tidak_diterapkan ?? null, summary: sheet.summary, inputs: sheet.inputs } : null, ram: rows.find((r) => r.kode === p[1]) ?? null };
   }
   switch (path) {
     case "/ras": {

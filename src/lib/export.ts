@@ -99,7 +99,8 @@ const RAM_COLS: Col[] = [
   { header: "No", key: "kategoriNo", width: 5 }, { header: "Taksonomi Risiko", key: "kategori", width: 24 }, { header: "Kode", key: "kode", width: 7 },
   { header: "Parameter Pengukuran", key: "parameter", width: 40 }, { header: "Formula", key: "formula", width: 44 }, { header: "Unit Satuan", key: "satuan", width: 10 },
   { header: "Kategori Parameter", key: "kategoriParameter", width: 18 }, { header: "Limit", key: "limit", width: 11 }, { header: "Appetite", key: "appetite", width: 11 },
-  { header: "Tolerance", key: "tolerance", width: 11 }, { header: "Sikap Risiko Sesuai RAS", key: "sikap", width: 18 }, { header: "Hasil Pengukuran (Risiko Inheren)", key: "hasil", width: 16 },
+  { header: "Tolerance", key: "tolerance", width: 11 }, { header: "Rasionalisasi & Dasar Perhitungan Threshold", key: "rasionalisasi", width: 44 },
+  { header: "Sikap Risiko Sesuai RAS", key: "sikap", width: 18 }, { header: "Hasil Pengukuran (Risiko Inheren)", key: "hasil", width: 16 },
   { header: "Status Pengukuran", key: "status", width: 16 }, { header: "Inisiatif Strategis", key: "inisiatif", width: 30 }, { header: "Kebijakan", key: "kebijakan", width: 30 },
   { header: "Program Kerja", key: "program", width: 30 }, { header: "Anggaran (Rp miliar)", key: "anggaran", width: 14 },
   { header: "Indikator Keberhasilan", key: "indikator", width: 34 },
@@ -108,7 +109,7 @@ const RAM_COLS: Col[] = [
 /** Parameter yang diukur lebih dulu, parameter tidak diterapkan dikumpulkan terpisah di bawahnya. */
 const ramRows = (rows: RamRow[]) => [...rows.filter((r) => r.diterapkan), ...rows.filter((r) => !r.diterapkan)].map((r) => {
   const src = (r.tambahan ?? r.pengendalian ?? {}) as Record<string, unknown>;
-  return { ...r, inisiatif: src.inisiatif, kebijakan: src.kebijakan, program: src.program, anggaran: src.anggaran, indikator: src.indikator };
+  return { ...r, inisiatif: src.inisiatif, kebijakan: src.kebijakan, program: src.program, anggaran: src.anggaran, indikator: src.indikator, rasionalisasi: src.rasionalisasi };
 });
 
 const AKSI_COLS: Col[] = [

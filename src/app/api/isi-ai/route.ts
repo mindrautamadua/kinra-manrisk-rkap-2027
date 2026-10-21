@@ -36,6 +36,7 @@ const KHUSUS: Record<JenisIsi, string> = {
 - kebijakan: kebijakan/limit/prosedur yang ditetapkan untuk mengendalikan parameter.
 - program: program kerja konkret 2027 dengan target terukur dan waktu; kaitkan dengan root cause atau mitigasi risiko terkait bila ada.
 - indikator: indikator keberhasilan pengendalian yang terukur dan dapat dipantau sepanjang 2027 (mis. hasil parameter kembali ke dalam appetite pada Triwulan [...], persentase penyelesaian program, jumlah kejadian). Boleh 1-3 indikator bernomor; target angka yang tidak ada di konteks ditulis "[...]".
+- rasionalisasi: dasar penetapan limit/appetite/tolerance parameter ini, mempertimbangkan sikap risiko RAS, karakteristik indikator dan arahnya, kapasitas risiko, kondisi aktual/data historis, dan proyeksi RKAP 2027. Jelaskan dasar perhitungan tiap batas (mis. covenant kreditur, ketentuan Induk, rata-rata historis, margin terhadap kapasitas). Angka hanya boleh dikutip dari konteks; angka lain ditulis "[...]". Boleh 3-5 kalimat.
 - Jangan mengisi angka anggaran.`,
   program: `Lembar: 7.4 Program atau Inisiatif Strategis GRCS (satu kartu program pada Executive Summary RKAP 2027).
 - Pilar GRCS: Governance (tata kelola, GCG, struktur dan kebijakan organ perusahaan), Risk Management (penerapan ERM, model dan budaya risiko), Compliance (kepatuhan regulasi, anti-fraud/anti-suap, sistem manajemen kepatuhan), Sustainability (ESG, lingkungan, sosial, pelaporan keberlanjutan). Program harus sesuai pilar pada konteks.

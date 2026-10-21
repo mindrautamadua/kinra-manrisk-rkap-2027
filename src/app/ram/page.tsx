@@ -160,6 +160,20 @@ export default function RamPage() {
     );
   };
 
+  /** Rasionalisasi threshold wajib untuk semua parameter yang diukur (arahan Challenge Session 5c). */
+  const rasio = (r: RamRow) => {
+    const val = (r.tambahan ?? r.pengendalian)?.rasionalisasi ?? null;
+    const save = (v: string | number | null) => {
+      const isi = (v as string) || null;
+      if (r.tambahan) patchTambahan(r.tambahan.id, { rasionalisasi: isi }); else savePengendalian(r.kode, { rasionalisasi: isi });
+    };
+    return (
+      <td className={clsx("input text-[12px]", !val && "!bg-amber-100/70")}>
+        <EditCell value={val} placeholder="Dasar penetapan Limit/Appetite/Tolerance: sikap RAS, kapasitas risiko, data historis, proyeksi RKAP 2027…" onSave={save} />
+      </td>
+    );
+  };
+
   return (
     <SheetPage title="Risk Acceptance Matrix RKAP 2027 - PT KINRA" code="RAM" note={note("RAM")} wide
       actions={<>{saver.indicator}{massal ? (
@@ -176,12 +190,12 @@ export default function RamPage() {
       {q.loading ? <Loading /> : q.error ? <ErrorBox error={q.error} /> : d && (<>
         <Section letter="A" title={`Parameter yang Diukur (${diukur.length})`}>
         <TableWrap stickyHeader>
-          <table ref={tableRef} className="kk-table min-w-[2520px]">
+          <table ref={tableRef} className="kk-table min-w-[2810px]">
             <thead>
               <tr>
                 <th rowSpan={2} className="fz fz-no w-10">No</th><th rowSpan={2} className="fz fz-tax w-36">Taksonomi Risiko</th><th rowSpan={2} colSpan={2} className="fz fz-kode fz-edge w-72">Parameter Pengukuran</th>
                 <th rowSpan={2} className="w-72">Formula</th><th rowSpan={2} className="w-20">Unit Satuan Formula</th><th rowSpan={2} className="w-28">Kategori Parameter</th>
-                <th colSpan={3} className="text-center"><ThresholdHint jenis="Risk Threshold" /></th><th rowSpan={2} className="w-32">Sikap Risiko Sesuai RAS</th>
+                <th colSpan={3} className="text-center"><ThresholdHint jenis="Risk Threshold" /></th><th rowSpan={2} className="w-72">Rasionalisasi &amp; Dasar Perhitungan Threshold</th><th rowSpan={2} className="w-32">Sikap Risiko Sesuai RAS</th>
                 <th rowSpan={2} className="w-32">Hasil Pengukuran Risiko pada RKAP 2027 (Risiko Inheren)</th><th rowSpan={2} className="min-w-[210px]">Status Pengukuran</th>
                 <th colSpan={5} className="text-center">Rencana Pengendalian</th><th rowSpan={2} className="w-10" />
               </tr>
@@ -211,6 +225,7 @@ export default function RamPage() {
                               {(["limit_v", "appetite_v", "tolerance_v"] as const).map((f) => (
                                 <td key={f} className="input"><EditCell kind={t.satuan === "%" ? "percent" : "number"} value={t[f]} display={(v) => nilaiParam(v, t.satuan)} onSave={(v) => patchTambahan(t.id, { [f]: v })} /></td>
                               ))}
+                              {rasio(r)}
                               <td className="calc"><SikapBadge sikap={r.sikap} /></td>
                               <td className="input"><EditCell kind={t.satuan === "%" ? "percent" : "number"} value={t.hasil} display={(v) => nilaiParam(v, t.satuan)} onSave={(v) => patchTambahan(t.id, { hasil: v as number })} /></td>
                             </>
@@ -222,6 +237,7 @@ export default function RamPage() {
                               <td className="calc text-right tabnum">{nilaiParam(r.limit, r.satuan)}</td>
                               <td className="calc text-right tabnum">{nilaiParam(r.appetite, r.satuan)}</td>
                               <td className="calc text-right tabnum">{nilaiParam(r.tolerance, r.satuan)}</td>
+                              {rasio(r)}
                               <td className="calc">{r.sikap.includes("·") ? <span className="text-[11.5px] font-semibold">{r.sikap}</span> : <SikapBadge sikap={r.sikap} />}</td>
                               <td className="calc text-right font-semibold tabnum">{nilaiParam(r.hasil, r.satuan)}</td>
                             </>
@@ -237,7 +253,7 @@ export default function RamPage() {
                     })}
                     <tr>
                       {list.length === 0 && <><td className="group fz fz-no text-center">{ki + 1}</td><td className="group fz fz-tax">{kat}</td></>}
-                      <td colSpan={18} className="!bg-paper/60 py-1.5">
+                      <td colSpan={19} className="!bg-paper/60 py-1.5">
                         <div className="fz fz-kode w-max">
                           <button data-edit onClick={() => addTambahan(kat)} className="inline-flex items-center gap-1 text-[12px] font-semibold text-brand-700 hover:underline">
                             <Plus className="h-3.5 w-3.5" />Tambah parameter unik
@@ -285,7 +301,7 @@ export default function RamPage() {
       </>)}
       {ai && (
         <AiFillModal jenis="ram" subjek={`Parameter ${ai.kode} ${ai.parameter} · ${ai.status}`} konteks={aiKonteks(ai)}
-          fields={[...AI_FIELDS]}
+          fields={[...AI_FIELDS, { key: "rasionalisasi", label: "Rasionalisasi & Dasar Perhitungan Threshold" }]}
           nilai={ai.tambahan ?? ai.pengendalian ?? {}} onApply={applyAi} onClose={() => setAi(null)}
           placeholder="Contoh: Hasil DER naik karena rencana pinjaman pabrik baru. Kami ingin menjaganya lewat restrukturisasi tenor dan penambahan setoran modal dari Induk." />
       )}

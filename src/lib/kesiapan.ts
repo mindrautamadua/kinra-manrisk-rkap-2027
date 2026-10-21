@@ -50,6 +50,13 @@ export function periksa(d: InputKesiapan): Pemeriksaan[] {
       detail: `${r.parameter} · hasil ${nilaiParam(r.hasil, r.satuan)} (tolerance ${nilaiParam(r.tolerance, r.satuan)})`, href: "/ram", ref: refP(r.kode, r.parameter),
     })));
 
+  add("ram-rasionalisasi", "RAM", "Setiap risk threshold punya rasionalisasi dan dasar perhitungan",
+    d.ram.filter((r) => r.diterapkan && kosong((r.tambahan ?? r.pengendalian)?.rasionalisasi)).map((r) => ({
+      id: `rasio-${r.key}`, severity: "perhatian", area: "RAM",
+      judul: `${r.kode || r.parameter} belum punya rasionalisasi threshold`,
+      detail: `${r.parameter} · limit ${nilaiParam(r.limit, r.satuan)}, appetite ${nilaiParam(r.appetite, r.satuan)}, tolerance ${nilaiParam(r.tolerance, r.satuan)}`, href: "/ram", ref: refP(r.kode, r.parameter),
+    })));
+
   add("ram-belum-terukur", "Lembar Parameter", "Parameter yang diterapkan sudah terhitung",
     d.ram.filter((r) => r.diterapkan && !r.tambahan && !["Hijau", "Merah"].includes(r.status)).map((r) => ({
       id: `ukur-${r.kode}`, severity: "perhatian", area: "Lembar Parameter",
