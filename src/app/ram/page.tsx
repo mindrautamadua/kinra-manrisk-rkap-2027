@@ -16,7 +16,10 @@ import type { IsiRequest, IsiResponse } from "@/lib/isi-ai";
 import type { RamPengendalian, RamTambahan } from "@/lib/types";
 import { konfirmasi } from "@/components/Konfirmasi";
 
-const AI_FIELDS = [{ key: "inisiatif", label: "Inisiatif Strategis" }, { key: "kebijakan", label: "Kebijakan" }, { key: "program", label: "Program Kerja" }] as const;
+const AI_FIELDS = [
+  { key: "inisiatif", label: "Inisiatif Strategis" }, { key: "kebijakan", label: "Kebijakan" }, { key: "program", label: "Program Kerja" },
+  { key: "indikator", label: "Indikator Keberhasilan" },
+] as const;
 type AiField = (typeof AI_FIELDS)[number]["key"];
 const AI_PARALEL = 3;
 
@@ -92,7 +95,7 @@ export default function RamPage() {
   const isiMassal = async () => {
     const target = targetMassal;
     if (!target.length) return;
-    if (!(await konfirmasi({ judul: `Susun draf AI untuk ${target.length} parameter?`, pesan: "AI akan menyusun draf Inisiatif Strategis, Kebijakan, dan Program Kerja untuk parameter berstatus Kuning/Oranye/Merah.\n\nHanya kolom yang masih kosong yang diisi; isian yang sudah ada tidak diubah. Anggaran tetap diisi manual.", aksi: "Susun Draf", nada: "info" }))) return;
+    if (!(await konfirmasi({ judul: `Susun draf AI untuk ${target.length} parameter?`, pesan: "AI akan menyusun draf Inisiatif Strategis, Kebijakan, Program Kerja, dan Indikator Keberhasilan untuk parameter berstatus Kuning/Oranye/Merah.\n\nHanya kolom yang masih kosong yang diisi; isian yang sudah ada tidak diubah. Anggaran tetap diisi manual.", aksi: "Susun Draf", nada: "info" }))) return;
     const entitas = await api.sampul().then((s) => s.nama_entitas || "PT KINRA").catch(() => "PT KINRA");
     const gagal: string[] = [];
     let selesai = 0;
@@ -164,18 +167,18 @@ export default function RamPage() {
       )}<Button variant="outline" onClick={() => exportRam(rows)}><Download className="h-4 w-4" />Excel</Button></>}>
       {q.loading ? <Loading /> : q.error ? <ErrorBox error={q.error} /> : d && (
         <TableWrap stickyHeader>
-          <table ref={tableRef} className="kk-table min-w-[2300px]">
+          <table ref={tableRef} className="kk-table min-w-[2520px]">
             <thead>
               <tr>
                 <th rowSpan={2} className="fz fz-no w-10">No</th><th rowSpan={2} className="fz fz-tax w-36">Taksonomi Risiko</th><th rowSpan={2} colSpan={2} className="fz fz-kode fz-edge w-72">Parameter Pengukuran</th>
                 <th rowSpan={2} className="w-72">Formula</th><th rowSpan={2} className="w-20">Unit Satuan Formula</th><th rowSpan={2} className="w-28">Kategori Parameter</th>
                 <th colSpan={3} className="text-center"><ThresholdHint jenis="Risk Threshold" /></th><th rowSpan={2} className="w-32">Sikap Risiko Sesuai RAS</th>
                 <th rowSpan={2} className="w-32">Hasil Pengukuran Risiko pada RKAP 2027 (Risiko Inheren)</th><th rowSpan={2} className="min-w-[210px]">Status Pengukuran</th>
-                <th colSpan={4} className="text-center">Rencana Pengendalian</th><th rowSpan={2} className="w-10" />
+                <th colSpan={5} className="text-center">Rencana Pengendalian</th><th rowSpan={2} className="w-10" />
               </tr>
               <tr>
                 <th className="w-24"><ThresholdHint jenis="Limit" /></th><th className="w-24"><ThresholdHint jenis="Appetite" /></th><th className="w-24"><ThresholdHint jenis="Tolerance" /></th>
-                <th className="w-56">Inisiatif Strategis</th><th className="w-56">Kebijakan</th><th className="w-56">Program Kerja</th><th className="w-28">Anggaran (Rp miliar)</th>
+                <th className="w-56">Inisiatif Strategis</th><th className="w-56">Kebijakan</th><th className="w-56">Program Kerja</th><th className="w-28">Anggaran (Rp miliar)</th><th className="w-56">Indikator Keberhasilan</th>
               </tr>
             </thead>
             <tbody>
@@ -216,7 +219,7 @@ export default function RamPage() {
                             </>
                           )}
                           <td className="calc"><StatusNarasi r={r} /></td>
-                          {ctl(r, "inisiatif")}{ctl(r, "kebijakan")}{ctl(r, "program")}{ctl(r, "anggaran")}
+                          {ctl(r, "inisiatif")}{ctl(r, "kebijakan")}{ctl(r, "program")}{ctl(r, "anggaran")}{ctl(r, "indikator")}
                           <td><div className="flex flex-col items-center gap-2">
                             {r.diterapkan && <AiRowButton title="Susun rencana pengendalian dengan AI" onClick={() => setAi(r)} />}
                             {t && <button data-edit onClick={() => delTambahan(t.id)} className="text-slate-400 hover:text-rose-600"><Trash2 className="h-4 w-4" /></button>}
@@ -226,7 +229,7 @@ export default function RamPage() {
                     })}
                     <tr>
                       {list.length === 0 && <><td className="group fz fz-no text-center">{ki + 1}</td><td className="group fz fz-tax">{kat}</td></>}
-                      <td colSpan={17} className="!bg-paper/60 py-1.5">
+                      <td colSpan={18} className="!bg-paper/60 py-1.5">
                         <div className="fz fz-kode w-max">
                           <button data-edit onClick={() => addTambahan(kat)} className="inline-flex items-center gap-1 text-[12px] font-semibold text-brand-700 hover:underline">
                             <Plus className="h-3.5 w-3.5" />Tambah parameter unik

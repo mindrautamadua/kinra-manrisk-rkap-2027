@@ -33,6 +33,8 @@ export interface RiskRegister {
   target_probabilitas?: number | null;
   target_nilai_dampak?: number | null;
   target_kategori_dampak?: string | null;
+  /** Dasar penetapan probabilitas dan dampak (data historis, proyeksi RKAP, skenario). Kolom dari migrasi 0010. */
+  dasar_penilaian?: string | null;
 }
 export const TRIWULAN = ["TW I", "TW II", "TW III", "TW IV"] as const;
 /** Rencana aksi mitigasi terstruktur satu risiko (migrasi 0008). */
@@ -46,12 +48,16 @@ export interface ParamSummary { limit?: number | string | null; appetite?: numbe
 export interface ParameterSheet {
   code: string; title: string; grup: string; urutan: number; diterapkan: string | null;
   inputs: Record<string, CellValue>; summary: ParamSummary; updated_at?: string;
+  /** Justifikasi bila parameter tidak diterapkan. Kolom dari migrasi 0010. */
+  alasan_tidak_diterapkan?: string | null;
 }
-export interface RamPengendalian { kode: string; inisiatif: string | null; kebijakan: string | null; program: string | null; anggaran: number | null }
+export interface RamPengendalian { kode: string; inisiatif: string | null; kebijakan: string | null; program: string | null; anggaran: number | null; indikator?: string | null }
 export interface RamTambahan {
   id: string; kategori: string; kode: string | null; parameter: string | null; formula: string | null; satuan: string | null;
   limit_v: number | null; appetite_v: number | null; tolerance_v: number | null; arah: string | null; hasil: number | null;
   inisiatif: string | null; kebijakan: string | null; program: string | null; anggaran: number | null;
+  /** Indikator keberhasilan pengendalian. Kolom dari migrasi 0010. */
+  indikator?: string | null;
 }
 export interface CatAksi {
   id: string; urutan: number; jenis: string | null; nama: string | null; rencana_detail: string | null; dasar_kewenangan: string | null;
@@ -66,7 +72,10 @@ export interface ProgramStrategis {
   program_kerja: string | null; pemimpin: string | null; pemilik: string | null; bulan_mulai: string | null; bulan_selesai: string | null;
   deskripsi: string | null; tujuan_kualitatif: string | null; tujuan_kuantitatif: string | null; target: string | null;
   opex: number | null; capex: number | null; risiko_implementasi: string | null; mitigasi: string | null;
+  /** Milestone 2027. Kolom dari migrasi 0010. */
+  milestone?: Milestone[] | null;
 }
+export interface Milestone { bulan: string; uraian: string }
 /** Induk Sasaran Strategis RJPP 2026-2030: 3 pilar strategis + Sasaran Korporasi sebagai Fondasi. */
 export const PILAR_RJPP = ["Performance Driven", "Stability and Growth", "New Business Expansion", "Fondasi"] as const;
 export interface SasaranStrategis { kode: string; urutan: number; pilar: string; nama: string; target: string | null; rujukan: string | null }

@@ -6,7 +6,7 @@ import { Button, Card, EditCell, ErrorBox, Loading, SelectCell, SheetPage, useLo
 import { api } from "@/lib/data";
 import { isTopRisk, rupiah } from "@/lib/format";
 import { buildRam } from "@/lib/ram";
-import { PILAR_GRCS, type ProgramStrategis } from "@/lib/types";
+import { PILAR_GRCS, type Milestone, type ProgramStrategis } from "@/lib/types";
 import { konfirmasi } from "@/components/Konfirmasi";
 
 type Field = { key: keyof ProgramStrategis; label: string; kind?: "number"; hint?: string; span?: 2 };
@@ -21,9 +21,19 @@ const BLOK: Field[][] = [
     { key: "risiko_implementasi", label: "Risiko Implementasi", hint: "Satu poin per baris" }, { key: "mitigasi", label: "Mitigasi Risiko", hint: "Satu poin per baris" }],
 ];
 
-/** Kolom teks yang dibantu AI; anggaran OPEX/CAPEX tetap diisi pengguna. */
+/** Kolom teks yang dibantu AI; anggaran OPEX/CAPEX tetap diisi pengguna. Milestone dipertukarkan dengan AI sebagai teks satu baris per milestone. */
 const AI_FIELDS = [{ key: "nama", label: "Nama Program atau Inisiatif Strategis" },
-  ...BLOK.flat().filter((f) => !f.kind).map((f) => ({ key: f.key, label: f.label }))];
+  ...BLOK.flat().filter((f) => !f.kind).map((f) => ({ key: f.key, label: f.label })),
+  { key: "milestone", label: "Milestone 2027 (satu per baris: \"Bulan 2027 – capaian\")" }];
+
+const BULAN_2027 = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"].map((b) => `${b} 2027`);
+const milestoneKeTeks = (m?: Milestone[] | null) => (m ?? []).map((x) => `${x.bulan} – ${x.uraian}`).join("\n");
+/** "Maret 2027 – Uraian" per baris → daftar milestone; baris tanpa bulan dikenali disimpan dengan bulan kosong. */
+const teksKeMilestone = (t: string): Milestone[] => t.split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {
+  const m = l.match(/^([A-Za-z]+\s+20\d\d)\s*[–:-]\s*(.+)$/);
+  const bulan = m ? BULAN_2027.find((b) => b.toLowerCase() === m[1].toLowerCase()) ?? m[1] : "";
+  return { bulan, uraian: m ? m[2].trim() : l.replace(/^[-•\d.)\s]+/, "") };
+});
 const CONTOH = {
   pilar: "Risk Management", nama: "Pengembangan Pemodelan Risiko Berbasis Statistik",
   inisiatif_rjpp: "Penguatan Implementasi Enterprise Risk Management (Go Secure)", objective_scorecard: "Ketersediaan Model Risiko atas Taksonomi Risiko DAM",
@@ -70,7 +80,9 @@ export default function ProgramStrategisPage() {
   };
   const aiRow = rows.find((r) => r.id === ai);
   const aiPilar = aiRow?.pilar ?? ai?.replace(/^baru:/, "") ?? "Risk Management";
-  const applyAi = async (p: Record<string, string>) => {
+  const applyAi = async (raw: Record<string, string>) => {
+    const { milestone, ...rest } = raw;
+    const p: Partial<ProgramStrategis> = { ...rest, ...(milestone != null ? { milestone: teksKeMilestone(milestone) } : {}) };
     if (aiRow) { patch(aiRow.id, p); return; }
     const row = await api.insert<ProgramStrategis>("program_strategis", { pilar: aiPilar, urutan: rows.length + 1, ...p });
     q.setData([...rows, row]);
@@ -113,7 +125,7 @@ export default function ProgramStrategisPage() {
         </div>
       )}
       {ai && (
-        <AiFillModal jenis="program" fields={AI_FIELDS} nilai={aiRow ?? {}} onApply={applyAi} onClose={() => setAi(null)}
+        <AiFillModal jenis="program" fields={AI_FIELDS} nilai={aiRow ? { ...aiRow, milestone: milestoneKeTeks(aiRow.milestone) } : {}} onApply={applyAi} onClose={() => setAi(null)}
           subjek={aiRow ? `${aiRow.pilar} · ${aiRow.nama || "(tanpa nama)"}` : `Program baru pilar ${aiPilar}`}
           konteks={{ pilar: aiPilar, contoh_kartu: CONTOH, ...(konteks ?? {}),
             program_lain: rows.filter((r) => r.id !== ai && r.nama).map((r) => ({ pilar: r.pilar, nama: r.nama, program_kerja: r.program_kerja })) }}
@@ -146,6 +158,36 @@ function ProgramCard({ r, patch, onDelete, onAi }: { r: ProgramStrategis; patch:
           </div>
         ))}
       </div>
+      <MilestoneEditor list={r.milestone ?? []} onChange={(m) => patch({ milestone: m })} />
     </Card>
+  );
+}
+
+/** Milestone sepanjang 2027: capaian yang direncanakan per bulan (arahan Challenge Session 7d). */
+function MilestoneEditor({ list, onChange }: { list: Milestone[]; onChange: (m: Milestone[]) => void }) {
+  const ubah = (i: number, p: Partial<Milestone>) => onChange(list.map((m, j) => (j === i ? { ...m, ...p } : m)));
+  const urut = (m: Milestone[]) => [...m].sort((a, b) => (BULAN_2027.indexOf(a.bulan) + 99) % 99 - (BULAN_2027.indexOf(b.bulan) + 99) % 99);
+  return (
+    <div className="px-4 py-3">
+      <div className="mb-2 flex items-center gap-2">
+        <div className="text-[11px] font-bold tracking-wide text-brand-700 uppercase">Milestone 2027</div>
+        {!list.length && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold text-amber-800">Belum ada milestone</span>}
+        <Button edit variant="ghost" className="ml-auto" onClick={() => onChange([...list, { bulan: "", uraian: "" }])}><Plus className="h-4 w-4" />Tambah milestone</Button>
+      </div>
+      {list.length > 0 && (
+        <table className="kk-table">
+          <thead><tr><th className="w-44">Bulan Target</th><th>Capaian / Hasil Kerja yang Direncanakan</th><th className="w-10" /></tr></thead>
+          <tbody>
+            {list.map((m, i) => (
+              <tr key={i}>
+                <td className="input"><SelectCell value={m.bulan || null} options={BULAN_2027} onSave={(v) => onChange(urut(list.map((x, j) => (j === i ? { ...x, bulan: v ?? "" } : x))))} /></td>
+                <td className="input"><EditCell value={m.uraian || null} placeholder="Mis. Draf kebijakan anti-suap disetujui Direksi" onSave={(v) => ubah(i, { uraian: (v as string) ?? "" })} /></td>
+                <td className="text-center"><button data-edit onClick={() => onChange(list.filter((_, j) => j !== i))} className="text-slate-400 hover:text-rose-600" title="Hapus milestone"><Trash2 className="h-4 w-4" /></button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
   );
 }

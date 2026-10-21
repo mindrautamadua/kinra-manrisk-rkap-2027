@@ -18,7 +18,7 @@ import {
   bacaRedundansi, isianUbah, JENIS_REDUNDAN, simpanRedundansi, type HasilRedundansi, type KelompokRedundan, type OpsiTindakan, type RedundansiRequest,
 } from "@/lib/redundansi-risiko";
 import { RencanaAksiModal } from "@/components/RencanaAksi";
-import { ringkasTarget, type RingkasTarget } from "@/lib/target-risiko";
+import { elInheren, ringkasTarget, type RingkasTarget } from "@/lib/target-risiko";
 import { POS } from "@/lib/rkap-baca";
 import { AiFillModal, AiRowButton } from "@/components/AiFill";
 import type { FieldSpec } from "@/lib/isi-ai";
@@ -300,7 +300,7 @@ export default function RiskRegisterPage() {
 
   const total = d?.register.length ?? 0;
   const top = d?.register.filter((r) => isTopRisk(r.kategori_dampak)).length ?? 0;
-  const el = d?.register.reduce((a, r) => a + Number(r.expected_loss ?? 0), 0) ?? 0;
+  const el = d?.register.reduce((a, r) => a + (elInheren(r) ?? 0), 0) ?? 0;
   const dampak = d?.register.reduce((a, r) => a + Number(r.nilai_dampak ?? 0), 0) ?? 0;
   const elT = d?.register.reduce((a, r) => a + (mutu.get(r.id)?.target?.elTarget ?? 0), 0) ?? 0;
   const biaya = (d?.aksi ?? []).reduce((a, x) => a + Number(x.biaya ?? 0), 0);
@@ -347,6 +347,7 @@ export default function RiskRegisterPage() {
                   <th className="w-72">Deskripsi Risk Event</th><th className="w-60">Root Cause</th><th className="w-24">Probabilitas Kejadian (0%-100%)</th>
                   <th className="w-52">Deskripsi Dampak Risiko</th><th className="w-40">Nilai Dampak Risiko (Rp)</th><th className="w-52">Kriteria Dampak Acuan</th>
                   <th className="w-32">Kategori Dampak Risiko</th><th className="w-20">Tagging Top Risk</th><th className="w-40">Expected Loss (Rp)</th>
+                  <th className="w-64">Dasar Penilaian Probabilitas & Dampak</th>
                   <th className="w-56">Existing Control</th><th className="w-56">Rencana Mitigasi</th><th className="w-32">Kategori Mitigasi</th>
                   <th className="w-24 !bg-brand-800">Target Probabilitas</th><th className="w-40 !bg-brand-800">Target Nilai Dampak (Rp)</th>
                   <th className="w-44 !bg-brand-800">Target Kategori Dampak</th><th className="w-40 !bg-brand-800">Target Expected Loss (Rp)</th>
@@ -421,7 +422,16 @@ export default function RiskRegisterPage() {
                           )}
                         </td>
                         <td className={clsx("calc text-center font-bold", isTopRisk(r.kategori_dampak) ? "text-orange-700" : "text-slate-500")}>{r.kategori_dampak ? (isTopRisk(r.kategori_dampak) ? "Ya" : "Tidak") : ""}</td>
-                        <td className="input"><EditCell kind="number" value={r.expected_loss} placeholder={el != null ? `≈ ${rupiah(el).replace("Rp ", "")}` : "Opsional"} display={(v) => rupiah(v as number).replace("Rp ", "")} onSave={(v) => patch(r.id, { expected_loss: v as number })} /></td>
+                        <td className="input">
+                          <EditCell kind="number" value={r.expected_loss} placeholder={el != null ? `≈ ${rupiah(el).replace("Rp ", "")}` : "Opsional"} display={(v) => rupiah(v as number).replace("Rp ", "")} onSave={(v) => patch(r.id, { expected_loss: v as number })} />
+                          {el != null && !(Number(r.expected_loss) > 0) && (
+                            <button data-edit onClick={() => patch(r.id, { expected_loss: Math.round(el) })} className="mt-1 text-[11px] font-semibold text-brand-700 hover:underline"
+                              title="Isi dengan probabilitas × nilai dampak">Isi ≈ {rupiah(el, true)}</button>
+                          )}
+                        </td>
+                        <td className={clsx("input", !r.dasar_penilaian && r.probabilitas != null && "!bg-amber-50/70")}>
+                          <EditCell value={r.dasar_penilaian} placeholder="Data historis, proyeksi RKAP 2027, analisis skenario…" onSave={(v) => patch(r.id, { dasar_penilaian: v as string })} />
+                        </td>
                         <td className="input"><EditCell value={r.existing_control} onSave={(v) => patch(r.id, { existing_control: v as string })} /></td>
                         <td className="input">
                           <EditCell value={r.rencana_mitigasi} onSave={(v) => patch(r.id, { rencana_mitigasi: v as string })} />
@@ -481,7 +491,7 @@ export default function RiskRegisterPage() {
                       </tr>
                       {buka === r.id && isu.length > 0 && (
                         <tr>
-                          <td colSpan={23} className="!bg-amber-50/70 !py-2">
+                          <td colSpan={24} className="!bg-amber-50/70 !py-2">
                             <div className="sticky left-12 max-w-[900px] space-y-1 pl-2 text-[12px]">
                               {isu.map((x, j) => (
                                 <div key={j} className="flex gap-2"><span className="w-36 shrink-0 font-semibold text-amber-900">{x.kolom}</span><span className="text-slate-700">{x.pesan}</span></div>
@@ -502,7 +512,7 @@ export default function RiskRegisterPage() {
                       </Fragment>
                     );
                   })}
-                  {rows.length === 0 && <tr><td colSpan={23} className="py-10 text-center text-slate-400">Belum ada risiko. Klik “Tambah Risiko”.</td></tr>}
+                  {rows.length === 0 && <tr><td colSpan={24} className="py-10 text-center text-slate-400">Belum ada risiko. Klik “Tambah Risiko”.</td></tr>}
                 </tbody>
               </table>
             </TableWrap>

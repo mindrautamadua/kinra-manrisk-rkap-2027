@@ -30,7 +30,7 @@ export function diffSnapshot(a: SnapshotData, b: SnapshotData): SectionDiff[] {
   const reg = byKey("Risk Register", "register", a.register, b.register, (x) => x.id, (x) => x.risk_event ?? "(tanpa risk event)", [
     ["kategori", "Taksonomi Risiko"], ["risk_driver", "Risk Driver"], ["risk_event", "Risk Event"], ["deskripsi", "Deskripsi"], ["root_cause", "Root Cause"],
     ["probabilitas", "Probabilitas"], ["deskripsi_dampak", "Deskripsi Dampak"], ["nilai_dampak", "Nilai Dampak (Rp)"], ["kriteria_dampak", "Kriteria Dampak"],
-    ["kategori_dampak", "Kategori Dampak"], ["expected_loss", "Expected Loss (Rp)"], ["existing_control", "Existing Control"],
+    ["kategori_dampak", "Kategori Dampak"], ["expected_loss", "Expected Loss (Rp)"], ["dasar_penilaian", "Dasar Penilaian"], ["existing_control", "Existing Control"],
     ["rencana_mitigasi", "Rencana Mitigasi"], ["kategori_mitigasi", "Kategori Mitigasi"], ["parameter_ram", "Parameter RAM Terkait"],
     ["target_probabilitas", "Target Probabilitas"], ["target_nilai_dampak", "Target Nilai Dampak (Rp)"], ["target_kategori_dampak", "Target Kategori Dampak"],
   ]);

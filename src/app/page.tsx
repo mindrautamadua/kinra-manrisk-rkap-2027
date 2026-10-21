@@ -8,6 +8,7 @@ import { RiskMatrix } from "@/components/RiskMatrix";
 import { api } from "@/lib/data";
 import { buildRam, KATEGORI_URUT } from "@/lib/ram";
 import { alasanStatus, ARTI_STATUS, isTopRisk, nilaiParam, persen, rupiah, statusStyle } from "@/lib/format";
+import { elInheren } from "@/lib/target-risiko";
 import type { RiskRegister } from "@/lib/types";
 
 const STATUSES = ["Hijau", "Kuning", "Oranye", "Merah", "Data belum lengkap"];
@@ -26,7 +27,7 @@ export default function Dashboard() {
         const aktif = d.ram.filter((r) => r.diterapkan);
         const count = (s: string) => aktif.filter((r) => (s === "Data belum lengkap" ? !["Hijau", "Kuning", "Oranye", "Merah"].includes(r.status) : r.status === s)).length;
         const utama = d.register.filter((r) => isTopRisk(r.kategori_dampak));
-        const el = d.register.reduce((a, r) => a + Number(r.expected_loss ?? 0), 0);
+        const el = d.register.reduce((a, r) => a + (elInheren(r) ?? 0), 0);
         const dampak = d.register.reduce((a, r) => a + Number(r.nilai_dampak ?? 0), 0);
         const attention = aktif.filter((r) => ["Merah", "Oranye", "Kuning"].includes(r.status))
           .sort((a, b) => ["Merah", "Oranye", "Kuning"].indexOf(a.status) - ["Merah", "Oranye", "Kuning"].indexOf(b.status));

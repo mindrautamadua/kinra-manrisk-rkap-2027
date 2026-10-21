@@ -21,8 +21,9 @@ export function sikapKategori(ras: Ras[], kategori?: string | null) {
   return r?.sikap || r?.sikap_induk || null;
 }
 
+/** Expected loss inheren: nilai isian bila > 0; nilai 0/kosong dianggap belum diisi sehingga dihitung probabilitas × nilai dampak. */
 export const elInheren = (r: RiskRegister) =>
-  r.expected_loss != null ? Number(r.expected_loss) : r.probabilitas != null && r.nilai_dampak != null ? Number(r.probabilitas) * Number(r.nilai_dampak) : null;
+  Number(r.expected_loss) > 0 ? Number(r.expected_loss) : r.probabilitas != null && r.nilai_dampak != null ? Number(r.probabilitas) * Number(r.nilai_dampak) : null;
 export const elTarget = (r: RiskRegister) =>
   r.target_probabilitas != null && r.target_nilai_dampak != null ? Number(r.target_probabilitas) * Number(r.target_nilai_dampak) : null;
 

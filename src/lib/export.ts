@@ -71,7 +71,7 @@ const REGISTER_COLS: Col[] = [
   { header: "Probabilitas Kejadian (0%-100%)", key: "probabilitas", width: 14, fmt: "0%" }, { header: "Deskripsi Dampak Risiko", key: "deskripsi_dampak", width: 36 },
   { header: "Nilai Dampak Risiko (Rp)", key: "nilai_dampak", width: 20, fmt: RP }, { header: "Kriteria Dampak Acuan", key: "kriteria_dampak", width: 34 },
   { header: "Kategori Dampak Risiko", key: "kategori_dampak", width: 16 }, { header: "Tagging Top Risk", key: "tagging", width: 10 },
-  { header: "Expected Loss (Rp)", key: "expected_loss", width: 20, fmt: RP }, { header: "Existing Control", key: "existing_control", width: 36 },
+  { header: "Expected Loss (Rp)", key: "expected_loss", width: 20, fmt: RP }, { header: "Dasar Penilaian Probabilitas & Dampak", key: "dasar_penilaian", width: 36 }, { header: "Existing Control", key: "existing_control", width: 36 },
   { header: "Rencana Mitigasi", key: "rencana_mitigasi", width: 36 }, { header: "Kategori Mitigasi", key: "kategori_mitigasi", width: 14 },
   { header: "Target Probabilitas", key: "target_probabilitas", width: 12, fmt: "0%" }, { header: "Target Nilai Dampak (Rp)", key: "target_nilai_dampak", width: 20, fmt: RP },
   { header: "Target Kategori Dampak", key: "target_kategori_dampak", width: 16 }, { header: "Target Expected Loss (Rp)", key: "target_el", width: 20, fmt: RP },
@@ -86,10 +86,11 @@ const REKAP_COLS: Col[] = [
   { header: "Kategori Risiko", key: "kategori", width: 28 }, { header: "Satuan", key: "satuan", width: 10 },
   { header: "Limit", key: "limit", width: 12 }, { header: "Appetite", key: "appetite", width: 12 }, { header: "Tolerance", key: "tolerance", width: 12 },
   { header: "Hasil Pengukuran RKAP 2027", key: "hasil", width: 16 }, { header: "Status Pengukuran", key: "status", width: 18 }, { header: "Diterapkan", key: "diterapkan", width: 11 },
+  { header: "Alasan Tidak Diterapkan", key: "alasan_tidak_diterapkan", width: 40 },
 ];
 const rekapRows = (params: ParameterSheet[]) => REKAP.map((r) => {
   const p = params.find((x) => x.code === r.kode);
-  return { ...r, ...(p?.summary ?? {}), diterapkan: r.grup === "Parameter Standar" ? "Ya" : p?.diterapkan };
+  return { ...r, ...(p?.summary ?? {}), diterapkan: r.grup === "Parameter Standar" ? "Ya" : p?.diterapkan, alasan_tidak_diterapkan: p?.diterapkan === "Tidak" ? p.alasan_tidak_diterapkan : null };
 });
 
 const RAM_COLS: Col[] = [
@@ -99,10 +100,11 @@ const RAM_COLS: Col[] = [
   { header: "Tolerance", key: "tolerance", width: 11 }, { header: "Sikap Risiko Sesuai RAS", key: "sikap", width: 18 }, { header: "Hasil Pengukuran (Risiko Inheren)", key: "hasil", width: 16 },
   { header: "Status Pengukuran", key: "status", width: 16 }, { header: "Inisiatif Strategis", key: "inisiatif", width: 30 }, { header: "Kebijakan", key: "kebijakan", width: 30 },
   { header: "Program Kerja", key: "program", width: 30 }, { header: "Anggaran (Rp miliar)", key: "anggaran", width: 14 },
+  { header: "Indikator Keberhasilan", key: "indikator", width: 34 },
 ];
 const ramRows = (rows: RamRow[]) => rows.map((r) => {
   const src = (r.tambahan ?? r.pengendalian ?? {}) as Record<string, unknown>;
-  return { ...r, inisiatif: src.inisiatif, kebijakan: src.kebijakan, program: src.program, anggaran: src.anggaran };
+  return { ...r, inisiatif: src.inisiatif, kebijakan: src.kebijakan, program: src.program, anggaran: src.anggaran, indikator: src.indikator };
 });
 
 const AKSI_COLS: Col[] = [

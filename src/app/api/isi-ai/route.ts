@@ -35,6 +35,7 @@ const KHUSUS: Record<JenisIsi, string> = {
 - inisiatif: inisiatif strategis tingkat korporat (arah besar).
 - kebijakan: kebijakan/limit/prosedur yang ditetapkan untuk mengendalikan parameter.
 - program: program kerja konkret 2027 dengan target terukur dan waktu; kaitkan dengan root cause atau mitigasi risiko terkait bila ada.
+- indikator: indikator keberhasilan pengendalian yang terukur dan dapat dipantau sepanjang 2027 (mis. hasil parameter kembali ke dalam appetite pada Triwulan [...], persentase penyelesaian program, jumlah kejadian). Boleh 1-3 indikator bernomor; target angka yang tidak ada di konteks ditulis "[...]".
 - Jangan mengisi angka anggaran.`,
   program: `Lembar: 7.4 Program atau Inisiatif Strategis GRCS (satu kartu program pada Executive Summary RKAP 2027).
 - Pilar GRCS: Governance (tata kelola, GCG, struktur dan kebijakan organ perusahaan), Risk Management (penerapan ERM, model dan budaya risiko), Compliance (kepatuhan regulasi, anti-fraud/anti-suap, sistem manajemen kepatuhan), Sustainability (ESG, lingkungan, sosial, pelaporan keberlanjutan). Program harus sesuai pilar pada konteks.
@@ -49,6 +50,7 @@ const KHUSUS: Record<JenisIsi, string> = {
 - tujuan_kualitatif dan tujuan_kuantitatif: 2-3 poin, SATU POIN PER BARIS (pisahkan dengan baris baru, tanpa penomoran). Kuantitatif wajib memuat angka/persentase terukur.
 - target: keluaran akhir yang terukur pada akhir program (deliverable).
 - risiko_implementasi: 2-3 hambatan pelaksanaan program, satu per baris. mitigasi: tindakan yang menjawab tiap risiko implementasi secara berurutan, satu per baris.
+- milestone: 3-6 milestone sepanjang 2027, SATU PER BARIS dengan format persis "Maret 2027 – capaian terukur" (nama bulan lengkap + 2027, tanda –, lalu hasil kerja konkret yang selesai pada bulan itu, bukan sekadar aktivitas). Urut kronologis, berada di antara bulan_mulai dan bulan_selesai.
 - Jangan mengisi angka anggaran OPEX/CAPEX; sebutkan di catatan bahwa anggaran diisi manual.`,
 };
 
