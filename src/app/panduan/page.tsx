@@ -122,6 +122,7 @@ const SESI: { fase: string; tone: string; langkah: { judul: string; href?: strin
 
 const EKSPOR = [
   { halaman: "Semua halaman (header)", href: "/", tombol: "Unduh Semua", hasil: "Satu file Excel berisi seluruh lembar kertas kerja: Sampul, RAS, Kriteria Dampak, Risk Driver, Risk Register, RAM, CAT, Rekap, Program Strategis, dan 32 lembar parameter (kecuali Executive Summary)" },
+  { halaman: "Semua halaman (header)", href: "/", tombol: "Format DAM", hasil: "Dokumen Excel sesuai Template DAM Perencanaan Manajemen Risiko RKAP 2027 PTPN Group: Title, Framework, Risk.RAS, Risk.RAM-form isian, Risk Register, Risk Driver, Kriteria Dampak, Parameter Standar & Klaster, lembar data parameter, dan Risk.CAT-aksikorporasi" },
   { halaman: "Risk Register", href: "/risk-register", tombol: "Excel", hasil: "Daftar seluruh risiko korporat" },
   { halaman: "RAM", href: "/ram", tombol: "Excel", hasil: "Risk Acceptance Matrix" },
   { halaman: "Rekap Parameter", href: "/rekap", tombol: "Excel", hasil: "Rekap 32 parameter beserta status" },
@@ -271,6 +272,7 @@ export default function PanduanPage() {
                 <ul className="mt-2 space-y-1.5 text-[12.5px] text-slate-600">
                   <li><b className="text-ink">Ikon tanda tanya</b> — membuka panduan ini</li>
                   <li><b className="text-ink">Unduh Semua</b> — seluruh lembar kertas kerja dalam satu file Excel</li>
+                  <li><b className="text-ink">Format DAM</b> — dokumen Excel sesuai Template DAM Perencanaan Manajemen Risiko RKAP 2027 PTPN Group</li>
                   <li><b className="text-ink">Mode Presentasi</b> — mengunci isian di semua layar (ON/OFF)</li>
                   <li><b className="text-ink">Keluar</b> — mengakhiri sesi login di perangkat ini</li>
                 </ul>

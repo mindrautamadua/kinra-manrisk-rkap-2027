@@ -46,12 +46,12 @@ function addTable(wb: Wb, sheetName: string, title: string, cols: Col[], rows: R
   return ws;
 }
 
-async function newWorkbook() {
+export async function newWorkbook() {
   const ExcelJS = (await import("exceljs")).default;
   return new ExcelJS.Workbook();
 }
 
-async function save(wb: Wb, filename: string) {
+export async function save(wb: Wb, filename: string) {
   const buf = await wb.xlsx.writeBuffer();
   const url = URL.createObjectURL(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
   const a = document.createElement("a");
@@ -167,8 +167,8 @@ function addSampul(wb: Wb, s: Sampul) {
 }
 
 /** Lembar parameter dibangun ulang dari template asli: format, rumus, dan daftar pilihan ikut, nilai hasil hitung disimpan sebagai cache. */
-function addParam(wb: Wb, t: SheetTemplate, p: ParameterSheet | undefined, hitung: (addr: string) => unknown) {
-  const ws = wb.addWorksheet(t.code, { properties: { tabColor: { argb: p?.diterapkan === "Tidak" ? "FFBFBFBF" : "FFC00000" } } });
+export function addParam(wb: Wb, t: SheetTemplate, p: ParameterSheet | undefined, hitung: (addr: string) => unknown, nama = t.code) {
+  const ws = wb.addWorksheet(nama, { properties: { tabColor: { argb: p?.diterapkan === "Tidak" ? "FFBFBFBF" : "FFC00000" } } });
   for (const [c, w] of Object.entries(t.widths)) ws.getColumn(c).width = w;
   const inp = p?.inputs ?? {};
   for (const [addr, c] of Object.entries(t.cells)) {

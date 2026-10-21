@@ -204,6 +204,7 @@ function AppShell({ children, path }: { children: React.ReactNode; path: string 
             <HelpCircle className="h-5 w-5" />
           </Link>
           <UnduhSemua />
+          <UnduhDam />
           <button onClick={mode.toggle} disabled={mode.busy}
             title={mode.readonly ? "Mode presentasi aktif: semua data terkunci. Klik untuk membuka kunci." : "Kunci semua isian di semua layar selama presentasi"}
             className={clsx("flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold transition",
@@ -248,26 +249,40 @@ function SectionLabel({ children, mini }: { children: React.ReactNode; mini?: bo
   return <div className="px-3 pb-2 text-[10.5px] font-bold tracking-[0.14em] text-brand-200/50 uppercase">{children}</div>;
 }
 
+/** Muat seluruh data kertas kerja untuk ekspor Excel. */
+async function muatSemua() {
+  const [{ api }, { loadAllTemplates }] = await Promise.all([import("@/lib/data"), import("@/lib/engine")]);
+  const [sampul, kategori, ras, rasTambahan, kriteria, drivers, register, params, pengendalian, ramTambahan, cat, program, templates, aksi] = await Promise.all([
+    api.sampul(), api.kategori(), api.ras(), api.rasTambahan(), api.kriteria(), api.drivers(), api.register(), api.params(),
+    api.pengendalian(), api.ramTambahan(), api.cat(), api.program().catch(() => []), loadAllTemplates(), api.mitigasiAksi(),
+  ]);
+  return { sampul, kategori, ras, rasTambahan, kriteria, drivers, register, params, pengendalian, ramTambahan, cat, program, templates, aksi };
+}
+
 /** Unduh seluruh lembar kertas kerja (kecuali Executive Summary) dalam satu file Excel. */
 function UnduhSemua() {
+  return <TombolUnduh label="Unduh Semua" title="Unduh seluruh lembar kertas kerja (kecuali Executive Summary) dalam satu file Excel"
+    jalankan={async () => (await import("@/lib/export")).exportSemua(await muatSemua())} />;
+}
+
+/** Unduh dokumen sesuai DAM_Template_Perencanaan Manajemen Risiko RKAP 2027 PTPN Group. */
+function UnduhDam() {
+  return <TombolUnduh label="Format DAM" title="Unduh dokumen sesuai Template DAM Perencanaan Manajemen Risiko RKAP 2027 PTPN Group (RAS, RAM, Risk Register, Risk Driver, Kriteria Dampak, data parameter, CAT)"
+    jalankan={async () => (await import("@/lib/export-dam")).exportDam(await muatSemua())} />;
+}
+
+function TombolUnduh({ label, title, jalankan }: { label: string; title: string; jalankan: () => Promise<void> }) {
   const [busy, setBusy] = useState(false);
   const unduh = async () => {
     setBusy(true);
-    try {
-      const [{ api }, { exportSemua }, { loadAllTemplates }] = await Promise.all([import("@/lib/data"), import("@/lib/export"), import("@/lib/engine")]);
-      const [sampul, kategori, ras, rasTambahan, kriteria, drivers, register, params, pengendalian, ramTambahan, cat, program, templates, aksi] = await Promise.all([
-        api.sampul(), api.kategori(), api.ras(), api.rasTambahan(), api.kriteria(), api.drivers(), api.register(), api.params(),
-        api.pengendalian(), api.ramTambahan(), api.cat(), api.program().catch(() => []), loadAllTemplates(), api.mitigasiAksi(),
-      ]);
-      await exportSemua({ sampul, kategori, ras, rasTambahan, kriteria, drivers, register, params, pengendalian, ramTambahan, cat, program, templates, aksi });
-    } catch (e) { alert(`Gagal mengunduh Excel: ${(e as Error).message}`); }
+    try { await jalankan(); } catch (e) { alert(`Gagal mengunduh Excel: ${(e as Error).message}`); }
     setBusy(false);
   };
   return (
-    <button onClick={unduh} disabled={busy} title="Unduh seluruh lembar kertas kerja (kecuali Executive Summary) dalam satu file Excel"
+    <button onClick={unduh} disabled={busy} title={title}
       className="flex shrink-0 items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-600 transition hover:border-brand-500 hover:text-brand-700 disabled:opacity-60">
       {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileSpreadsheet className="h-3.5 w-3.5" />}
-      <span className="hidden sm:inline">{busy ? "Menyiapkan…" : "Unduh Semua"}</span>
+      <span className="hidden sm:inline">{busy ? "Menyiapkan…" : label}</span>
     </button>
   );
 }
