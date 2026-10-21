@@ -28,6 +28,8 @@ const daftar = (a: string[], n = 8) => `${a.slice(0, n).join(", ")}${a.length > 
 export function cekUmum(t: SheetTemplate, get: Get, meta?: RekapRef, sudah = new Set<string>()): TemuanKewajaran[] {
   const out: TemuanKewajaran[] = [];
   const strip: string[] = [], teks: string[] = [], galat: string[] = [], persen100: string[] = [], juta: string[] = [], penuh: string[] = [];
+  // Sel isian batas boleh di atas 100% bila parameternya rasio yang dinyatakan dalam persen (mis. 6a IRR ÷ hurdle rate = 120%).
+  const selBatas = new Set(meta ? [meta.ref_limit, meta.ref_appetite, meta.ref_tolerance].flatMap((r) => (r ? [r, ...referensi(t.cells[r]?.f ?? "").map((x) => x.ref)] : [])) : []);
   for (const [a, c] of Object.entries(t.cells)) {
     const v = get(a);
     if (c.f && typeof v === "string" && /^#[A-Z/0!?]+/.test(v)) galat.push(a);
@@ -36,7 +38,7 @@ export function cekUmum(t: SheetTemplate, get: Get, meta?: RekapRef, sudah = new
     const x = num(v);
     if (x == null || x === 0) continue;
     const judul = `${headerKolom(t, get, a)} ${labelBaris(t, get, parseAddr(a).row)}`;
-    if ((isPersenFmt(c.nf) || /probabilitas|\(%\)|0%-100%/i.test(judul)) && Math.abs(x) > 1) persen100.push(`${a} ${formatCell(x, "0.00%")}`);
+    if (!selBatas.has(a) && (isPersenFmt(c.nf) || /probabilitas|\(%\)|0%-100%/i.test(judul)) && Math.abs(x) > 1) persen100.push(`${a} ${formatCell(x, "0.00%")}`);
     if (/rp juta/i.test(judul) && Math.abs(x) >= 1e8) juta.push(`${a} ${formatCell(x, "#,##0")}`);
     else if (/\(rp\)/i.test(judul) && !/rp juta/i.test(judul) && Math.abs(x) < 1e4) penuh.push(`${a} ${formatCell(x, "#,##0")}`);
   }
