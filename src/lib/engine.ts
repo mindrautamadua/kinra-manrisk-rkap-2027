@@ -2,6 +2,7 @@
 import { HyperFormula, type CellValue as HfValue } from "hyperformula";
 import type { CellValue, ParamSummary, SheetTemplate, TemplateCell } from "./types";
 import { REKAP } from "./static";
+import { statusBiner } from "./format";
 export { REKAP, type RekapRef } from "./static";
 
 /** Sel isian entitas pada kertas kerja berwarna kuning (FFFFCC). */
@@ -83,7 +84,7 @@ export class Workbook {
     const r = REKAP.find((x) => x.kode === code);
     if (!r) return {};
     const g = (a: string | null) => (a ? this.get(code, a) : null);
-    return { limit: g(r.ref_limit) as number, appetite: g(r.ref_appetite) as number, tolerance: g(r.ref_tolerance) as number, hasil: g(r.ref_hasil) as number | string | null, status: g(r.ref_status) as string };
+    return { limit: g(r.ref_limit) as number, appetite: g(r.ref_appetite) as number, tolerance: g(r.ref_tolerance) as number, hasil: g(r.ref_hasil) as number | string | null, status: statusBiner(g(r.ref_status) as string) };
   }
 
   destroy() { this.hf.destroy(); }

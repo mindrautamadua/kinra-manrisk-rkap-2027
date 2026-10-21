@@ -12,7 +12,7 @@ Tugas: menilai KUALITAS ISI kertas kerja manajemen risiko, bukan kelengkapan kol
 Nilai hal berikut:
 1. RAS: apakah rasionalisasi benar-benar menjelaskan alasan pemilihan sikap risiko sesuai karakter usaha entitas (bukan sekadar mengulang pernyataan), dan apakah pernyataan konsisten dengan sikapnya (mis. "Zero Tolerance" tetapi kalimatnya menerima penyimpangan).
 2. Risk Register: apakah root cause benar-benar penyebab (bukan gejala atau pengulangan risk event), apakah deskripsi dampak masuk akal, dan apakah rencana mitigasi menyasar root cause, spesifik, terukur, dan berbeda dari existing control. Prioritaskan risiko top_risk=true.
-3. RAM: untuk parameter berstatus Kuning/Oranye/Merah, apakah inisiatif/kebijakan/program pengendalian relevan dan cukup kuat untuk mengembalikan parameter ke dalam threshold.
+3. RAM: untuk parameter berstatus Merah (melampaui Tolerance), apakah inisiatif/kebijakan/program pengendalian relevan dan cukup kuat untuk mengembalikan parameter ke dalam threshold.
 
 Aturan:
 - Hanya laporkan masalah nyata dan spesifik; jangan mengarang fakta di luar data. Jika suatu bagian kosong, cukup satu temuan singkat (kelengkapan bukan fokus).

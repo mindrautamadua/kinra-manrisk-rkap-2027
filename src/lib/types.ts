@@ -1,5 +1,5 @@
 export type Sikap = "Zero Tolerance" | "Conservative" | "Moderate" | "Aggressive" | string;
-export type StatusUkur = "Hijau" | "Kuning" | "Oranye" | "Merah" | "Data belum lengkap" | "Tidak diterapkan" | "Batas belum diisi" | string;
+export type StatusUkur = "Hijau" | "Merah" | "Data belum lengkap" | "Tidak diterapkan" | "Batas belum diisi" | string;
 export const KATEGORI_DAMPAK = ["Sangat Rendah", "Rendah", "Moderat", "Tinggi", "Sangat Tinggi"] as const;
 export const KATEGORI_MITIGASI = ["Preventive", "Detective", "Corrective"] as const;
 export const SIKAP = ["Zero Tolerance", "Conservative", "Moderate", "Aggressive"] as const;

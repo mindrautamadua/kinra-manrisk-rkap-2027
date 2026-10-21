@@ -52,7 +52,7 @@ async function muatKonteks() {
   return {
     risiko_utama: register.filter((r) => r.risk_event && isTopRisk(r.kategori_dampak))
       .map((r) => ({ kategori: r.kategori, risk_event: r.risk_event, kategori_dampak: r.kategori_dampak, rencana_mitigasi: r.rencana_mitigasi })),
-    ram_perlu_pengendalian: buildRam(params, ras, pengendalian, tambahan).filter((r) => r.diterapkan && ["Kuning", "Oranye", "Merah"].includes(r.status))
+    ram_perlu_pengendalian: buildRam(params, ras, pengendalian, tambahan).filter((r) => r.diterapkan && r.status === "Merah")
       .map((r) => ({ kode: r.kode, parameter: r.parameter, kategori: r.kategori, status: r.status, inisiatif: r.pengendalian?.inisiatif, program: r.pengendalian?.program })),
   };
 }

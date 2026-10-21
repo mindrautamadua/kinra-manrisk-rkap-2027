@@ -19,7 +19,7 @@ const DEF_SIKAP: Record<string, string> = {
   Aggressive: "Bersedia mengambil risiko relatif tinggi untuk pertumbuhan, transformasi, atau penciptaan nilai yang lebih besar, sepanjang masih dalam kapasitas risiko perusahaan.",
 };
 
-const STATUS_HEX: Record<string, string> = { Hijau: "#00B050", Kuning: "#F2C200", Oranye: "#F07D00", Merah: "#C01E13" };
+const STATUS_HEX: Record<string, string> = { Hijau: "#00B050", Merah: "#C01E13" };
 const DAMPAK_HEX: Record<string, string> = { "Sangat Rendah": "#2E7D32", Rendah: "#7CB342", Moderat: "#F2C200", Tinggi: "#F07D00", "Sangat Tinggi": "#C01E13" };
 
 /** "Conservative to Moderate" → [1, 2] (indeks pada SIKAP). */
@@ -320,7 +320,7 @@ function RamRingkasan({ ram }: { ram: RamRow[] }) {
   const aktif = ram.filter((r) => r.diterapkan);
   const grup = (g: string) => aktif.filter((r) => r.kategoriParameter.includes(g)).length;
   const hit = (s: string) => aktif.filter((r) => r.status === s).length;
-  const lain = aktif.length - ["Hijau", "Kuning", "Oranye", "Merah"].reduce((a, s) => a + hit(s), 0);
+  const lain = aktif.length - ["Hijau", "Merah"].reduce((a, s) => a + hit(s), 0);
   return (
     <div className="grid h-full grid-cols-[250px_1fr] gap-6">
       <div className="flex flex-col gap-3">
@@ -337,7 +337,7 @@ function RamRingkasan({ ram }: { ram: RamRow[] }) {
         </div>
         <div className="rounded-lg bg-[#F2F2F2] p-3 text-[11.5px]">
           <div className="mb-1.5 text-[10.5px] font-bold tracking-[0.12em] text-[#707070] uppercase">Status Pengukuran RKAP 2027</div>
-          {["Hijau", "Kuning", "Oranye", "Merah"].map((s) => (
+          {["Hijau", "Merah"].map((s) => (
             <div key={s} className="flex items-center gap-2 py-0.5"><Dot status={s} size={12} /><b className="w-6 text-right text-[15px]">{hit(s)}</b>{s}</div>
           ))}
           {lain > 0 && <div className="flex items-center gap-2 py-0.5"><Dot size={12} /><b className="w-6 text-right text-[15px]">{lain}</b>Belum terukur</div>}
@@ -412,7 +412,7 @@ function RamDetail({ groups }: { groups: { key: string; items: RamRow[] }[] }) {
       </table>
       <div className="mt-auto flex gap-5 pt-2 text-[10.5px] text-[#707070]">
         <span>Risk threshold diusulkan PTPN III</span>
-        {["Hijau", "Kuning", "Oranye", "Merah"].map((s) => <span key={s} className="flex items-center gap-1.5"><Dot status={s} />{s}</span>)}
+        {["Hijau", "Merah"].map((s) => <span key={s} className="flex items-center gap-1.5"><Dot status={s} />{s}</span>)}
       </div>
     </div>
   );

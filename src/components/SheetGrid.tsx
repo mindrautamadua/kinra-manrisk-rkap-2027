@@ -2,6 +2,7 @@
 import { memo, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import { colName, expandRange, formatCell, isInputCell, parseAddr, parseInput, type Workbook } from "@/lib/engine";
+import { statusBiner } from "@/lib/format";
 import type { CellValue, SheetTemplate, TemplateCell } from "@/lib/types";
 
 const px = (w: number) => Math.round(w * 7 + 6);
@@ -12,7 +13,7 @@ const FC_MAP: Record<string, string> = { C00000: "175636" };
 
 /** Status kertas kerja diberi warna seperti conditional formatting Excel. */
 const STATUS_CELL: Record<string, string> = {
-  Hijau: "!bg-emerald-500 !text-white", Kuning: "!bg-amber-300 !text-amber-950", Oranye: "!bg-orange-500 !text-white", Merah: "!bg-rose-600 !text-white",
+  Hijau: "!bg-emerald-500 !text-white", Merah: "!bg-rose-600 !text-white",
   "On-track": "!text-emerald-700 font-semibold", "Off-track": "!text-rose-700 font-semibold",
 };
 
@@ -87,7 +88,8 @@ export const SheetGrid = memo(function SheetGrid({ t, layout, wb, version, onEdi
       const inp = isInp && !readonly;
       const list = layout.lists.get(addr);
       void version; // nilai diambil ulang setiap kali workbook berubah
-      const v = c ? (c.f || isInp ? wb.get(t.code, addr) : c.v ?? null) : null;
+      const raw = c ? (c.f || isInp ? wb.get(t.code, addr) : c.v ?? null) : null;
+      const v = c?.f ? statusBiner(raw) : raw; // rumus asli masih bisa menghasilkan Kuning/Oranye
       const text = formatCell(v as CellValue, c?.nf);
       const isEditing = editing === addr;
       const style: React.CSSProperties = {};

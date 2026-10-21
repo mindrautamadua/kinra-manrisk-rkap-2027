@@ -77,7 +77,7 @@ const ALUR: Langkah[] = [
   {
     tanya: "Bagaimana kita tahu masih di jalur aman?",
     maksud: "Pasang rambu berupa angka. Bila indikator melewati batas, ada tindakan yang sudah disepakati sebelumnya. Aksi korporasi besar juga punya batas persetujuan.",
-    hasil: "Parameter RAM dengan threshold (limit, appetite, tolerance) dan statusnya, rencana pengendalian untuk status Kuning ke atas, serta CAT.",
+    hasil: "Parameter RAM dengan threshold (limit, appetite, tolerance) dan statusnya, rencana pengendalian untuk status Merah, serta CAT.",
     lembar: [{ label: "Rekap Parameter", href: "/rekap" }, { label: "Lembar Parameter", href: "/parameter/1a" }, { label: "RAM", href: "/ram" }, { label: "CAT", href: "/cat" }],
     jebakan: "Parameter RAM berstatus Merah tetapi tidak ada risiko di Risk Register yang menjelaskannya.",
   },
@@ -150,7 +150,7 @@ const PERIKSA = [
   "Target residual risk saya sudah masuk selera risiko kategorinya di RAS.",
   "Biaya mitigasi sudah dimasukkan ke anggaran RKAP.",
   "Risiko utama saya terhubung ke parameter RAM yang relevan.",
-  "Parameter RAM berstatus Kuning/Oranye/Merah sudah punya rencana pengendalian.",
+  "Parameter RAM berstatus Merah sudah punya rencana pengendalian.",
   "Saya siap menjawab pertanyaan challenger: \"apa datanya?\" dan \"kenapa angkanya segitu?\"",
 ];
 

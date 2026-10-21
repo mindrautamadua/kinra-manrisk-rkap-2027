@@ -8,23 +8,14 @@ import { ArahBadge, StatusBadge } from "@/components/ui";
 import { alasanStatus, NARASI_STATUS, nilaiParam, polaritas } from "@/lib/format";
 import type { RamRow } from "@/lib/ram";
 
+/** Risk threshold PTPN III hanya dua warna: Hijau sampai Tolerance, Merah setelahnya. Limit dan Appetite tetap ditandai sebagai acuan. */
 const ZONA = [
-  { status: "Hijau", warna: "bg-emerald-500" },
-  { status: "Kuning", warna: "bg-amber-400" },
-  { status: "Oranye", warna: "bg-orange-500" },
-  { status: "Merah", warna: "bg-rose-600" },
+  { status: "Hijau", warna: "bg-emerald-500 flex-[3]" },
+  { status: "Merah", warna: "bg-rose-600 flex-1" },
 ] as const;
 
 /** Konsekuensi tiap status sesuai catatan lembar RAM (pedoman PT DAM). */
 const TINDAKAN: Record<string, { tingkat: string; isi: string }> = {
-  Kuning: {
-    tingkat: "Tindakan perbaikan",
-    isi: "Unit pemilik risiko melakukan tindakan perbaikan dan pemantauan lebih ketat. Rencana pengendalian (inisiatif strategis, kebijakan, program kerja) wajib disusun.",
-  },
-  Oranye: {
-    tingkat: "Eskalasi kepada PT DAM",
-    isi: "Kondisi dieskalasi kepada PT DAM. Rencana pengendalian wajib disusun dan parameter harus ditopang risk event di Risk Register.",
-  },
   Merah: {
     tingkat: "Eskalasi dan intervensi PT DAM",
     isi: "Kondisi dieskalasi dan memerlukan intervensi PT DAM. Rencana pemulihan harus konkret dan terukur untuk mengembalikan hasil ke dalam batas toleransi, dan parameter wajib ditopang risk event di Risk Register.",
@@ -32,9 +23,9 @@ const TINDAKAN: Record<string, { tingkat: string; isi: string }> = {
 };
 
 const BATAS = [
-  { key: "limit", label: "Limit", jadi: "Hijau" },
-  { key: "appetite", label: "Appetite", jadi: "Kuning" },
-  { key: "tolerance", label: "Tolerance", jadi: "Oranye" },
+  { key: "limit", label: "Limit" },
+  { key: "appetite", label: "Appetite" },
+  { key: "tolerance", label: "Tolerance" },
 ] as const;
 
 /** Posisi hasil pada skala zona (0–100%). Zona digambar sama lebar; posisi di dalam zona diinterpolasi dari nilai batas. */
@@ -50,7 +41,7 @@ function posisi(x: number, l: number, a: number, t: number, naik: boolean) {
   return (3 + clamp((b - bt) / span)) * 25;
 }
 
-/** Dialog penjelasan rinci kenapa sebuah parameter berstatus Kuning/Oranye/Merah. */
+/** Dialog penjelasan rinci kenapa sebuah parameter berstatus Merah. */
 export function PenjelasanStatus({ r, onClose }: { r: RamRow; onClose: () => void }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -73,14 +64,13 @@ export function PenjelasanStatus({ r, onClose }: { r: RamRow; onClose: () => voi
     { label: "Program Kerja", ok: !!src?.program?.trim() },
   ];
 
-  // Target perbaikan: batas yang saat ini terlewati dan berapa jauh hasil harus bergeser.
-  // Syarat lolos mengikuti hitungStatus: maximize Hijau bila ≥ Limit, Kuning/Oranye bila > batas; minimize bila < batas.
-  const target = lengkap ? BATAS.map((t) => {
+  // Target perbaikan: hanya Tolerance yang menentukan warna; syarat lolos mengikuti hitungStatus (maximize > Tolerance, minimize < Tolerance).
+  const target = lengkap ? BATAS.filter((t) => t.key === "tolerance").map((t) => {
     const b = nilai[t.key] as number;
-    const syarat = p.naik ? (t.key === "limit" ? "≥" : ">") : "<";
-    const lolos = p.naik ? (t.key === "limit" ? x >= b : x > b) : x < b;
-    return { ...t, b, syarat, lolos, d: b - x };
-  }).filter((t) => !t.lolos).reverse() : [];
+    const syarat = p.naik ? ">" : "<";
+    const lolos = p.naik ? x > b : x < b;
+    return { ...t, jadi: "Hijau", b, syarat, lolos, d: b - x };
+  }).filter((t) => !t.lolos) : [];
 
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="penjelasan-judul">
@@ -115,7 +105,7 @@ export function PenjelasanStatus({ r, onClose }: { r: RamRow; onClose: () => voi
                   <div className="mx-auto h-0 w-0 border-x-[5px] border-t-[6px] border-x-transparent border-t-ink" />
                 </div>
                 <div className="flex h-3 overflow-hidden rounded-full">
-                  {ZONA.map((z) => <div key={z.status} className={clsx("flex-1", z.warna, z.status !== r.status && "opacity-35")} />)}
+                  {ZONA.map((z) => <div key={z.status} className={clsx(z.warna, z.status !== r.status && "opacity-35")} />)}
                 </div>
                 <div className="absolute inset-x-0 bottom-0 flex text-[11px]">
                   {BATAS.map((t, i) => (

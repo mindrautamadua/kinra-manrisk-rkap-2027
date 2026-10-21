@@ -40,18 +40,18 @@ export function periksa(d: InputKesiapan): Pemeriksaan[] {
   const refP = (kode: string, label: string) => ({ type: "parameter", id: kode, label: `Parameter ${kode} – ${label}` });
 
   // ---------- RAM ----------
-  add("ram-pengendalian", "RAM", "Parameter Kuning/Oranye/Merah wajib punya rencana pengendalian",
+  add("ram-pengendalian", "RAM", "Parameter Merah wajib punya rencana pengendalian",
     d.ram.filter((r) => r.diterapkan && perluPengendalian(r.status)).filter((r) => {
       const src = r.tambahan ?? r.pengendalian;
       return !src || [src.inisiatif, src.kebijakan, src.program].every(kosong);
     }).map((r) => ({
-      id: `peng-${r.key}`, severity: r.status === "Kuning" ? "perhatian" : "kritis", area: "RAM",
+      id: `peng-${r.key}`, severity: "kritis", area: "RAM",
       judul: `${r.kode || r.parameter} berstatus ${r.status} tanpa rencana pengendalian`,
       detail: `${r.parameter} · hasil ${nilaiParam(r.hasil, r.satuan)} (tolerance ${nilaiParam(r.tolerance, r.satuan)})`, href: "/ram", ref: refP(r.kode, r.parameter),
     })));
 
   add("ram-belum-terukur", "Lembar Parameter", "Parameter yang diterapkan sudah terhitung",
-    d.ram.filter((r) => r.diterapkan && !r.tambahan && !["Hijau", "Kuning", "Oranye", "Merah"].includes(r.status)).map((r) => ({
+    d.ram.filter((r) => r.diterapkan && !r.tambahan && !["Hijau", "Merah"].includes(r.status)).map((r) => ({
       id: `ukur-${r.kode}`, severity: "perhatian", area: "Lembar Parameter",
       judul: `${r.kode} ${r.parameter}: ${r.status}`, detail: `Hasil: ${nilaiParam(r.hasil, r.satuan)}. Lengkapi sel kuning bagian C atau isi konfirmasi eksposur di bagian D.`,
       href: `/parameter/${r.kode}`, ref: refP(r.kode, r.parameter),
@@ -135,11 +135,11 @@ export function periksa(d: InputKesiapan): Pemeriksaan[] {
     })));
 
   // Kategori RAM bermasalah tetapi tidak ada risk event di kategorinya
-  const katMasalah = Array.from(new Set(d.ram.filter((r) => r.diterapkan && ["Oranye", "Merah"].includes(r.status)).map((r) => r.kategori)));
-  add("reg-cakupan", "Risk Register", "Setiap kategori dengan parameter Oranye/Merah punya risk event",
+  const katMasalah = Array.from(new Set(d.ram.filter((r) => r.diterapkan && r.status === "Merah").map((r) => r.kategori)));
+  add("reg-cakupan", "Risk Register", "Setiap kategori dengan parameter Merah punya risk event",
     katMasalah.filter((k) => !reg.some((r) => r.kategori === k)).map((k) => ({
-      id: `cak-${k}`, severity: "kritis", area: "Risk Register", judul: `${k}: parameter Oranye/Merah tetapi tidak ada risiko di Risk Register`,
-      detail: d.ram.filter((r) => r.kategori === k && ["Oranye", "Merah"].includes(r.status)).map((r) => `${r.kode} ${r.status}`).join(", "), href: "/risk-register",
+      id: `cak-${k}`, severity: "kritis", area: "Risk Register", judul: `${k}: parameter Merah tetapi tidak ada risiko di Risk Register`,
+      detail: d.ram.filter((r) => r.kategori === k && r.status === "Merah").map((r) => `${r.kode} ${r.status}`).join(", "), href: "/risk-register",
     })));
 
   // ---------- Keterkaitan ----------
@@ -149,7 +149,7 @@ export function periksa(d: InputKesiapan): Pemeriksaan[] {
         id: `trr-${r.id}`, severity: "perhatian", area: "Keterkaitan", judul: `${nama(r, i)} belum dikaitkan ke parameter RAM`,
         href: "/risk-register", ref: refR(r, i),
       })));
-    add("trace-param", "Keterkaitan", "Parameter Kuning/Oranye/Merah ditopang risk event",
+    add("trace-param", "Keterkaitan", "Parameter Merah ditopang risk event",
       d.ram.filter((r) => r.diterapkan && perluPengendalian(r.status) && r.kode && !reg.some((x) => (x.parameter_ram ?? []).includes(r.kode))).map((r) => ({
         id: `trp-${r.key}`, severity: "perhatian", area: "Keterkaitan", judul: `${r.kode} (${r.status}) tidak dikaitkan ke risk event mana pun`,
         detail: r.parameter, href: "/keterkaitan", ref: refP(r.kode, r.parameter),

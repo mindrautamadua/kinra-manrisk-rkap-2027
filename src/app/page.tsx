@@ -11,7 +11,7 @@ import { alasanStatus, ARTI_STATUS, isTopRisk, nilaiParam, persen, rupiah, statu
 import { elInheren } from "@/lib/target-risiko";
 import type { RiskRegister } from "@/lib/types";
 
-const STATUSES = ["Hijau", "Kuning", "Oranye", "Merah", "Data belum lengkap"];
+const STATUSES = ["Hijau", "Merah", "Data belum lengkap"];
 
 export default function Dashboard() {
   const q = useLoad(async () => {
@@ -25,18 +25,17 @@ export default function Dashboard() {
     <SheetPage title="Dashboard Manajemen Risiko RKAP 2027" code={d?.sampul.nama_entitas ?? "PT KINRA"}>
       {q.loading ? <Loading variant="dashboard" /> : q.error ? <ErrorBox error={q.error} /> : d && (() => {
         const aktif = d.ram.filter((r) => r.diterapkan);
-        const count = (s: string) => aktif.filter((r) => (s === "Data belum lengkap" ? !["Hijau", "Kuning", "Oranye", "Merah"].includes(r.status) : r.status === s)).length;
+        const count = (s: string) => aktif.filter((r) => (s === "Data belum lengkap" ? !["Hijau", "Merah"].includes(r.status) : r.status === s)).length;
         const utama = d.register.filter((r) => isTopRisk(r.kategori_dampak));
         const el = d.register.reduce((a, r) => a + (elInheren(r) ?? 0), 0);
         const dampak = d.register.reduce((a, r) => a + Number(r.nilai_dampak ?? 0), 0);
-        const attention = aktif.filter((r) => ["Merah", "Oranye", "Kuning"].includes(r.status))
-          .sort((a, b) => ["Merah", "Oranye", "Kuning"].indexOf(a.status) - ["Merah", "Oranye", "Kuning"].indexOf(b.status));
+        const attention = aktif.filter((r) => r.status === "Merah");
         const maxKat = Math.max(1, ...KATEGORI_URUT.map((k) => d.register.filter((r) => r.kategori === k).length));
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
               <Stat label="Risiko Korporat" value={d.register.length} sub={`${utama.length} risiko utama (top risk)`} accent="bg-brand-600" />
-              <Stat label="Parameter RAM Aktif" value={aktif.length} sub={`${count("Merah")} merah · ${count("Oranye")} oranye · ${count("Kuning")} kuning`} accent="bg-rose-500" />
+              <Stat label="Parameter RAM Aktif" value={aktif.length} sub={`${count("Merah")} merah · ${count("Hijau")} hijau`} accent="bg-rose-500" />
               <Stat label="Total Nilai Dampak" value={rupiah(dampak, true)} sub="Risk Register, rupiah penuh" accent="bg-sky-500" />
               <Stat label="Total Expected Loss" value={rupiah(el, true)} sub="Risk Register, rupiah penuh" accent="bg-amber-500" />
             </div>
@@ -65,7 +64,7 @@ export default function Dashboard() {
                     <Link key={r.key} href={r.tambahan ? "/ram" : `/parameter/${r.kode}`} className="flex items-center gap-3 py-2.5 hover:bg-paper/60">
                       <span className="w-10 font-mono text-[12px] font-bold text-brand-700">{r.kode}</span>
                       <span className="flex-1 text-[13px]">{r.parameter}<span className="block text-[11px] text-slate-400">{r.kategori}</span>
-                        {(() => { const why = alasanStatus(r.status, r.hasil, r.limit, r.appetite, r.tolerance, r.satuan); return why && <span className={clsx("mt-0.5 block text-[11px] font-medium", r.status === "Merah" ? "text-rose-700" : r.status === "Oranye" ? "text-orange-700" : "text-amber-700")}>{why}</span>; })()}</span>
+                        {(() => { const why = alasanStatus(r.status, r.hasil, r.limit, r.appetite, r.tolerance, r.satuan); return why && <span className="mt-0.5 block text-[11px] font-medium text-rose-700">{why}</span>; })()}</span>
                       <span className="text-right text-[12px] tabnum">{nilaiParam(r.hasil, r.satuan)}<span className="block text-[10.5px] text-slate-400">tol. {nilaiParam(r.tolerance, r.satuan)}</span></span>
                       <StatusBadge status={r.status} size="sm" />
                     </Link>

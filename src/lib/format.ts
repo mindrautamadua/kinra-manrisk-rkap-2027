@@ -27,11 +27,10 @@ export function nilaiParam(v: unknown, satuan?: string | null) {
 
 export const STATUS_STYLE: Record<string, { dot: string; chip: string; label: string }> = {
   Hijau: { dot: "bg-emerald-500", chip: "bg-emerald-50 text-emerald-800 ring-emerald-600/20", label: "Hijau" },
-  Kuning: { dot: "bg-amber-400", chip: "bg-amber-50 text-amber-800 ring-amber-500/30", label: "Kuning" },
-  Oranye: { dot: "bg-orange-500", chip: "bg-orange-50 text-orange-800 ring-orange-600/25", label: "Oranye" },
   Merah: { dot: "bg-rose-600", chip: "bg-rose-50 text-rose-800 ring-rose-600/25", label: "Merah" },
 };
 export function statusStyle(s: StatusUkur | null | undefined) {
+  s = statusBiner(s);
   return STATUS_STYLE[s ?? ""] ?? { dot: "bg-slate-300", chip: "bg-slate-50 text-slate-600 ring-slate-400/25", label: s || "–" };
 }
 
@@ -79,18 +78,22 @@ export function cekSikap(entitas?: string | null, induk?: string | null) {
 export const isTopRisk = (k?: string | null) => k === "Moderat" || k === "Tinggi" || k === "Sangat Tinggi";
 
 /**
- * Status pengukuran sesuai kertas kerja:
- * - makin tinggi makin buruk: < Limit Hijau, < Appetite Kuning, < Tolerance Oranye, selain itu Merah
- * - makin rendah makin buruk: >= Limit Hijau, > Appetite Kuning, > Tolerance Oranye, selain itu Merah
+ * Status pengukuran mengikuti risk threshold PTPN III yang hanya mengenal dua warna:
+ * Merah bila hasil melampaui Tolerance, selain itu Hijau.
+ * - makin tinggi makin buruk: < Tolerance Hijau, selain itu Merah
+ * - makin rendah makin buruk: > Tolerance Hijau, selain itu Merah
  */
 export function hitungStatus(hasil: unknown, limit: unknown, appetite: unknown, tolerance: unknown, arah: string | null | undefined): StatusUkur {
   if (typeof hasil !== "number") return "Data belum lengkap";
   if ([limit, appetite, tolerance].some((x) => typeof x !== "number")) return "Batas belum diisi";
   const x = Math.round(hasil * 1e10) / 1e10;
-  const [l, a, t] = [limit, appetite, tolerance] as number[];
-  if ((arah ?? "").includes("rendah makin buruk")) return x >= l ? "Hijau" : x > a ? "Kuning" : x > t ? "Oranye" : "Merah";
-  return x < l ? "Hijau" : x < a ? "Kuning" : x < t ? "Oranye" : "Merah";
+  const t = tolerance as number;
+  if ((arah ?? "").includes("rendah makin buruk")) return x > t ? "Hijau" : "Merah";
+  return x < t ? "Hijau" : "Merah";
 }
+
+/** Rumus kertas kerja masih menghasilkan Kuning/Oranye; keduanya masih dalam Tolerance sehingga dibaca Hijau. */
+export const statusBiner = <T,>(s: T): T => (s === "Kuning" || s === "Oranye" ? ("Hijau" as T) : s);
 
 /** Polaritas parameter untuk pembaca awam: "Makin rendah makin buruk" berarti target dimaksimalkan, sebaliknya diminimalkan. */
 export const ARAH_PILIHAN = ["Makin tinggi makin buruk", "Makin rendah makin buruk"];
@@ -107,44 +110,38 @@ export const ARTI_THRESHOLD = {
   },
   Limit: {
     isi: "Batas aman pertama, yaitu batas kinerja normal yang ingin dijaga perusahaan.",
-    aksi: "Masih dalam Limit: Hijau, cukup pemantauan rutin. Melewati Limit: minimal Kuning.",
+    aksi: "Batas kinerja normal; dipakai sebagai acuan pemantauan, tidak mengubah warna status.",
   },
   Appetite: {
     isi: "Batas risiko yang bersedia diambil perusahaan untuk mencapai sasarannya.",
-    aksi: "Melewati Limit tetapi masih dalam Appetite: Kuning, perlu tindakan perbaikan.",
+    aksi: "Batas yang bersedia diambil; dipakai sebagai acuan pemantauan, tidak mengubah warna status.",
   },
   Tolerance: {
     isi: "Batas maksimal penyimpangan yang masih dapat ditanggung perusahaan.",
-    aksi: "Melewati Appetite tetapi masih dalam Tolerance: Oranye, eskalasi kepada PT DAM. Melampaui Tolerance: Merah, eskalasi dan intervensi PT DAM.",
+    aksi: "Masih dalam Tolerance: Hijau. Melampaui Tolerance: Merah, eskalasi dan intervensi PT DAM.",
   },
 } as const;
 
 /** Arti tiap status pengukuran, ringkas untuk legenda. */
 export const ARTI_STATUS: Record<string, string> = {
-  Hijau: "Dalam limit",
-  Kuning: "Melewati limit, masih dalam appetite",
-  Oranye: "Melewati appetite, masih dalam toleransi",
+  Hijau: "Dalam batas toleransi",
   Merah: "Melewati batas toleransi",
   "Data belum lengkap": "Hasil atau batas belum diisi",
 };
 
 /** Narasi status untuk pembaca awam: apa arti warnanya dan apa yang perlu dilakukan. */
 export const NARASI_STATUS: Record<string, string> = {
-  Hijau: "Aman. Kinerja masih dalam batas normal yang ditetapkan.",
-  Kuning: "Waspada. Mulai keluar dari batas normal, tetapi masih dapat diterima perusahaan. Perlu dipantau dan dikendalikan.",
-  Oranye: "Berisiko tinggi. Sudah melewati batas yang dapat diterima perusahaan, tetapi belum melewati batas toleransi. Perlu tindakan pengendalian.",
+  Hijau: "Aman. Hasil masih dalam batas toleransi yang ditetapkan.",
   Merah: "Kritis. Sudah melewati batas toleransi maksimal perusahaan. Perlu tindakan pemulihan segera.",
   "Data belum lengkap": "Status belum dapat ditentukan karena hasil pengukuran atau batasnya belum diisi.",
   "Batas belum diisi": "Status belum dapat ditentukan karena limit, appetite, atau tolerance belum diisi.",
 };
 
-/** Kalimat penjelas kenapa sebuah parameter berstatus Kuning/Oranye/Merah, dibandingkan langsung dengan batas yang dilewati. */
+/** Kalimat penjelas kenapa sebuah parameter berstatus Merah, dibandingkan langsung dengan batas yang dilewati. */
 export function alasanStatus(status: string, hasil: unknown, limit: unknown, appetite: unknown, tolerance: unknown, satuan?: string | null) {
   if (![hasil, limit, appetite, tolerance].every((v) => typeof v === "number")) return null;
   const x = hasil as number;
-  const [h, l, a, t] = [hasil, limit, appetite, tolerance].map((v) => nilaiParam(v, satuan));
+  const [h, t] = [hasil, tolerance].map((v) => nilaiParam(v, satuan));
   if (status === "Merah") return x >= (tolerance as number) ? `Hasil ${h} ≥ toleransi ${t}` : `Hasil ${h} ≤ toleransi ${t}`;
-  if (status === "Oranye") return x >= (appetite as number) ? `Hasil ${h} melewati appetite ${a}, belum mencapai toleransi ${t}` : `Hasil ${h} di bawah appetite ${a}, masih di atas toleransi ${t}`;
-  if (status === "Kuning") return x >= (limit as number) ? `Hasil ${h} melewati limit ${l}, masih dalam appetite ${a}` : `Hasil ${h} di bawah limit ${l}, masih di atas appetite ${a}`;
   return null;
 }

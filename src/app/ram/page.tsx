@@ -89,13 +89,13 @@ export default function RamPage() {
     if (ai.tambahan) patchTambahan(ai.tambahan.id, p); else savePengendalian(ai.kode, p);
   };
 
-  /** Isi massal: susun draf AI untuk semua parameter berstatus Kuning/Oranye/Merah. Hanya kolom kosong yang diisi. */
+  /** Isi massal: susun draf AI untuk semua parameter berstatus Merah. Hanya kolom kosong yang diisi. */
   const [massal, setMassal] = useState<{ selesai: number; total: number; gagal: string[] } | null>(null);
   const targetMassal = rows.filter((r) => r.diterapkan && perluPengendalian(r.status) && AI_FIELDS.some((f) => !nilaiCtl(r, f.key)));
   const isiMassal = async () => {
     const target = targetMassal;
     if (!target.length) return;
-    if (!(await konfirmasi({ judul: `Susun draf AI untuk ${target.length} parameter?`, pesan: "AI akan menyusun draf Inisiatif Strategis, Kebijakan, Program Kerja, dan Indikator Keberhasilan untuk parameter berstatus Kuning/Oranye/Merah.\n\nHanya kolom yang masih kosong yang diisi; isian yang sudah ada tidak diubah. Anggaran tetap diisi manual.", aksi: "Susun Draf", nada: "info" }))) return;
+    if (!(await konfirmasi({ judul: `Susun draf AI untuk ${target.length} parameter?`, pesan: "AI akan menyusun draf Inisiatif Strategis, Kebijakan, Program Kerja, dan Indikator Keberhasilan untuk parameter berstatus Merah.\n\nHanya kolom yang masih kosong yang diisi; isian yang sudah ada tidak diubah. Anggaran tetap diisi manual.", aksi: "Susun Draf", nada: "info" }))) return;
     const entitas = await api.sampul().then((s) => s.nama_entitas || "PT KINRA").catch(() => "PT KINRA");
     const gagal: string[] = [];
     let selesai = 0;
@@ -161,7 +161,7 @@ export default function RamPage() {
           {massal.selesai === massal.total && massal.gagal.length > 0 && <button onClick={() => setMassal(null)} className="ml-1 underline">tutup</button>}
         </span>
       ) : d && targetMassal.length > 0 && (
-        <Button edit variant="outline" onClick={isiMassal} title="Isi kolom Rencana Pengendalian yang masih kosong untuk semua parameter berstatus Kuning/Oranye/Merah">
+        <Button edit variant="outline" onClick={isiMassal} title="Isi kolom Rencana Pengendalian yang masih kosong untuk semua parameter berstatus Merah">
           <Sparkles className="h-4 w-4" />Isi Pengendalian dengan AI ({targetMassal.length})
         </Button>
       )}<Button variant="outline" onClick={() => exportRam(rows)}><Download className="h-4 w-4" />Excel</Button></>}>
@@ -263,7 +263,7 @@ function StatusNarasi({ r }: { r: RamRow }) {
     <div className="min-w-[190px] max-w-[240px]">
       <StatusBadge status={r.status} size="sm" />
       {narasi && <p className="mt-1.5 text-[11.5px] leading-snug text-slate-600">{narasi}</p>}
-      {alasan && <p className={clsx("mt-1 text-[11px] font-medium leading-snug", r.status === "Merah" ? "text-rose-700" : r.status === "Oranye" ? "text-orange-700" : "text-amber-700")}>{alasan}.</p>}
+      {alasan && <p className="mt-1 text-[11px] font-medium leading-snug text-rose-700">{alasan}.</p>}
       {perluPengendalian(r.status) && (
         <button onClick={() => setBuka(true)} className="mt-1.5 inline-flex items-center gap-1 text-[11.5px] font-semibold text-brand-700 hover:underline">
           <Info className="h-3.5 w-3.5" />Lihat penjelasan detail

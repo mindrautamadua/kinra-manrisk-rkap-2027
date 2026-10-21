@@ -1,6 +1,6 @@
 import { arahParameter, REKAP } from "./static";
 import { RAM_LAYOUT } from "./static";
-import { hitungStatus } from "./format";
+import { hitungStatus, statusBiner } from "./format";
 import type { ParameterSheet, RamPengendalian, RamTambahan, Ras } from "./types";
 
 export interface RamRow {
@@ -38,7 +38,7 @@ export function buildRam(params: ParameterSheet[], ras: Ras[], pengendalian: Ram
       kategoriParameter: l.kategori_parameter ?? "", diterapkan,
       limit: diterapkan ? s.limit : null, appetite: diterapkan ? s.appetite : null, tolerance: diterapkan ? s.tolerance : null,
       sikap: sikapUntuk(l.kode, kat, ras), hasil: diterapkan ? s.hasil : null,
-      status: diterapkan ? String(s.status ?? "Data belum lengkap") : "Tidak diterapkan", arah: arahParameter(l.kode),
+      status: diterapkan ? statusBiner(String(s.status ?? "Data belum lengkap")) : "Tidak diterapkan", arah: arahParameter(l.kode),
       pengendalian: pengendalian.find((x) => x.kode === l.kode) ?? null,
     });
   }
@@ -54,4 +54,4 @@ export function buildRam(params: ParameterSheet[], ras: Ras[], pengendalian: Ram
   return out.sort((a, b) => a.kategoriNo - b.kategoriNo);
 }
 
-export const perluPengendalian = (s: string) => s === "Kuning" || s === "Oranye" || s === "Merah";
+export const perluPengendalian = (s: string) => s === "Merah";
