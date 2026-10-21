@@ -120,7 +120,13 @@ export interface ModePresentasi { aktif: boolean; sejak?: string | null }
 // ---------- Data Keuangan RKAP 2027 (migrasi 0005) ----------
 /** Satu pos laba rugi dalam rupiah penuh. `bulan` = Januari..Desember 2027. */
 export interface RkapPos { tahun: number | null; bulan: (number | null)[]; pembanding: Record<string, number | null> }
-export interface RkapData { sheet: string; pembanding: string[]; pos: Record<string, RkapPos> }
+/** Satu baris laporan arus kas/neraca apa adanya dari Kertas Kerja RKAP, rupiah penuh. */
+export interface RkapBaris { uraian: string; tahun: number | null; bulan: (number | null)[] }
+export interface RkapData {
+  sheet: string; pembanding: string[]; pos: Record<string, RkapPos>;
+  /** Sheet Fin4-CF 2027 dan Fin1-BS 2027; tidak ada pada versi yang diunggah sebelum fitur ini. */
+  arus_kas?: RkapBaris[]; neraca?: RkapBaris[];
+}
 export interface RkapKeuangan {
   id: string; created_at: string; nama: string; sumber: string | null; catatan: string | null;
   aktif: boolean; ebitda_basis: "holding" | "komite"; data: RkapData;

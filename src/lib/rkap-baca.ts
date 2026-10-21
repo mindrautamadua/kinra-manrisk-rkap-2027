@@ -1,6 +1,6 @@
 /** Pembaca Kertas Kerja RKAP (Excel) tanpa ketergantungan ke browser/DB, sehingga bisa diuji di Node. */
 import type ExcelJSNs from "exceljs";
-import type { RkapData, RkapPos } from "./types";
+import type { RkapBaris, RkapData, RkapPos } from "./types";
 
 /** Sheet laba rugi resmi pada Kertas Kerja RKAP (ditetapkan tim Keuangan). */
 export const SHEET_LR = "BD RL_REKAP KONSOLIDASI SMNT";
@@ -116,7 +116,63 @@ export async function bacaKertasKerja(file: File): Promise<HasilBaca> {
   }
   const hilang = POS.filter((p) => !pos[p.kode]);
   if (hilang.length) peringatan.push(`Pos tidak ditemukan: ${hilang.map((p) => p.label).join(", ")}.`);
-  return { data: { sheet: SHEET_LR, pembanding: pembanding.map((p) => p.label), pos }, peringatan };
+  const arus_kas = bacaLaporan(wb, SHEET_CF, peringatan);
+  const neraca = bacaLaporan(wb, SHEET_BS, peringatan);
+  return { data: { sheet: SHEET_LR, pembanding: pembanding.map((p) => p.label), pos, ...(arus_kas ? { arus_kas } : {}), ...(neraca ? { neraca } : {}) }, peringatan };
+}
+
+export const SHEET_CF = "Fin4-CF 2027";
+export const SHEET_BS = "Fin1-BS 2027";
+const BULAN_SINGKAT = ["jan", "feb", "mar", "apr", "mei", "jun", "jul", "agt", "sep", "okt", "nov", "des"];
+
+/**
+ * Membaca sheet laporan RKAP format Holding (arus kas/neraca): kolom "RKAP 2027" sebagai nilai setahun, kolom bulan
+ * dari judul JAN..DES atau tanggal akhir bulan. Uraian diambil dari kolom teks pertama; hanya baris bernilai yang disimpan.
+ */
+function bacaLaporan(wb: ExcelJSNs.Workbook, nama: string, peringatan: string[]): RkapBaris[] | null {
+  const ws = wb.getWorksheet(nama);
+  if (!ws) { peringatan.push(`Sheet "${nama}" tidak ditemukan; arus kas/neraca tidak ikut tersimpan.`); return null; }
+  let kolTahun: number | null = null;
+  const kolBulan: (number | null)[] = Array(12).fill(null);
+  for (let r = 1; r <= 10; r++) {
+    ws.getRow(r).eachCell((cell, c) => {
+      const v = cell.value;
+      if (v instanceof Date) { const b = v.getUTCMonth(); if (v.getUTCFullYear() === 2027 && kolBulan[b] == null) kolBulan[b] = c; return; }
+      const t = teks(v).toLowerCase();
+      if (/^rkap\s*2027$/.test(t) && kolTahun == null) kolTahun = c;
+      const b = BULAN_SINGKAT.indexOf(t);
+      if (b >= 0 && kolBulan[b] == null) kolBulan[b] = c;
+    });
+  }
+  if (kolTahun == null) { peringatan.push(`Kolom "RKAP 2027" tidak ditemukan pada sheet "${nama}".`); return null; }
+  const out: RkapBaris[] = [];
+  for (let r = 8; r <= Math.min(ws.rowCount, 250); r++) {
+    const row = ws.getRow(r);
+    const uraian = [1, 2, 3, 4, 5, 6].map((c) => teks(row.getCell(c).value)).find((t) => t && isNaN(Number(t)) && !t.startsWith("#"));
+    if (!uraian) continue;
+    const tahun = angkaSel(row.getCell(kolTahun).value);
+    const bulan = kolBulan.map((c) => (c ? angkaSel(row.getCell(c).value) : null));
+    if (!tahun && bulan.every((v) => !v)) continue;
+    out.push({ uraian, tahun, bulan });
+  }
+  return out;
+}
+
+/** Angka kunci likuiditas dan investasi dari arus kas/neraca RKAP (rupiah penuh); null bila tidak terbaca. */
+export function angkaKas(d: RkapData) {
+  const cari = (l: RkapBaris[] | undefined, re: RegExp) => l?.find((b) => re.test(b.uraian.toLowerCase()))?.tahun ?? null;
+  return {
+    arus_kas_operasi: cari(d.arus_kas, /^arus kas dari aktivitas operasi$/),
+    kas_bersih_operasi: cari(d.arus_kas, /^kas bersih .*operasi/),
+    capex: cari(d.arus_kas, /^penambahan aset tetap/),
+    kas_bersih_investasi: cari(d.arus_kas, /^kas bersih .*investasi/),
+    kas_akhir: cari(d.arus_kas, /kas dan setara kas akhir/),
+    aset_lancar: cari(d.neraca, /^total aset lancar/),
+    total_aset: cari(d.neraca, /^total aset$/),
+    liabilitas_jangka_pendek: cari(d.neraca, /^total liabilitas jangka pendek/),
+    total_liabilitas: cari(d.neraca, /^total liabilitas$/),
+    total_ekuitas: cari(d.neraca, /^total ekuitas$/),
+  };
 }
 
 // ---------- pemeriksaan konsistensi ----------

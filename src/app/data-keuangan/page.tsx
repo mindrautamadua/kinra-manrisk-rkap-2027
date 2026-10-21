@@ -7,9 +7,9 @@ import { Button, Card, EditCell, ErrorBox, Loading, Section, SheetPage, Stat, Ta
 import { api } from "@/lib/data";
 import { angka, persen, rupiah } from "@/lib/format";
 import {
-  BULAN, GRUP, LABEL_SUMBER, POS, TAUTAN, bacaKertasKerja, ebitda, nilaiTautan, periksa, samaNilai, terapkanKeParameter, type HasilBaca,
+  BULAN, GRUP, LABEL_SUMBER, POS, TAUTAN, angkaKas, bacaKertasKerja, ebitda, nilaiTautan, periksa, samaNilai, terapkanKeParameter, type HasilBaca,
 } from "@/lib/rkap";
-import type { ParameterSheet, RkapKeuangan } from "@/lib/types";
+import type { ParameterSheet, RkapBaris, RkapKeuangan } from "@/lib/types";
 import { konfirmasi } from "@/components/Konfirmasi";
 
 const butuhMigrasi = (e: string) => /rkap_keuangan|schema cache|tidak diizinkan/i.test(e);
@@ -68,7 +68,7 @@ export default function DataKeuanganPage() {
 
   return (
     <SheetPage code="Master Data" title="Data Keuangan RKAP 2027"
-      note={`Ringkasan Laba Rugi Konsolidasi dari Kertas Kerja RKAP (sheet "BD RL_REKAP KONSOLIDASI SMNT"). Satu unggahan = satu versi (Draft II, Draft III, Final). Versi aktif menjadi sumber angka EBITDA dan total pendapatan pada lembar parameter, sehingga angka kertas kerja manajemen risiko sama dengan RKAP keuangan.\n\nSemua nilai disimpan dalam rupiah penuh. Tabel menampilkan Rp juta.`}
+      note={`Ringkasan Laba Rugi Konsolidasi dari Kertas Kerja RKAP (sheet "BD RL_REKAP KONSOLIDASI SMNT"), ditambah Arus Kas (sheet "Fin4-CF 2027") dan Neraca (sheet "Fin1-BS 2027"). Angka RKAP ini menjadi acuan aplikasi, termasuk bila berbeda dengan proyeksi RJPP. Satu unggahan = satu versi (Draft II, Draft III, Final). Versi aktif menjadi sumber angka EBITDA dan total pendapatan pada lembar parameter, sehingga angka kertas kerja manajemen risiko sama dengan RKAP keuangan.\n\nSemua nilai disimpan dalam rupiah penuh. Tabel menampilkan Rp juta.`}
       actions={<>
         {saver.indicator}
         <input ref={fileRef} type="file" accept=".xlsx" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) unggah(f); e.target.value = ""; }} />
@@ -105,6 +105,7 @@ export default function DataKeuanganPage() {
             })} />
             <p className="mt-2 text-[11.5px] text-slate-500">Dalam Rp juta. Kolom RKAP 2027 dapat dikoreksi manual (klik angka); koreksi hanya berlaku untuk versi ini.</p>
           </Section>
+          <KasNeraca r={tampil} bulanan={bulanan} />
         </>
       )}
     </SheetPage>
@@ -276,6 +277,51 @@ function Tautan({ r, params, onTerapkan }: { r: RkapKeuangan; params: ParameterS
       </TableWrap>
       <p className="mt-2 text-[11.5px] text-slate-500">Terapkan menulis nilai RKAP ke sel kuning lembar parameter (sudah dikonversi ke satuan sel) dan menghitung ulang hasil pengukurannya. Isian lain pada lembar tidak berubah.</p>
     </Section>
+  );
+}
+
+/** Arus kas dan neraca RKAP 2027 (dasar likuiditas, Operating Cash Flow Ratio, dan capex). */
+function KasNeraca({ r, bulanan }: { r: RkapKeuangan; bulanan: boolean }) {
+  if (!r.data.arus_kas && !r.data.neraca) {
+    return <Card className="mb-8 px-4 py-3 text-[12.5px] text-amber-900">Versi ini diunggah sebelum aplikasi membaca Arus Kas dan Neraca. Unggah ulang Kertas Kerja RKAP untuk menambahkannya.</Card>;
+  }
+  const k = angkaKas(r.data);
+  const rasio = k.arus_kas_operasi != null && k.liabilitas_jangka_pendek ? k.arus_kas_operasi / k.liabilitas_jangka_pendek : null;
+  const lancar = k.aset_lancar != null && k.liabilitas_jangka_pendek ? k.aset_lancar / k.liabilitas_jangka_pendek : null;
+  return (
+    <>
+      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Stat label="Kas Bersih dari Operasi" value={rupiah(k.kas_bersih_operasi, true)} sub={`Sebelum pajak & bunga ${rupiah(k.arus_kas_operasi, true)}`} accent="bg-sky-600" />
+        <Stat label="Capex (Penambahan Aset Tetap)" value={rupiah(k.capex == null ? null : Math.abs(k.capex), true)} sub="Acuan aplikasi; dibandingkan RJPP di Referensi Strategis" accent="bg-sky-600" />
+        <Stat label="Kas Akhir Tahun 2027" value={rupiah(k.kas_akhir, true)} sub={`Total aset ${rupiah(k.total_aset, true)}`} accent="bg-sky-600" />
+        <Stat label="Likuiditas" value={rasio == null ? "–" : `${angka(rasio, 2)}×`} sub={`Arus kas operasi / liabilitas jangka pendek · current ratio ${lancar == null ? "–" : `${angka(lancar, 2)}×`}`} accent="bg-sky-600" />
+      </div>
+      {r.data.arus_kas && <Section letter="D" title="Arus Kas 2027 (Fin4-CF 2027)"><TabelBaris rows={r.data.arus_kas} bulanan={bulanan} /></Section>}
+      {r.data.neraca && <Section letter="E" title="Neraca 2027 (Fin1-BS 2027)"><TabelBaris rows={r.data.neraca} bulanan={bulanan} /></Section>}
+    </>
+  );
+}
+
+function TabelBaris({ rows, bulanan }: { rows: RkapBaris[]; bulanan: boolean }) {
+  return (
+    <TableWrap>
+      <table className="kk-table w-full text-[12.5px]">
+        <thead><tr><th className="sticky left-0 z-10 min-w-[300px]">Uraian</th><th className="text-right">RKAP 2027</th>{bulanan && BULAN.map((b) => <th key={b} className="text-right">{b}</th>)}</tr></thead>
+        <tbody>
+          {rows.map((b, i) => {
+            const total = /^(total|kas bersih|kenaikan|kas dan setara kas (awal|akhir)|arus kas dari)/i.test(b.uraian) || b.uraian === b.uraian.toUpperCase();
+            return (
+              <tr key={i} className={clsx(total && "font-semibold")}>
+                <td className={clsx("sticky left-0 z-[1]", !total && "pl-6")}>{b.uraian}</td>
+                <td className="text-right tabnum">{jutaan(b.tahun)}</td>
+                {bulanan && b.bulan.map((v, j) => <td key={j} className="text-right text-slate-600 tabnum">{jutaan(v)}</td>)}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <p className="mt-2 text-[11.5px] text-slate-500">Dalam Rp juta. Hanya baris yang bernilai yang ditampilkan.</p>
+    </TableWrap>
   );
 }
 

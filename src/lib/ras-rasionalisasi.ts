@@ -6,7 +6,7 @@
 import { api, challengeApi } from "./data";
 import { isTopRisk } from "./format";
 import { buildRam } from "./ram";
-import { ebitda, POS } from "./rkap";
+import { angkaKas, ebitda, POS } from "./rkap";
 import type { ChallengeLog, RiskRegister, RkapKeuangan } from "./types";
 
 export interface DataPendukungRas {
@@ -41,6 +41,7 @@ export function konteksRasionalisasi(kategori: string | null, d: DataPendukungRa
     keuangan_rkap_2027: d.rkap ? {
       total_pendapatan: rp(pos?.total_pendapatan?.tahun), ebitda: rp(ebitda(d.rkap)), laba_bersih: rp(pos?.laba_bersih?.tahun),
       pendapatan_per_segmen: Object.fromEntries(POS.filter((p) => p.segmen && pos?.[p.kode]?.tahun).map((p) => [p.label, rp(pos![p.kode].tahun)])),
+      ...(d.rkap.data.arus_kas || d.rkap.data.neraca ? { arus_kas_dan_neraca: Object.fromEntries(Object.entries(angkaKas(d.rkap.data)).map(([k, v]) => [k, rp(v)])) } : {}),
     } : "Data Keuangan RKAP 2027 belum diunggah",
     risiko_kategori_ini: risiko.map((r) => ({
       risk_event: r.risk_event, kategori_dampak: r.kategori_dampak, risiko_utama: isTopRisk(r.kategori_dampak),

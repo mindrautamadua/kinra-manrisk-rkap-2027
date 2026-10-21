@@ -7,7 +7,7 @@ import { ErrorBox, Loading, Section, SelectCell, SheetPage, Stat, TableWrap, use
 import { api } from "@/lib/data";
 import { isTopRisk, rupiah } from "@/lib/format";
 import { buildRam, type RamRow } from "@/lib/ram";
-import { ebitda } from "@/lib/rkap";
+import { angkaKas, ebitda } from "@/lib/rkap";
 import { elTarget } from "@/lib/target-risiko";
 import {
   miliar, muatReferensi, namaDok, saranPadanan, selisih, urlPdf, type HalamanRef, type KodeDok, type PadananReferensi, type Referensi,
@@ -139,6 +139,8 @@ function TabKawasan({ R, lihat, rkap }: { R: Referensi; lihat: (d: KodeDok, h: n
   const banding = [
     { label: "Total Pendapatan 2027", rjpp: k.keuangan.baris[0].nilai[i27], app: pendapatanApp, hal: 68 },
     { label: "EBITDA 2027", rjpp: k.keuangan.baris[4].nilai[i27], app: ebitdaApp, hal: 68 },
+    // Capex: RKAP (Fin4-CF) jadi acuan; RJPP punya tiga versi, dibandingkan dengan versi roadmap.
+    { label: "Capex 2027", rjpp: k.capex.versi[0].nilai[i27], app: (() => { const c = rkap && angkaKas(rkap.data).capex; return c == null ? null : Math.abs(c); })(), hal: 67 },
   ];
   return (
     <>
@@ -165,12 +167,12 @@ function TabKawasan({ R, lihat, rkap }: { R: Referensi; lihat: (d: KodeDok, h: n
       <Section letter="C" title={`Proyeksi Keuangan 2026–2030 (${k.keuangan.satuan})`}>
         <TabelTahun th={th} rows={[...k.keuangan.baris.map((b) => ({ label: b.label, sel: b.nilai.map((v) => fmt(v)), hal: b.hal })),
           ...k.keuangan.rasio.map((b) => ({ label: b.label, sel: b.nilai, hal: b.hal }))]} lihat={lihat} />
-        <div className="mt-3 grid gap-3 md:grid-cols-2">
+        <div className="mt-3 grid gap-3 md:grid-cols-3">
           {banding.map((b) => {
             const s = selisih(b.app != null ? b.app / 1e9 : null, b.rjpp);
             return (
               <div key={b.label} className="glass rounded-xl px-4 py-3 text-[12.5px]">
-                <div className="font-bold text-ink">{b.label}: RJPP vs Data Keuangan RKAP</div>
+                <div className="font-bold text-ink">{b.label}: RJPP vs RKAP (acuan)</div>
                 <div className="mt-1 flex flex-wrap gap-x-5 text-slate-700">
                   <span>RJPP {miliar(b.rjpp)}</span>
                   <span>Aplikasi {b.app != null ? rupiah(b.app, true) : <Link href="/data-keuangan" className="text-brand-700 hover:underline">belum diunggah</Link>}</span>
