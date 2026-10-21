@@ -1,6 +1,7 @@
 "use client";
 import { sb, must } from "./supabase";
 import type { CakupanTopRisk } from "./cakupan-top-risk";
+import type { PadananReferensi } from "./referensi";
 import type {
   ChallengeLog, MitigasiAksi, ModePresentasi, Snapshot, SnapshotData,
   CatAksi, KategoriRisiko, ProgramStrategis, KriteriaDampak, ParameterSheet, RamPengendalian, RamTambahan, Ras, RasTambahan, RiskDriver,
@@ -45,6 +46,15 @@ export const api = {
   ramTambahan: async () => must(await sb().from("ram_tambahan").select("*").order("kategori")) as RamTambahan[],
   cat: async () => must(await sb().from("cat_aksi").select("*").order("urutan")) as CatAksi[],
   sasaran: async () => must(await sb().from("sasaran_strategis").select("*").order("urutan")) as SasaranStrategis[],
+  /** Pemetaan manual risiko di dokumen referensi (RJPP/DKMR) ke Risk Register (lembar Referensi Strategis). */
+  async padananReferensi(): Promise<PadananReferensi> {
+    const rows = must(await sb().from("app_settings").select("value").eq("key", "padanan_referensi"));
+    return (rows[0]?.value ?? {}) as PadananReferensi;
+  },
+  async savePadananReferensi(v: PadananReferensi) {
+    guard("app_settings");
+    must(await sb().from("app_settings").upsert({ key: "padanan_referensi", value: v, updated_at: new Date().toISOString() }));
+  },
   program: async () => must(await sb().from("program_strategis").select("*").order("urutan")) as ProgramStrategis[],
   /** null bila migrasi 0008 belum dijalankan. */
   mitigasiAksi: async () => {

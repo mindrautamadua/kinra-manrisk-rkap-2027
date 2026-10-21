@@ -49,3 +49,6 @@ supabase/.temp/
 /*.xlsx
 /*.pdf
 
+
+# Dokumen referensi rahasia (transkrip & data terstruktur); disimpan di Supabase Storage, bukan di repo publik
+/referensi-lokal/

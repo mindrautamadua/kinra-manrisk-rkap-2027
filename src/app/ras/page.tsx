@@ -1,6 +1,6 @@
 "use client";
 import { useLayoutEffect, useRef, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 import { AiFillModal, AiRowButton } from "@/components/AiFill";
 import clsx from "clsx";
 import { Button, EditCell, ErrorBox, InfoHint, Loading, Section, SelectCell, SheetPage, SikapBadge, TableWrap, useLoad, useSaver } from "@/components/ui";
@@ -9,6 +9,7 @@ import { ARTI_SIKAP, cekSikap } from "@/lib/format";
 import { note } from "@/lib/static";
 import { SIKAP, type Ras, type RasTambahan, type KategoriRisiko } from "@/lib/types";
 import { konfirmasi } from "@/components/Konfirmasi";
+import { konteksRasionalisasi, muatPendukungRas, type DataPendukungRas } from "@/lib/ras-rasionalisasi";
 
 export default function RasPage() {
   const q = useLoad(async () => ({ ras: await api.ras(), tambahan: await api.rasTambahan(), kategori: await api.kategori() }));
@@ -35,13 +36,28 @@ export default function RasPage() {
   };
 
   // Bantuan AI untuk baris RAS (bagian A) atau pernyataan tambahan (bagian B).
-  const [ai, setAi] = useState<{ bagian: "A"; row: Ras } | { bagian: "B"; row: RasTambahan } | null>(null);
+  // `mode: "rasionalisasi"` = hanya kolom rasionalisasi, dengan data keuangan, risiko, dan RAM sebagai dasar.
+  const [ai, setAi] = useState<({ bagian: "A"; row: Ras } | { bagian: "B"; row: RasTambahan }) & { mode?: "rasionalisasi" } | null>(null);
+  const [pendukung, setPendukung] = useState<DataPendukungRas | null>(null);
+  const [memuat, setMemuat] = useState(false);
+  const aiRasionalisasi = async (a: { bagian: "A"; row: Ras } | { bagian: "B"; row: RasTambahan }) => {
+    if (!a.row.kategori) { alert("Pilih kategori risiko terlebih dahulu."); return; }
+    if (!a.row.sikap) { alert("Isi Sikap Risiko terlebih dahulu; rasionalisasi menjelaskan alasan sikap itu."); return; }
+    if (!pendukung) {
+      setMemuat(true);
+      try { setPendukung(await muatPendukungRas()); } catch (e) { alert(`Gagal memuat data pendukung: ${(e as Error).message}`); setMemuat(false); return; }
+      setMemuat(false);
+    }
+    setAi({ ...a, mode: "rasionalisasi" });
+  };
   const sikapBoleh = (induk?: string | null) => SIKAP.filter((x) => !induk || cekSikap(x, induk) === "Sesuai");
   const aiProps = (a: NonNullable<typeof ai>) => {
     const induk = a.bagian === "A" ? a.row : d!.ras.find((r) => r.kategori === a.row.kategori);
+    const rasional = a.mode === "rasionalisasi";
     return {
-      subjek: `${a.bagian === "A" ? "RAS" : "RAS Tambahan"} ${a.row.kategori ?? ""}`,
-      fields: [
+      subjek: `${a.bagian === "A" ? "RAS" : "RAS Tambahan"} ${a.row.kategori ?? ""}${rasional ? ` · sikap ${a.row.sikap}` : ""}`,
+      judul: rasional ? "Susun Rasionalisasi Sikap dengan AI" : undefined,
+      fields: rasional ? [{ key: "rasionalisasi", label: "Rasionalisasi Sikap Risiko" }] : [
         { key: "sikap", label: "Sikap Risiko", options: sikapBoleh(induk?.sikap_induk) },
         { key: "pernyataan", label: "Pernyataan Selera Risiko" },
         { key: "rasionalisasi", label: "Rasionalisasi Sikap Risiko" },
@@ -51,6 +67,10 @@ export default function RasPage() {
         kategori: a.row.kategori, definisi_kategori: d!.kategori.find((k) => k.nama === a.row.kategori)?.definisi,
         sikap_induk: induk?.sikap_induk, pernyataan_induk: induk?.pernyataan_induk,
         pernyataan_entitas_lain: d!.ras.filter((r) => r.id !== a.row.id && r.pernyataan).map((r) => ({ kategori: r.kategori, sikap: r.sikap, pernyataan: r.pernyataan })),
+        ...(rasional && pendukung ? {
+          sikap_entitas: a.row.sikap, pernyataan_entitas: a.row.pernyataan,
+          data_pendukung: konteksRasionalisasi(a.row.kategori, pendukung),
+        } : {}),
       },
     };
   };
@@ -93,7 +113,7 @@ export default function RasPage() {
                           {r.sikap && ARTI_SIKAP[r.sikap] && <div className="px-2 pb-1.5 text-[11px] leading-snug text-slate-500">{ARTI_SIKAP[r.sikap].ringkas}</div>}
                         </td>
                         <td className="input"><EditCell value={r.pernyataan} onSave={(v) => patchRas(r.id, { pernyataan: v as string })} /></td>
-                        <td className="input"><EditCell value={r.rasionalisasi} onSave={(v) => patchRas(r.id, { rasionalisasi: v as string })} /></td>
+                        <td className="input"><SelRasionalisasi value={r.rasionalisasi} onSave={(v) => patchRas(r.id, { rasionalisasi: v })} onAi={() => aiRasionalisasi({ bagian: "A", row: r })} memuat={memuat} /></td>
                         <td className={clsx("calc font-semibold", cek === "Sesuai" ? "text-emerald-700" : "text-rose-700")}>{cek || "–"}</td>
                         <td className="text-center"><AiRowButton onClick={() => setAi({ bagian: "A", row: r })} /></td>
                       </tr>
@@ -116,7 +136,7 @@ export default function RasPage() {
                       <td className="input fz fz-tax fz-edge"><SelectCell value={r.kategori} options={d.kategori.map((k: KategoriRisiko) => k.nama)} onSave={(v) => patchTambahan(r.id, { kategori: v })} /></td>
                       <td className="input"><SelectCell value={r.sikap} options={SIKAP} onSave={(v) => patchTambahan(r.id, { sikap: v })} /></td>
                       <td className="input"><EditCell value={r.pernyataan} onSave={(v) => patchTambahan(r.id, { pernyataan: v as string })} /></td>
-                      <td className="input"><EditCell value={r.rasionalisasi} onSave={(v) => patchTambahan(r.id, { rasionalisasi: v as string })} /></td>
+                      <td className="input"><SelRasionalisasi value={r.rasionalisasi} onSave={(v) => patchTambahan(r.id, { rasionalisasi: v })} onAi={() => aiRasionalisasi({ bagian: "B", row: r })} memuat={memuat} /></td>
                       <td><div className="flex flex-col items-center gap-2"><AiRowButton onClick={() => r.kategori ? setAi({ bagian: "B", row: r }) : alert("Pilih kategori risiko terlebih dahulu.")} /><button data-edit onClick={() => delTambahan(r.id)} className="text-slate-400 hover:text-rose-600"><Trash2 className="h-4 w-4" /></button></div></td>
                     </tr>
                   ))}
@@ -127,11 +147,23 @@ export default function RasPage() {
           </Section>
           {ai && (
             <AiFillModal jenis="ras" {...aiProps(ai)} nilai={ai.row} onApply={applyAi} onClose={() => setAi(null)}
-              placeholder="Contoh: Kami tidak menerima keterlambatan pembayaran pokok/bunga pinjaman, tapi masih menerima fluktuasi kurs dalam batas wajar karena sebagian pendapatan dalam USD." />
+              placeholder={ai.mode === "rasionalisasi"
+                ? "Opsional. Contoh: tekankan bahwa pendapatan utilitas bergantung pada keandalan pasokan listrik, dan sikap ini mengikuti arahan Holding untuk program strategis RJPP."
+                : "Contoh: Kami tidak menerima keterlambatan pembayaran pokok/bunga pinjaman, tapi masih menerima fluktuasi kurs dalam batas wajar karena sebagian pendapatan dalam USD."} />
           )}
         </>
       )}
     </SheetPage>
+  );
+}
+
+/** Sel Rasionalisasi dengan tombol AI yang menyusun alasan sikap dari data keuangan, risiko, dan RAM. */
+function SelRasionalisasi({ value, onSave, onAi, memuat }: { value: string | null; onSave: (v: string) => void; onAi: () => void; memuat: boolean }) {
+  return (
+    <div className="flex items-start gap-1">
+      <div className="min-w-0 flex-1"><EditCell value={value} onSave={(v) => onSave(v as string)} /></div>
+      <div className="pt-1">{memuat ? <Loader2 className="h-4 w-4 animate-spin text-brand-600" /> : <AiRowButton onClick={onAi} title="Susun rasionalisasi dengan AI dari data keuangan, risiko, dan RAM" />}</div>
+    </div>
   );
 }
 

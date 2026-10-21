@@ -26,7 +26,10 @@ const KHUSUS: Record<JenisIsi, string> = {
   ras: `Lembar: Risk Appetite Statement (RAS).
 - sikap: bila diminta, pilih dari daftar pilihan (daftar sudah dibatasi agar sama atau lebih ketat dari sikap Induk).
 - pernyataan: Pernyataan Selera Risiko entitas untuk kategori ini: risiko apa yang diterima/tidak diterima dan batas kualitatifnya. Harus konsisten dengan sikap (mis. Zero Tolerance tidak boleh menerima penyimpangan) dan tidak lebih longgar dari pernyataan Induk. Sesuaikan dengan karakter usaha entitas.
-- rasionalisasi: alasan pemilihan sikap tersebut berdasarkan karakter usaha, kondisi, dan strategi entitas; jangan sekadar mengulang pernyataan.`,
+- rasionalisasi: alasan pemilihan sikap tersebut berdasarkan karakter usaha, kondisi, dan strategi entitas; jangan sekadar mengulang pernyataan.
+- Bila konteks memuat data_pendukung, rasionalisasi WAJIB berpijak pada data itu dengan susunan "1) ... 2) ... 3) ... 4) ...": 1) karakteristik bisnis entitas yang relevan dengan kategori; 2) kondisi keuangan (pakai angka RKAP 2027 dari konteks bila relevan); 3) eksposur risiko dan Risiko Utama pada kategori ini (sebut risk event dan levelnya); 4) hasil pengukuran parameter RAM kategori ini (status dan posisinya terhadap threshold; bila belum diukur atau tidak diterapkan, katakan demikian). Tutup dengan alasan mengapa sikap terpilih (bukan yang lebih ketat/longgar) paling sesuai dan bagaimana sikap itu selaras dengan ambang batas RAM dan materialitas Risiko Utama.
+- Ikuti arahan_challenge_session yang relevan dengan kategori (mis. Moderate untuk kegiatan usaha berjalan dan Aggressive untuk program strategis RJPP/penugasan Pemerintah pada Risiko Strategis serta Investasi dan Proyek; kapasitas pendanaan dijaga lewat sikap Conservative Risiko Keuangan). Bila sikap yang diisi bertentangan dengan arahan, jangan ubah sikapnya; tulis di catatan.
+- Angka hanya boleh dikutip dari konteks. Rasionalisasi boleh 4-6 kalimat.`,
   ram: `Lembar: Risk Acceptance Matrix (RAM), kolom Rencana Pengendalian.
 - Tujuan pengendalian: menjaga atau mengembalikan hasil parameter ke dalam threshold (limit/appetite/tolerance) dengan memperhatikan arah parameter dan status saat ini.
 - inisiatif: inisiatif strategis tingkat korporat (arah besar).

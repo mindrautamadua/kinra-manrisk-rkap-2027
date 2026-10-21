@@ -6,7 +6,7 @@ import clsx from "clsx";
 import {
   LayoutDashboard, Presentation, FileText, BookOpen, Target, Gauge, Network, ListChecks, Flame, Grid3x3, Briefcase, Sigma,
   Library, Database, ChevronDown, Menu, X, PanelLeftClose, PanelLeftOpen, Table2,
-  ClipboardCheck, MessagesSquare, GitCompareArrows, Workflow, Lock, LockOpen, MessageSquarePlus, LifeBuoy, HelpCircle, LogOut, Lightbulb, Rocket, FileSpreadsheet, Loader2, Landmark, Flag,
+  ClipboardCheck, MessagesSquare, GitCompareArrows, Workflow, Lock, LockOpen, MessageSquarePlus, LifeBuoy, HelpCircle, LogOut, Lightbulb, Rocket, FileSpreadsheet, Loader2, Landmark, Flag, BookMarked,
 } from "lucide-react";
 import { useMode } from "@/lib/mode";
 import { ChallengeModal, refFromPath } from "./ChallengeForm";
@@ -33,6 +33,7 @@ const MASTER = [
   { href: "/taksonomi", label: "Taksonomi PTPN Group", icon: Library },
   { href: "/data-keuangan", label: "Data Keuangan RKAP", icon: Landmark },
   { href: "/sasaran-strategis", label: "Sasaran Strategis RJPP", icon: Flag },
+  { href: "/referensi-strategis", label: "Referensi Strategis", icon: BookMarked },
   { href: "/setup", label: "Inisialisasi Data", icon: Database },
 ];
 
