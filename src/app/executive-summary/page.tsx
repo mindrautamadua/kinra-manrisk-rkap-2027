@@ -89,6 +89,8 @@ function Deck({ entitas, ras, kategori, register, ram, program }: { entitas: str
   // 7.2 RAM detail: hanya parameter yang diterapkan.
   const ramGroups = KATEGORI_URUT.map((k) => ({ key: k, items: ram.filter((r) => r.kategori === k && r.diterapkan) }));
   const ramPages = kemas(ramGroups, () => 1, 12, 1);
+  // Parameter tidak diterapkan disajikan pada slide terpisah beserta justifikasinya (arahan Challenge Session 6f).
+  const tidakDiterapkan = ram.filter((r) => !r.diterapkan);
 
   // 7.3 Top risk: semua taksonomi tampil, risiko utama per taksonomi.
   const utama = register.filter((r) => r.risk_event && isTopRisk(r.kategori_dampak));
@@ -122,6 +124,11 @@ function Deck({ entitas, ras, kategori, register, ram, program }: { entitas: str
         <RamDetail groups={p} />
       </Slide>
     )),
+    ...(tidakDiterapkan.length ? [
+      <Slide key="ram-tidak" title={`7.2 Risk Acceptance Matrix (RAM) (${entitas})`} sub={`Parameter tidak diterapkan: ${tidakDiterapkan.length} parameter tidak relevan dengan kegiatan usaha`} entitas={entitas}>
+        <RamTidakDiterapkan rows={tidakDiterapkan} />
+      </Slide>,
+    ] : []),
     ...topPages.map((p, i) => (
       <Slide key={`top${i}`} title={`7.3 Top Risk (${entitas})`} sub={judul(topPages, i)} entitas={entitas}>
         <TopRisk groups={p} kat={kat} />
@@ -363,6 +370,29 @@ function RamRingkasan({ ram }: { ram: RamRow[] }) {
         })}
       </div>
     </div>
+  );
+}
+
+function RamTidakDiterapkan({ rows }: { rows: RamRow[] }) {
+  return (
+    <table className="w-full border-collapse text-[11px]">
+      <thead>
+        <tr>
+          <th className={clsx(th, "w-11 text-center")}>Kode</th><th className={clsx(th, "w-64")}>Parameter Pengukuran</th>
+          <th className={clsx(th, "w-44")}>Taksonomi Risiko</th><th className={th}>Dasar Pertimbangan / Justifikasi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr key={r.key}>
+            <td className={clsx(td, "text-center font-bold")}>{r.kode}</td>
+            <td className={clsx(td, "font-semibold")}>{r.parameter}</td>
+            <td className={td}>{r.kategori}</td>
+            <td className={td}>{r.alasanTidak?.trim() || <Kosong />}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
 

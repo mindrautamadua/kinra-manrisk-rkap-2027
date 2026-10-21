@@ -3,7 +3,7 @@ import { Fragment, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Download, Info, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
 import clsx from "clsx";
-import { ArahBadge, EditCell, ErrorBox, Loading, SelectCell, SheetPage, SikapBadge, StatusBadge, TableWrap, Button, useLoad, useSaver } from "@/components/ui";
+import { ArahBadge, EditCell, ErrorBox, Loading, Section, SelectCell, SheetPage, SikapBadge, StatusBadge, TableWrap, Button, useLoad, useSaver } from "@/components/ui";
 import { api } from "@/lib/data";
 import { alasanStatus, angka, ARAH_PILIHAN, cekUrutanBatas, NARASI_STATUS, nilaiParam } from "@/lib/format";
 import { buildRam, KATEGORI_URUT, perluPengendalian, type RamRow } from "@/lib/ram";
@@ -13,7 +13,7 @@ import { AiFillModal, AiRowButton } from "@/components/AiFill";
 import { ThresholdHint } from "@/components/ThresholdHint";
 import { PenjelasanStatus } from "@/components/PenjelasanStatus";
 import type { IsiRequest, IsiResponse } from "@/lib/isi-ai";
-import type { RamPengendalian, RamTambahan } from "@/lib/types";
+import type { ParameterSheet, RamPengendalian, RamTambahan } from "@/lib/types";
 import { konfirmasi } from "@/components/Konfirmasi";
 
 const AI_FIELDS = [
@@ -33,12 +33,20 @@ export default function RamPage() {
   const saver = useSaver();
   const d = q.data;
   const rows = d ? buildRam(d.params, d.ras, d.pengendalian, d.tambahan) : [];
+  // Parameter yang tidak diterapkan disajikan terpisah dari parameter yang diukur, beserta justifikasinya (arahan Challenge Session 6f).
+  const diukur = rows.filter((r) => r.diterapkan);
+  const tidak = rows.filter((r) => !r.diterapkan);
+  const tanpaAlasan = tidak.filter((r) => !r.alasanTidak?.trim()).length;
 
   const savePengendalian = (kode: string, p: Partial<RamPengendalian>) => {
     const cur = d!.pengendalian.find((x) => x.kode === kode) ?? { kode, inisiatif: null, kebijakan: null, program: null, anggaran: null };
     const next = { ...cur, ...p };
     q.setData({ ...d!, pengendalian: [...d!.pengendalian.filter((x) => x.kode !== kode), next] });
     saver.run(() => api.upsert("ram_pengendalian", next));
+  };
+  const patchParam = (code: string, p: Partial<ParameterSheet>) => {
+    q.setData({ ...d!, params: d!.params.map((x) => (x.code === code ? { ...x, ...p } : x)) });
+    saver.run(() => api.update<ParameterSheet>("parameter_sheet", "code", code, p));
   };
   const patchTambahan = (id: string, p: Partial<RamTambahan>) => {
     q.setData({ ...d!, tambahan: d!.tambahan.map((x) => (x.id === id ? { ...x, ...p } : x)) });
@@ -165,7 +173,8 @@ export default function RamPage() {
           <Sparkles className="h-4 w-4" />Isi Pengendalian dengan AI ({targetMassal.length})
         </Button>
       )}<Button variant="outline" onClick={() => exportRam(rows)}><Download className="h-4 w-4" />Excel</Button></>}>
-      {q.loading ? <Loading /> : q.error ? <ErrorBox error={q.error} /> : d && (
+      {q.loading ? <Loading /> : q.error ? <ErrorBox error={q.error} /> : d && (<>
+        <Section letter="A" title={`Parameter yang Diukur (${diukur.length})`}>
         <TableWrap stickyHeader>
           <table ref={tableRef} className="kk-table min-w-[2520px]">
             <thead>
@@ -183,14 +192,13 @@ export default function RamPage() {
             </thead>
             <tbody>
               {KATEGORI_URUT.map((kat, ki) => {
-                const list = rows.filter((r) => r.kategori === kat);
+                const list = diukur.filter((r) => r.kategori === kat);
                 return (
                   <Fragment key={kat}>
                     {list.map((r, i) => {
                       const t = r.tambahan;
-                      const off = !r.diterapkan;
                       return (
-                        <tr key={r.key} className={clsx(off && "row-off")}>
+                        <tr key={r.key}>
                           {i === 0 && <td rowSpan={list.length + 1} className="group fz fz-no text-center">{ki + 1}</td>}
                           {i === 0 && <td rowSpan={list.length + 1} className="group fz fz-tax">{kat}</td>}
                           {t ? (
@@ -243,7 +251,38 @@ export default function RamPage() {
             </tbody>
           </table>
         </TableWrap>
-      )}
+        </Section>
+
+        <Section letter="B" title={`Parameter Tidak Diterapkan (${tidak.length})`}
+          right={tanpaAlasan ? <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[12px] font-semibold text-amber-800">{tanpaAlasan} belum ada justifikasi</span> : undefined}>
+          <p className="mb-2 text-[12.5px] text-slate-500">Parameter klaster dan unik yang dinyatakan tidak relevan dengan kegiatan usaha tidak diukur dan wajib disertai dasar pertimbangan. Ubah kolom Diterapkan menjadi &quot;Ya&quot; untuk mengembalikannya ke bagian A.</p>
+          <TableWrap>
+            <table className="kk-table min-w-[1000px]">
+              <thead><tr>
+                <th className="w-14">Kode</th><th className="w-72">Parameter</th><th className="w-44">Taksonomi Risiko</th><th className="w-32">Kategori Parameter</th><th className="w-28">Diterapkan</th>
+                <th>Dasar Pertimbangan / Justifikasi Tidak Diterapkan</th>
+              </tr></thead>
+              <tbody>
+                {tidak.map((r) => {
+                  const p = d.params.find((x) => x.code === r.kode);
+                  return (
+                    <tr key={r.key}>
+                      <td className="font-bold"><Link className="text-brand-700 hover:underline" href={`/parameter/${r.kode}`}>{r.kode}</Link></td>
+                      <td>{r.parameter}</td><td className="text-[12px]">{r.kategori}</td><td className="text-[12px]">{r.kategoriParameter}</td>
+                      <td className="input"><SelectCell value={p?.diterapkan} options={["Ya", "Tidak"]} onSave={(v) => patchParam(r.kode, { diterapkan: v })} /></td>
+                      <td className={r.alasanTidak?.trim() ? "input" : "input !bg-amber-100/70"}>
+                        <EditCell value={p?.alasan_tidak_diterapkan} placeholder={p?.diterapkan === "Tidak" ? "Mengapa parameter ini tidak relevan dengan kegiatan usaha PT KINRA…" : "Pilih Diterapkan Ya/Tidak terlebih dahulu…"}
+                          onSave={(v) => patchParam(r.kode, { alasan_tidak_diterapkan: (v as string) || null })} />
+                      </td>
+                    </tr>
+                  );
+                })}
+                {!tidak.length && <tr><td colSpan={6} className="py-6 text-center text-slate-400">Semua parameter diterapkan.</td></tr>}
+              </tbody>
+            </table>
+          </TableWrap>
+        </Section>
+      </>)}
       {ai && (
         <AiFillModal jenis="ram" subjek={`Parameter ${ai.kode} ${ai.parameter} · ${ai.status}`} konteks={aiKonteks(ai)}
           fields={[...AI_FIELDS]}

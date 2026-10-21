@@ -103,8 +103,10 @@ const RAM_COLS: Col[] = [
   { header: "Status Pengukuran", key: "status", width: 16 }, { header: "Inisiatif Strategis", key: "inisiatif", width: 30 }, { header: "Kebijakan", key: "kebijakan", width: 30 },
   { header: "Program Kerja", key: "program", width: 30 }, { header: "Anggaran (Rp miliar)", key: "anggaran", width: 14 },
   { header: "Indikator Keberhasilan", key: "indikator", width: 34 },
+  { header: "Justifikasi Tidak Diterapkan", key: "alasanTidak", width: 40 },
 ];
-const ramRows = (rows: RamRow[]) => rows.map((r) => {
+/** Parameter yang diukur lebih dulu, parameter tidak diterapkan dikumpulkan terpisah di bawahnya. */
+const ramRows = (rows: RamRow[]) => [...rows.filter((r) => r.diterapkan), ...rows.filter((r) => !r.diterapkan)].map((r) => {
   const src = (r.tambahan ?? r.pengendalian ?? {}) as Record<string, unknown>;
   return { ...r, inisiatif: src.inisiatif, kebijakan: src.kebijakan, program: src.program, anggaran: src.anggaran, indikator: src.indikator };
 });

@@ -110,7 +110,7 @@ export const STATUS_MANUAL = ["Terbuka", "Dalam proses"] as const;
 export interface Snapshot { id: string; created_at: string; nama: string; catatan: string | null; data?: SnapshotData }
 export interface SnapshotData {
   sampul: Sampul; ras: Ras[]; ras_tambahan: RasTambahan[]; register: RiskRegister[];
-  params: Pick<ParameterSheet, "code" | "diterapkan" | "summary" | "inputs">[];
+  params: Pick<ParameterSheet, "code" | "diterapkan" | "summary" | "inputs" | "alasan_tidak_diterapkan">[];
   pengendalian: RamPengendalian[]; ram_tambahan: RamTambahan[]; cat: CatAksi[];
   /** Tidak ada pada snapshot sebelum migrasi 0008. */
   mitigasi_aksi?: MitigasiAksi[];

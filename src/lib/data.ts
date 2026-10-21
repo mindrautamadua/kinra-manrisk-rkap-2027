@@ -123,7 +123,7 @@ export async function captureSnapshot(): Promise<SnapshotData> {
   ]);
   return {
     sampul, ras, ras_tambahan, register, pengendalian, ram_tambahan, cat, ...(aksi ? { mitigasi_aksi: aksi } : {}),
-    params: params.map(({ code, diterapkan, summary, inputs }) => ({ code, diterapkan, summary, inputs })),
+    params: params.map(({ code, diterapkan, summary, inputs, alasan_tidak_diterapkan }) => ({ code, diterapkan, summary, inputs, alasan_tidak_diterapkan })),
   };
 }
 

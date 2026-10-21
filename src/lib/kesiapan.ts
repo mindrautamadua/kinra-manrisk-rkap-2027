@@ -73,6 +73,15 @@ export function periksa(d: InputKesiapan): Pemeriksaan[] {
       detail: "Pilih Ya atau Tidak pada lembar Rekap.", href: "/rekap", ref: refP(r.kode, r.parameter),
     })));
 
+  add("rekap-justifikasi", "Rekap", "Parameter tidak diterapkan disertai justifikasi",
+    REKAP.filter((r) => r.grup !== "Parameter Standar").filter((r) => {
+      const p = d.params.find((x) => x.code === r.kode);
+      return p?.diterapkan === "Tidak" && kosong(p.alasan_tidak_diterapkan);
+    }).map((r) => ({
+      id: `just-${r.kode}`, severity: "perhatian", area: "Rekap", judul: `${r.kode} ${r.parameter}: tidak diterapkan tanpa justifikasi`,
+      detail: "Isi dasar pertimbangan mengapa parameter tidak relevan dengan kegiatan usaha pada bagian B lembar Rekap.", href: "/rekap", ref: refP(r.kode, r.parameter),
+    })));
+
   add("ram-tambahan", "RAM", "Parameter unik tambahan lengkap (kode, threshold, hasil)",
     d.ram.filter((r) => r.tambahan).filter((r) => [r.kode, r.limit, r.appetite, r.tolerance, r.hasil].some(kosong)).map((r) => ({
       id: `tamb-${r.key}`, severity: "perhatian", area: "RAM", judul: `Parameter unik "${r.parameter || "tanpa nama"}" belum lengkap`,

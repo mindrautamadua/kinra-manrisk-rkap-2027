@@ -7,6 +7,8 @@ export interface RamRow {
   key: string; kategoriNo: number; kategori: string; kode: string; parameter: string; formula: string; satuan: string;
   kategoriParameter: string; diterapkan: boolean; limit: unknown; appetite: unknown; tolerance: unknown; sikap: string;
   hasil: unknown; status: string; arah: string; tambahan?: RamTambahan; pengendalian?: RamPengendalian | null;
+  /** Justifikasi parameter yang tidak diterapkan (arahan Challenge Session 6f). */
+  alasanTidak?: string | null;
 }
 
 export const KATEGORI_URUT = [
@@ -43,6 +45,7 @@ export function buildRam(params: ParameterSheet[], ras: Ras[], pengendalian: Ram
       sikap: sikapUntuk(l.kode, kat, ras), hasil: diterapkan ? s.hasil : null,
       status: diterapkan ? status : "Tidak diterapkan", arah,
       pengendalian: pengendalian.find((x) => x.kode === l.kode) ?? null,
+      alasanTidak: diterapkan ? null : p?.alasan_tidak_diterapkan ?? null,
     });
   }
   for (const t of tambahan) {

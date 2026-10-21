@@ -3,7 +3,7 @@ import { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Brain, Grid2x2, Landmark, RotateCcw, Sparkles } from "lucide-react";
 import clsx from "clsx";
-import { Card, ErrorBox, Loading, SheetPage, StatusBadge, useSaver } from "@/components/ui";
+import { Card, EditCell, ErrorBox, Loading, SheetPage, StatusBadge, useSaver } from "@/components/ui";
 import { SheetGrid, buildLayout } from "@/components/SheetGrid";
 import { SheetAiModal } from "@/components/SheetAi";
 import { SHEET_AI } from "@/lib/sheet-ai";
@@ -106,6 +106,11 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
     saver.run(() => api.update<ParameterSheet>("parameter_sheet", "code", code, { diterapkan: v }));
   };
 
+  const setAlasan = (v: string | null) => {
+    setRow((r) => (r ? { ...r, alasan_tidak_diterapkan: v } : r));
+    saver.run(() => api.update<ParameterSheet>("parameter_sheet", "code", code, { alasan_tidak_diterapkan: v }));
+  };
+
   const resetInputs = async () => {
     if (!tpl || !(await konfirmasi({ judul: "Kosongkan isian lembar?", pesan: "Seluruh isian (sel kuning) pada lembar ini akan dikosongkan.", aksi: "Kosongkan", nada: "peringatan" }))) return;
     const empty: Record<string, CellValue> = {};
@@ -163,6 +168,16 @@ export default function ParameterPage({ params }: { params: Promise<{ code: stri
               )}
             </Card>
           </div>
+
+          {meta.grup !== "Parameter Standar" && row?.diterapkan === "Tidak" && (
+            <div className={clsx("mb-3 rounded-xl border px-4 py-3 text-[12.5px]", row.alasan_tidak_diterapkan?.trim() ? "border-line bg-white" : "border-amber-300 bg-amber-50")}>
+              <div className="mb-1 font-semibold text-ink">Dasar pertimbangan / justifikasi tidak diterapkan</div>
+              <p className="mb-2 text-[11.5px] text-slate-500">Parameter yang tidak diterapkan disajikan terpisah di lembar Rekap dan RAM, dan wajib disertai alasan mengapa tidak relevan dengan kegiatan usaha.</p>
+              <div className="rounded-md border border-line bg-white">
+                <EditCell value={row.alasan_tidak_diterapkan} placeholder="Mengapa parameter ini tidak relevan dengan kegiatan usaha PT KINRA…" onSave={(v) => setAlasan((v as string) || null)} />
+              </div>
+            </div>
+          )}
 
           {rkap && tautan.map((t) => {
             const target = nilaiTautan(t, rkap);
