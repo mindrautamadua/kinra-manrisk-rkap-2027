@@ -6,7 +6,7 @@ import clsx from "clsx";
 import { Bot, ChevronDown, ExternalLink, Loader2, MessagesSquare, Sparkles } from "lucide-react";
 import { challengeApi } from "@/lib/data";
 import type { ChallengeLog } from "@/lib/types";
-import { validasiChallenge, type HasilValidasi } from "@/lib/validasi-challenge";
+import { konfirmasiManual, validasiChallenge, type HasilValidasi } from "@/lib/validasi-challenge";
 
 const PRIO_CLS: Record<string, string> = {
   Tinggi: "bg-rose-50 text-rose-700 ring-rose-600/20", Sedang: "bg-amber-50 text-amber-800 ring-amber-500/30", Rendah: "bg-slate-50 text-slate-600 ring-slate-400/30",
@@ -20,7 +20,7 @@ function cocok(l: ChallengeLog, path: string) {
   return false;
 }
 
-/** Daftar periksa masukan challenge session untuk lembar yang sedang dibuka; centang = status Selesai. */
+/** Daftar periksa masukan challenge session untuk lembar yang sedang dibuka; centang = status Selesai, hanya dari Validasi AI. */
 export function ChallengePanel() {
   const path = decodeURIComponent(usePathname());
   const [rows, setRows] = useState<ChallengeLog[]>([]);
@@ -46,15 +46,7 @@ export function ChallengePanel() {
   const terbuka = open ?? !semua;
   const hariIni = new Date().toISOString().slice(0, 10);
 
-  const toggle = async (l: ChallengeLog) => {
-    const status = l.status === "Selesai" ? "Terbuka" : "Selesai";
-    setRows((rs) => rs.map((r) => (r.id === l.id ? { ...r, status } : r)));
-    setErr("");
-    try { await challengeApi.update(l.id, { status }); window.dispatchEvent(new Event("challenge-log-updated")); }
-    catch (e) { setErr((e as Error).message); setRows((rs) => rs.map((r) => (r.id === l.id ? { ...r, status: l.status } : r))); }
-  };
-
-  /** AI menilai masukan yang belum selesai terhadap isi lembar; yang terpenuhi otomatis dicentang. */
+  /** AI menilai masukan yang belum selesai terhadap isi lembar; server mencentang yang terpenuhi dan menyimpan hasilnya. */
   const validasi = async () => {
     const belum = list.filter((l) => l.status !== "Selesai");
     if (!belum.length) return;
@@ -62,18 +54,20 @@ export function ChallengePanel() {
     try {
       const hasil = await validasiChallenge(path, belum[0].ref_label ?? path, belum);
       setAi((a) => ({ ...a, ...Object.fromEntries(hasil.map((h) => [h.id, h])) }));
-      const lolos = hasil.filter((h) => h.putusan === "terpenuhi");
-      const tgl = new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
-      for (const h of lolos) {
-        const l = belum.find((x) => x.id === h.id)!;
-        const patch: Partial<ChallengeLog> = { status: "Selesai", ...(!l.tanggapan ? { tanggapan: `Divalidasi AI ${tgl}: ${h.alasan}` } : {}) };
-        await challengeApi.update(h.id, patch);
-        setRows((rs) => rs.map((r) => (r.id === h.id ? { ...r, ...patch } : r)));
-      }
-      if (lolos.length) window.dispatchEvent(new Event("challenge-log-updated"));
-      setInfo(`${lolos.length} dari ${hasil.length} masukan dinilai terpenuhi${lolos.length ? " dan dicentang otomatis" : ""}.`);
+      const lolos = hasil.filter((h) => h.putusan === "terpenuhi").length;
+      window.dispatchEvent(new Event("challenge-log-updated"));
+      setInfo(`${lolos} dari ${hasil.length} masukan dinilai terpenuhi${lolos ? " dan dicentang otomatis" : ""}.`);
     } catch (e) { setErr((e as Error).message); }
     setBusy(false);
+  };
+
+  /** Hanya untuk putusan AI "perlu dicek manual": pengguna menyertakan bukti, server yang menutup. */
+  const konfirmasi = async (l: ChallengeLog) => {
+    const bukti = window.prompt("Bukti atau keterangan penyelesaian (mis. nomor undangan rapat dengan Holding, notulen, tautan dokumen):", "");
+    if (bukti == null) return;
+    setErr("");
+    try { await konfirmasiManual(l.id, bukti); window.dispatchEvent(new Event("challenge-log-updated")); }
+    catch (e) { setErr((e as Error).message); }
   };
 
   return (
@@ -105,8 +99,8 @@ export function ChallengePanel() {
               const telat = !done && l.tenggat && l.tenggat < hariIni;
               return (
                 <li key={l.id} className="flex items-start gap-3 py-2.5">
-                  <input type="checkbox" checked={done} onChange={() => toggle(l)} title={done ? "Tandai belum selesai" : "Tandai selesai"}
-                    className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-emerald-600" />
+                  <input type="checkbox" checked={done} readOnly disabled title={done ? "Selesai berdasarkan Validasi AI" : "Dicentang otomatis bila Validasi AI menilai terpenuhi"}
+                    className="mt-0.5 h-4 w-4 shrink-0 accent-emerald-600" />
                   <div className="min-w-0 flex-1">
                     <div className={clsx("text-[13px] leading-relaxed", done ? "text-slate-400 line-through" : "text-ink")}>{l.masukan}</div>
                     <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-slate-500">
@@ -117,7 +111,10 @@ export function ChallengePanel() {
                       {l.tenggat && <span className={clsx(telat && "font-semibold text-rose-600")}>Tenggat {new Date(l.tenggat).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}{telat && " (lewat)"}</span>}
                       {l.tanggapan && <span className="italic">“{l.tanggapan}”</span>}
                     </div>
-                    {ai[l.id] && <HasilAI h={ai[l.id]} />}
+                    {!done && (ai[l.id] ?? l.validasi_ai) && <HasilAI h={ai[l.id] ?? l.validasi_ai!} />}
+                    {!done && (ai[l.id] ?? l.validasi_ai)?.putusan === "verifikasi_manual" && (
+                      <button onClick={() => konfirmasi(l)} className="mt-1.5 text-[12px] font-semibold text-brand-700 hover:underline">Konfirmasi selesai dengan bukti…</button>
+                    )}
                   </div>
                 </li>
               );
@@ -140,7 +137,7 @@ const PUTUSAN = {
   verifikasi_manual: { label: "AI: perlu dicek manual", cls: "border-slate-200 bg-slate-50 text-slate-700" },
 } as const;
 
-function HasilAI({ h }: { h: HasilValidasi }) {
+function HasilAI({ h }: { h: Pick<HasilValidasi, "putusan" | "alasan" | "kekurangan"> }) {
   const p = PUTUSAN[h.putusan];
   return (
     <div className={clsx("mt-2 rounded-lg border px-3 py-2 text-[12px] leading-relaxed", p.cls)}>

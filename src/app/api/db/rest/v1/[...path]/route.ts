@@ -16,6 +16,16 @@ const TABLES = new Set([
 const FWD_REQ = ["accept", "content-type", "prefer", "range", "range-unit", "accept-profile", "content-profile"];
 const FWD_RES = ["content-type", "content-range", "preference-applied", "range-unit"];
 
+/**
+ * Masukan challenge session hanya boleh berstatus "Selesai" lewat server (Validasi AI / konfirmasi manual);
+ * penulisan status Selesai atau hasil validasi dari browser ditolak.
+ */
+function tutupManual(body: string) {
+  let data: unknown;
+  try { data = JSON.parse(body); } catch { return false; }
+  return (Array.isArray(data) ? data : [data]).some((r) => !!r && typeof r === "object" && ((r as Record<string, unknown>).status === "Selesai" || "validasi_ai" in r));
+}
+
 async function handle(req: NextRequest, ctx: { params: Promise<{ path: string[] }> }) {
   if (!(await verifySession(req.cookies.get(SESSION_COOKIE)?.value))) {
     return NextResponse.json({ message: "Sesi berakhir. Silakan login kembali." }, { status: 401 });
@@ -37,10 +47,15 @@ async function handle(req: NextRequest, ctx: { params: Promise<{ path: string[] 
   if (SECRET_KEY.startsWith("eyJ")) headers.set("authorization", `Bearer ${SECRET_KEY}`); // service_role key (JWT lama)
   for (const h of FWD_REQ) { const v = req.headers.get(h); if (v) headers.set(h, v); }
 
+  const body = req.method === "GET" || req.method === "HEAD" ? undefined : await req.text();
+  if (path[0] === "challenge_log" && body && tutupManual(body)) {
+    return NextResponse.json({ message: "Status Selesai hanya dapat diberikan melalui Validasi AI (atau konfirmasi manual atas putusan AI \"perlu dicek manual\")." }, { status: 403 });
+  }
+
   const upstream = await fetch(`${SUPABASE_URL}/rest/v1/${path[0]}${req.nextUrl.search}`, {
     method: req.method,
     headers,
-    body: req.method === "GET" || req.method === "HEAD" ? undefined : await req.text(),
+    body,
     cache: "no-store",
   });
   const out = new Headers({ "cache-control": "no-store" });

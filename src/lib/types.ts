@@ -94,7 +94,15 @@ export interface ChallengeLog {
   id: string; created_at: string; updated_at: string; ref_type: "umum" | "lembar" | "parameter" | "risiko" | string;
   ref_id: string | null; ref_label: string | null; masukan: string; challenger: string | null; prioritas: string;
   tanggapan: string | null; pic: string | null; tenggat: string | null; status: string;
+  /** Hasil Validasi AI terakhir; ditulis server saja (migrasi 0011). */
+  validasi_ai?: ValidasiAiLog | null;
 }
+export interface ValidasiAiLog {
+  putusan: "terpenuhi" | "belum" | "verifikasi_manual"; alasan: string; kekurangan: string; model?: string; waktu: string;
+  konfirmasi_manual?: { oleh: string; waktu: string; bukti: string };
+}
+/** Status yang boleh dipilih manual; "Selesai" hanya lewat Validasi AI. */
+export const STATUS_MANUAL = ["Terbuka", "Dalam proses"] as const;
 export interface Snapshot { id: string; created_at: string; nama: string; catatan: string | null; data?: SnapshotData }
 export interface SnapshotData {
   sampul: Sampul; ras: Ras[]; ras_tambahan: RasTambahan[]; register: RiskRegister[];

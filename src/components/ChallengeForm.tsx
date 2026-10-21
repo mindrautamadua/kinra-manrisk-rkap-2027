@@ -5,7 +5,7 @@ import { Button } from "./ui";
 import { api, challengeApi } from "@/lib/data";
 import { REKAP } from "@/lib/static";
 import { SHEETS } from "@/lib/nav";
-import { PRIORITAS, STATUS_LOG, type ChallengeLog, type RiskRegister } from "@/lib/types";
+import { PRIORITAS, STATUS_MANUAL, type ChallengeLog, type RiskRegister } from "@/lib/types";
 
 export interface RefItem { type: string; id: string; label: string }
 
@@ -163,7 +163,7 @@ export function ChallengeModal({ initial, onClose, onSaved }: { initial: RefItem
           <label className="md:col-span-2"><span className="mb-1 block text-[12px] font-semibold text-slate-600">Tanggapan / komitmen (opsional)</span>
             <textarea rows={2} className={input} value={f.tanggapan} onChange={(e) => setF({ ...f, tanggapan: e.target.value })} /></label>
           <label><span className="mb-1 block text-[12px] font-semibold text-slate-600">Status</span>
-            <select className={input} value={f.status} onChange={(e) => setF({ ...f, status: e.target.value })}>{STATUS_LOG.map((p) => <option key={p}>{p}</option>)}</select></label>
+            <select className={input} value={f.status} onChange={(e) => setF({ ...f, status: e.target.value })}>{STATUS_MANUAL.map((p) => <option key={p}>{p}</option>)}</select></label>
         </div>
         {err && <div className="mx-6 mb-3 rounded-lg bg-rose-50 px-3 py-2 text-[12.5px] text-rose-700">{err}</div>}
         <div className="flex items-center justify-between border-t border-line bg-paper/50 px-6 py-3">

@@ -7,7 +7,7 @@ import { Button, ErrorBox, Loading, SheetPage, Stat, TableWrap, useLoad, useSave
 import { ChallengeModal } from "@/components/ChallengeForm";
 import { challengeApi } from "@/lib/data";
 import { exportChallenge } from "@/lib/export";
-import { PRIORITAS, STATUS_LOG, type ChallengeLog } from "@/lib/types";
+import { PRIORITAS, STATUS_LOG, STATUS_MANUAL, type ChallengeLog } from "@/lib/types";
 import { konfirmasi } from "@/components/Konfirmasi";
 
 const STATUS_CLS: Record<string, string> = {
@@ -82,8 +82,8 @@ export default function ChallengePage() {
                   return (
                     <tr key={r.id}>
                       <td className="text-center">{list.length - i}</td>
-                      <td className="text-center"><input type="checkbox" checked={r.status === "Selesai"} onChange={() => patch(r.id, { status: r.status === "Selesai" ? "Terbuka" : "Selesai" })}
-                        title={r.status === "Selesai" ? "Tandai belum selesai" : "Tandai selesai"} className="h-4 w-4 cursor-pointer accent-emerald-600" /></td>
+                      <td className="text-center"><input type="checkbox" checked={r.status === "Selesai"} readOnly disabled
+                        title={r.status === "Selesai" ? "Selesai berdasarkan Validasi AI" : "Dicentang otomatis oleh Validasi AI di lembar terkait"} className="h-4 w-4 accent-emerald-600" /></td>
                       <td className="text-[11.5px] text-slate-500 tabnum">{new Date(r.created_at).toLocaleString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</td>
                       <td className="text-[12px]">
                         {href ? <Link href={href} className="inline-flex items-start gap-1 font-semibold text-brand-700 hover:underline">{r.ref_label}<ExternalLink className="mt-0.5 h-3 w-3 shrink-0" /></Link> : <span className="font-semibold">{r.ref_label ?? "Umum"}</span>}
@@ -97,10 +97,12 @@ export default function ChallengePage() {
                         <input type="date" value={r.tenggat ?? ""} onChange={(e) => patch(r.id, { tenggat: e.target.value || null })} className="w-full bg-transparent text-[12px] outline-none" />
                       </td>
                       <td>
-                        <select value={r.status} onChange={(e) => patch(r.id, { status: e.target.value })}
+                        {/* Selesai hanya dari Validasi AI; dari status Selesai pengguna masih boleh membuka kembali. */}
+                        <select value={r.status} onChange={(e) => patch(r.id, { status: e.target.value })} title="Status Selesai hanya diberikan melalui Validasi AI"
                           className={clsx("w-full cursor-pointer rounded-full px-2 py-0.5 text-[11.5px] font-bold ring-1 ring-inset outline-none", STATUS_CLS[r.status])}>
-                          {STATUS_LOG.map((s) => <option key={s}>{s}</option>)}
+                          {STATUS_LOG.map((s) => <option key={s} disabled={!(STATUS_MANUAL as readonly string[]).includes(s)}>{s}</option>)}
                         </select>
+                        {r.validasi_ai && <div className="mt-1 text-[10.5px] text-slate-500" title={r.validasi_ai.alasan}>AI: {r.validasi_ai.putusan === "verifikasi_manual" ? "perlu dicek manual" : r.validasi_ai.putusan}</div>}
                       </td>
                       <td><button onClick={() => del(r)} className="text-slate-400 hover:text-rose-600"><Trash2 className="h-4 w-4" /></button></td>
                     </tr>

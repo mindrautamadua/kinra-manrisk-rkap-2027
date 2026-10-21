@@ -64,6 +64,14 @@ export async function dataLembar(path: string): Promise<Record<string, unknown>>
   }
 }
 
+/** Konfirmasi manual Selesai untuk masukan yang dinilai AI "perlu dicek manual". */
+export async function konfirmasiManual(id: string, bukti: string) {
+  const res = await fetch("/api/validasi-challenge/konfirmasi", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, bukti }) });
+  const body = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(body?.error ?? res.statusText);
+}
+
+/** Server yang menyimpan hasil: status Selesai hanya untuk putusan "terpenuhi". */
 export async function validasiChallenge(path: string, label: string, items: ChallengeLog[]): Promise<HasilValidasi[]> {
   const input: ValidasiInput = {
     lembar: label, data: await dataLembar(path),
