@@ -90,7 +90,10 @@ function Deck({ entitas, ras, kategori, register, ram, program }: { entitas: str
   const ramGroups = KATEGORI_URUT.map((k) => ({ key: k, items: ram.filter((r) => r.kategori === k && r.diterapkan) }));
   const ramPages = kemas(ramGroups, () => 1, 12, 1);
   // Parameter tidak diterapkan disajikan pada slide terpisah beserta justifikasinya (arahan Challenge Session 6f).
+  // Bobot baris ≈ jumlah baris teks justifikasi (±200 karakter per baris) + padding sel.
   const tidakDiterapkan = ram.filter((r) => !r.diterapkan);
+  const tidakPages = !tidakDiterapkan.length ? [] : kemas([{ key: "", items: tidakDiterapkan }], (r) => 1 + Math.max(2, Math.ceil((r.alasanTidak?.trim().length ?? 0) / 200)), 26, 0)
+    .map((p) => p[0].items);
 
   // 7.3 Top risk: semua taksonomi tampil, risiko utama per taksonomi.
   const utama = register.filter((r) => r.risk_event && isTopRisk(r.kategori_dampak));
@@ -124,11 +127,11 @@ function Deck({ entitas, ras, kategori, register, ram, program }: { entitas: str
         <RamDetail groups={p} />
       </Slide>
     )),
-    ...(tidakDiterapkan.length ? [
-      <Slide key="ram-tidak" title={`7.2 Risk Acceptance Matrix (RAM) (${entitas})`} sub={`Parameter tidak diterapkan: ${tidakDiterapkan.length} parameter tidak relevan dengan kegiatan usaha`} entitas={entitas}>
-        <RamTidakDiterapkan rows={tidakDiterapkan} />
-      </Slide>,
-    ] : []),
+    ...tidakPages.map((rows, i) => (
+      <Slide key={`ram-tidak${i}`} title={`7.2 Risk Acceptance Matrix (RAM) (${entitas})`} sub={`${tidakPages.length > 1 ? `(${i + 1}/${tidakPages.length}) ` : ""}Parameter tidak diterapkan: ${tidakDiterapkan.length} parameter tidak relevan dengan kegiatan usaha`} entitas={entitas}>
+        <RamTidakDiterapkan rows={rows} />
+      </Slide>
+    )),
     ...topPages.map((p, i) => (
       <Slide key={`top${i}`} title={`7.3 Top Risk (${entitas})`} sub={judul(topPages, i)} entitas={entitas}>
         <TopRisk groups={p} kat={kat} />

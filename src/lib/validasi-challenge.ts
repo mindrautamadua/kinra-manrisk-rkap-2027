@@ -42,12 +42,17 @@ async function ramPenuh() {
 }
 async function ram() { return ramRingkas((await ramPenuh()).rows); }
 
+/** Ketentuan pengisian yang tidak terbaca dari isian sel saja, agar AI tidak menuntut data yang memang opsional. */
+const KETENTUAN_PARAMETER: Record<string, string> = {
+  "6a": "Tabel arus kas bersih proyek per tahun (baris 54–77) bersifat opsional sebagai pembanding IRR dan tidak wajib diisi untuk setiap proyek. Hasil 6a dihitung dari rata-rata IRR kajian kelayakan ÷ rata-rata Hurdle Rate (kolom F dan H), bukan dari tabel arus kas.",
+};
+
 /** Isi kertas kerja yang relevan untuk lembar yang sedang dibuka. */
 export async function dataLembar(path: string): Promise<Record<string, unknown>> {
   const p = path.match(/^\/parameter\/(.+)$/);
   if (p) {
     const [sheet, rows] = await Promise.all([api.param(p[1]), ram()]);
-    return { parameter: sheet ? { code: sheet.code, title: sheet.title, diterapkan: sheet.diterapkan, alasan_tidak_diterapkan: sheet.alasan_tidak_diterapkan ?? null, summary: sheet.summary, inputs: sheet.inputs } : null, ram: rows.find((r) => r.kode === p[1]) ?? null };
+    return { parameter: sheet ? { code: sheet.code, title: sheet.title, diterapkan: sheet.diterapkan, alasan_tidak_diterapkan: sheet.alasan_tidak_diterapkan ?? null, summary: sheet.summary, inputs: sheet.inputs, ketentuan: KETENTUAN_PARAMETER[p[1]] ?? null } : null, ram: rows.find((r) => r.kode === p[1]) ?? null };
   }
   switch (path) {
     case "/ras": {
@@ -121,6 +126,7 @@ export async function dataLembar(path: string): Promise<Record<string, unknown>>
         penyajian: "Lembar Rekap dan RAM memisahkan parameter yang diukur (bagian A) dari parameter tidak diterapkan (bagian B, dengan kolom Dasar Pertimbangan/Justifikasi); Executive Summary slide 7.2 dan ekspor Excel juga menyajikannya terpisah.",
         parameter_diukur: rows.filter((r) => r.diterapkan),
         parameter_tidak_diterapkan: rows.filter((r) => !r.diterapkan).map((r) => ({ kode: r.kode, parameter: r.parameter, kategori: r.kategori, alasan_tidak_diterapkan: r.alasan_tidak_diterapkan })),
+        ketentuan_parameter: KETENTUAN_PARAMETER,
       };
     }
     case "/program-strategis": return { program_strategis: await api.program() };
