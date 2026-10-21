@@ -58,6 +58,8 @@ export class Workbook {
         const { row, col } = parseAddr(a);
         let v: CellValue | undefined = c.f ?? c.v ?? null;
         if (isInputCell(c) && a in inp) v = inp[a];
+        // Tanggal yang tersimpan sebagai teks (diketik sebelum format nama bulan dikenali) dibaca ulang sebagai tanggal agar rumus durasi tidak #VALUE!.
+        if (isInputCell(c) && typeof v === "string" && isDateFmt(c.nf)) v = parseInput(v, c.nf);
         rows[row - 1][col - 1] = v as HfValue;
       }
       this.hf.setSheetContent(sheet, rows as (string | number | boolean | null)[][]);
@@ -95,6 +97,13 @@ const EXCEL_EPOCH = Date.UTC(1899, 11, 30);
 export const serialToDate = (n: number) => new Date(EXCEL_EPOCH + Math.round(n * 86400000));
 export const dateToSerial = (d: Date) => Math.round((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - EXCEL_EPOCH) / 86400000);
 
+const NAMA_BULAN = [
+  ["jan", "januari", "january"], ["feb", "februari", "february"], ["mar", "maret", "march"], ["apr", "april"], ["mei", "may"], ["jun", "juni", "june"],
+  ["jul", "juli", "july"], ["agu", "ags", "agt", "agustus", "aug", "august"], ["sep", "sept", "september"], ["okt", "oktober", "oct", "october"],
+  ["nov", "november", "nop", "nopember"], ["des", "desember", "dec", "december"],
+];
+const bulanKe = (s: string) => NAMA_BULAN.findIndex((n) => n.includes(s.toLowerCase()));
+
 const isDateFmt = (nf?: string) => !!nf && /(^|[^"])(d{1,4}|y{2,4})/i.test(nf.replace(/"[^"]*"/g, "")) && !/0/.test(nf);
 
 /** Ubah teks ketikan pengguna menjadi nilai sel (angka/tanggal/teks). */
@@ -107,6 +116,10 @@ export function parseInput(raw: string, nf?: string): CellValue {
       const [y, mo, d] = m[1].length === 4 ? [+m[1], +m[2], +m[3]] : [+m[3], +m[2], +m[1]];
       return dateToSerial(new Date(y, mo - 1, d));
     }
+    // Nama bulan Indonesia/Inggris, lengkap atau singkat: "2 Jan 2027", "31 Ags 2027", "15 Desember 2027".
+    const b = s.match(/^(\d{1,2})[\s/.-]+([a-z]+)\.?[\s/.-]+(\d{4})$/i);
+    const mo = b ? bulanKe(b[2]) : -1;
+    if (b && mo >= 0) return dateToSerial(new Date(+b[3], mo, +b[1]));
   }
   let t = s.replace(/\s|Rp/gi, "");
   const pct = t.endsWith("%");
