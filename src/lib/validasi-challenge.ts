@@ -46,8 +46,13 @@ export async function dataLembar(path: string): Promise<Record<string, unknown>>
   }
   switch (path) {
     case "/ras": {
-      const [ras, tambahan] = await Promise.all([api.ras(), api.rasTambahan()]);
-      return { ras, ras_tambahan: tambahan };
+      // RAS dinilai bersama ambang batas RAM dan mekanisme eskalasi CAT, karena arahan RAS (1b, 1c, 1e) merujuk keduanya.
+      const [ras, tambahan, rows, cat] = await Promise.all([api.ras(), api.rasTambahan(), ram(), api.cat().catch(() => [])]);
+      return {
+        ras, ras_tambahan: tambahan,
+        ram_risiko_keuangan_dan_investasi: rows.filter((r) => /Keuangan|Investasi/.test(r.kategori)),
+        cat_eskalasi_aksi_korporasi: cat,
+      };
     }
     case "/ram": return { ram: await ram() };
     case "/risk-register":
