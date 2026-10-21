@@ -17,7 +17,8 @@ function cocok(l: ChallengeLog, path: string) {
   if (l.ref_type === "lembar") return l.ref_id === path;
   if (l.ref_type === "parameter") return path === `/parameter/${l.ref_id}`;
   if (l.ref_type === "risiko") return path === "/risk-register";
-  return false;
+  // Masukan umum (mis. penutup surat) divalidasi dari Dashboard, yang membaca seluruh kertas kerja.
+  return path === "/" && (l.ref_type === "umum" || !l.ref_id);
 }
 
 /** Daftar periksa masukan challenge session untuk lembar yang sedang dibuka; centang = status Selesai, hanya dari Validasi AI. */

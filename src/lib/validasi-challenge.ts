@@ -2,6 +2,8 @@ import { api } from "./data";
 import { isTopRisk } from "./format";
 import { buildRam, type RamRow } from "./ram";
 import { labelPos } from "./keterkaitan-rkap";
+import { nilaiCakupan, type CakupanTopRisk } from "./cakupan-top-risk";
+import { peringkatRisiko } from "./peringkat-risiko";
 import type { ChallengeLog, MitigasiAksi, RiskRegister, RkapKeuangan } from "./types";
 
 /** Masukan yang dikirim ke /api/validasi-challenge. */
@@ -32,10 +34,11 @@ const risikoRingkas = (register: RiskRegister[], aksi: MitigasiAksi[] | null, rk
   aksi_mitigasi: (aksi ?? []).filter((a) => a.risk_id === r.id).map(({ aksi, kategori, pic, biaya, jadwal, output, bukti }) => ({ aksi, kategori, pic, biaya, jadwal, output, bukti: bukti ?? null })),
 }));
 
-async function ram() {
+async function ramPenuh() {
   const [params, ras, pengendalian, tambahan] = await Promise.all([api.params(), api.ras(), api.pengendalian(), api.ramTambahan()]);
-  return ramRingkas(buildRam(params, ras, pengendalian, tambahan));
+  return { ras, rows: buildRam(params, ras, pengendalian, tambahan) };
 }
+async function ram() { return ramRingkas((await ramPenuh()).rows); }
 
 /** Isi kertas kerja yang relevan untuk lembar yang sedang dibuka. */
 export async function dataLembar(path: string): Promise<Record<string, unknown>> {
@@ -57,11 +60,46 @@ export async function dataLembar(path: string): Promise<Record<string, unknown>>
     case "/ram": return { ram: await ram() };
     case "/risk-register":
     case "/risiko-utama": {
-      const [register, aksi, rows, sasaran, rkap] = await Promise.all([api.register(), api.mitigasiAksi(), ram(), api.sasaran().catch(() => []), api.rkapAktif().catch(() => null)]);
-      const risiko = risikoRingkas(register, aksi, rkap);
+      const [register, aksi, rows, sasaran, rkap, cakupan, tax] = await Promise.all([
+        api.register(), api.mitigasiAksi(), ram(), api.sasaran().catch(() => []), api.rkapAktif().catch(() => null), api.cakupanTopRisk().catch((): CakupanTopRisk => ({})), api.taksonomi().catch(() => []),
+      ]);
+      const aspek = new Map(tax.map((t) => [t.kode, `${t.aspek ?? ""} › ${t.risiko_korporat ?? ""}`]));
+      const risiko = risikoRingkas(register, aksi, rkap).map((r) => ({ ...r, aspek_taksonomi: r.taksonomi ? aspek.get(r.taksonomi) ?? null : null }));
+      const no = (id: string) => register.filter((r) => r.risk_event).findIndex((r) => r.id === id) + 1;
+      const penuh = await ramPenuh();
+      const peringkat = {
+        aturan_penetapan_risiko_utama: "Template PT DAM v.2: Tagging Top Risk otomatis Ya bila kategori dampak Moderat, Tinggi, atau Sangat Tinggi. Seluruh risiko diperingkat menurut expected loss inheren (probabilitas × nilai dampak), dikaitkan dengan batas selera sikap RAS kategorinya dan status terburuk parameter RAM tertaut; tingkat pemantauan ditetapkan dari kaitan tersebut. Ditampilkan pada lembar Risiko Utama bagian C.",
+        dasar_pemeringkatan_risiko_utama: peringkatRisiko(register, penuh.ras, penuh.rows).map((p) => ({
+          peringkat: p.peringkat, no: p.no, risk_event: p.r.risk_event, expected_loss_inheren: p.el, kategori_dampak: p.r.kategori_dampak,
+          sikap_ras: p.sikap, batas_selera: p.batas, terhadap_selera: p.terhadapSelera, status_ram_terburuk: p.ram, risiko_utama: p.utama, pemantauan: p.pemantauan,
+        })),
+      };
+      if (path === "/risiko-utama") {
+        // Lembar Risiko Utama dinilai dari ringkasan yang ringkas agar bukti pemeringkatan tidak tenggelam di detail rencana aksi.
+        return {
+          ...peringkat,
+          risiko_material_non_utama: peringkat.dasar_pemeringkatan_risiko_utama.filter((p) => !p.risiko_utama),
+          risiko: risiko.map((r) => ({
+            no: r.no, kategori: r.kategori, aspek_taksonomi: r.aspek_taksonomi, risk_event: r.risk_event, probabilitas: r.probabilitas, nilai_dampak: r.nilai_dampak,
+            kategori_dampak: r.kategori_dampak, top_risk: r.top_risk, parameter_ram: r.parameter_ram, target_probabilitas: r.target_probabilitas,
+            target_nilai_dampak: r.target_nilai_dampak, jumlah_aksi_mitigasi: r.aksi_mitigasi.length,
+          })),
+          ram: rows.map((x) => ({ kode: x.kode, kategori: x.kategori, parameter: x.parameter, diterapkan: x.diterapkan, sikap: x.sikap, status: x.status })),
+          telaah_cakupan_top_risk: nilaiCakupan(register, cakupan).map((h) => ({
+            topik: h.topik.label, status: h.status, risiko_penutup: h.top.map((r) => `#${no(r.id)} ${r.risk_event}`), alasan: cakupan[h.topik.id]?.alasan ?? null,
+          })),
+        };
+      }
       return {
-        risiko: path === "/risiko-utama" ? risiko.filter((r) => r.top_risk) : risiko, ram: rows,
+        ...peringkat,
+        // Seluruh risiko dikirim (top_risk true/false) agar risiko material non-utama yang tetap dipantau ikut terlihat.
+        risiko, ram: rows,
         sasaran_strategis_rjpp: sasaran.map((s) => ({ kode: s.kode, pilar: s.pilar, nama: s.nama, target: s.target })),
+        // Telaah cakupan topik wajib Top Risks (pasar, likuiditas, jasa, investasi, Fraud, ESG, PDP/Cyber) beserta keputusan dan alasannya.
+        telaah_cakupan_top_risk: nilaiCakupan(register, cakupan).map((h) => ({
+          topik: h.topik.label, status: h.status, risiko_penutup: h.top.map((r) => `#${no(r.id)} ${r.risk_event}`),
+          alasan: cakupan[h.topik.id]?.alasan ?? null, catatan: h.catatan,
+        })),
       };
     }
     case "/program-strategis": return { program_strategis: await api.program() };

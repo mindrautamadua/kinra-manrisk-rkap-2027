@@ -1,18 +1,22 @@
 "use client";
 import { useState } from "react";
 import clsx from "clsx";
-import { Card, DampakBadge, ErrorBox, Loading, Section, SheetPage, TableWrap, useLoad } from "@/components/ui";
+import { Card, DampakBadge, ErrorBox, Loading, Section, SheetPage, StatusBadge, TableWrap, useLoad } from "@/components/ui";
 import { RiskMatrix } from "@/components/RiskMatrix";
 import { CakupanTopRiskPanel } from "@/components/CakupanTopRisk";
 import { api } from "@/lib/data";
 import { isTopRisk, persen, rupiah } from "@/lib/format";
 import { note } from "@/lib/static";
+import { buildRam } from "@/lib/ram";
+import { peringkatRisiko } from "@/lib/peringkat-risiko";
 import type { RiskRegister } from "@/lib/types";
 
 export default function RisikoUtamaPage() {
   const q = useLoad(async () => {
-    const [register, kategori, cakupan] = await Promise.all([api.register(), api.kategori(), api.cakupanTopRisk()]);
-    return { register, kategori, cakupan };
+    const [register, kategori, cakupan, ras, params, pengendalian, tambahan] = await Promise.all([
+      api.register(), api.kategori(), api.cakupanTopRisk(), api.ras(), api.params(), api.pengendalian(), api.ramTambahan(),
+    ]);
+    return { register, kategori, cakupan, peringkat: peringkatRisiko(register, ras, buildRam(params, ras, pengendalian, tambahan)) };
   });
   const [sel, setSel] = useState<RiskRegister | null>(null);
   const [peta, setPeta] = useState<"inheren" | "target">("inheren");
@@ -86,7 +90,37 @@ export default function RisikoUtamaPage() {
               </table>
             </TableWrap>
           </Section>
-          <Section letter="C" title="Cakupan Topik Risiko Wajib">
+          <Section letter="C" title="Dasar Pemeringkatan Risiko Utama">
+            <p className="mb-2 text-[12.5px] text-slate-600">
+              Penetapan Risiko Utama mengikuti aturan template PT DAM v.2: kategori dampak Moderat, Tinggi, atau Sangat Tinggi. Seluruh risiko diperingkat objektif menurut
+              expected loss inheren (probabilitas × nilai dampak), lalu dikaitkan dengan batas selera sikap RAS kategorinya dan status terburuk parameter RAM yang tertaut.
+              Risiko yang tidak menjadi Risiko Utama tetap tercatat di Risk Register dan dipantau sesuai materialitasnya.
+            </p>
+            <TableWrap>
+              <table className="kk-table min-w-[1200px]">
+                <thead><tr>
+                  <th className="w-16">Peringkat</th><th className="w-12">No</th><th>Risk Event</th><th className="w-36 text-right">Expected Loss Inheren</th><th className="w-32">Kategori Dampak</th>
+                  <th className="w-44">Sikap RAS (batas selera)</th><th className="w-28">Terhadap Selera</th><th className="w-32">Status RAM Terburuk</th><th className="w-28">Risiko Utama</th><th className="w-60">Pemantauan</th>
+                </tr></thead>
+                <tbody>
+                  {d.peringkat.map((p) => (
+                    <tr key={p.r.id} className={clsx(!p.utama && "bg-slate-50/70")}>
+                      <td className="calc text-center font-bold">{p.peringkat}</td><td className="calc text-center">#{p.no}</td>
+                      <td className="calc font-semibold">{p.r.risk_event}<div className="text-[11px] font-normal text-slate-500">{p.r.kategori}</div></td>
+                      <td className="calc text-right tabnum">{p.el == null ? "–" : rupiah(p.el, true)}</td>
+                      <td className="calc"><DampakBadge k={p.r.kategori_dampak} /></td>
+                      <td className="calc text-[12px]">{p.sikap ?? "–"}{p.batas && <span className="text-slate-500"> (≤ {p.batas})</span>}</td>
+                      <td className={clsx("calc text-[12px] font-semibold", p.terhadapSelera === "Di atas selera" ? "text-rose-700" : "text-emerald-700")}>{p.terhadapSelera ?? "–"}</td>
+                      <td className="calc">{p.ram ? <span className="inline-flex items-center gap-1"><StatusBadge status={p.ram.status} size="sm" /><span className="text-[11px] text-slate-500">{p.ram.kode}</span></span> : <span className="text-[11px] text-slate-400">Belum diukur</span>}</td>
+                      <td className="calc text-center font-bold">{p.utama ? <span className="text-orange-700">Ya</span> : <span className="text-slate-500">Tidak</span>}</td>
+                      <td className="calc text-[12px]">{p.pemantauan}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </TableWrap>
+          </Section>
+          <Section letter="D" title="Cakupan Topik Risiko Wajib">
             <CakupanTopRiskPanel register={d.register} keputusan={d.cakupan} onChange={(cakupan) => q.setData({ ...d, cakupan })} />
           </Section>
         </>
