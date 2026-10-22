@@ -168,13 +168,60 @@ export function cekKategoriTarget(r: RiskRegister, k: KriteriaDampak | undefined
 }
 
 /** Angka di Dasar Penilaian yang tidak sama dengan kolomnya, biasanya karena kolom diubah tetapi teks tidak ikut diperbarui. */
+/** Unsur dasar penilaian sesuai arahan Challenge Session 2f, ditambah probabilitas dan target residual. */
+const UNSUR_DASAR: { nama: string; re: RegExp; perluTarget?: boolean }[] = [
+  { nama: "data historis", re: /histor|loss event|realisasi|pernah terjadi/i },
+  { nama: "proyeksi RKAP 2027", re: /rkap|proyeksi/i },
+  { nama: "skenario (ringan/dasar/berat)", re: /skenario/i },
+  { nama: "alasan probabilitas", re: /probabilitas|kemungkinan|frekuensi/i },
+  { nama: "dasar target residual", re: /target/i, perluTarget: true },
+];
+
+const persenAtauDesimal = (angkaTeks: string, adaPersen: boolean) => {
+  const n = Number(angkaTeks.replace(",", "."));
+  return adaPersen || n > 1 ? n / 100 : n;
+};
+const fmtPersen = (p: number) => `${fmt(p * 100)}%`;
+
+/**
+ * Probabilitas yang disebut di teks dibandingkan dengan kolomnya: "probabilitas 0,25", "probabilitasnya diangka 1 %",
+ * "probabilitas target tetap 20%", serta frekuensi "1 kali dalam/selama 4 tahun" (dibandingkan sebagai laju tahunan).
+ */
+function cekProbabilitasTeks(r: RiskRegister, teks: string): string[] {
+  const out: string[] = [];
+  for (const m of teks.matchAll(/probabilitas\w*\s+((?:[a-z]+\s+){0,3}?)(\d+(?:[.,]\d+)?)\s*(%?)/gi)) {
+    const target = /target/i.test(m[1]);
+    const kolom = target ? r.target_probabilitas : r.probabilitas;
+    const p = persenAtauDesimal(m[2], m[3] === "%");
+    if (kolom != null && p <= 1 && Math.abs(p - Number(kolom)) > 0.005) {
+      out.push(`Menyebut ${target ? "probabilitas target" : "probabilitas"} ${fmtPersen(p)} ("${m[0].trim()}"), sedangkan kolom ${target ? "Target Probabilitas" : "Probabilitas"} ${fmtPersen(Number(kolom))}. Samakan teks dengan angka di kolom.`);
+    }
+  }
+  const f = teks.match(/(\d+) ?kali (?:selama|dalam) (\d+) tahun/i);
+  if (f && r.probabilitas != null && Number(f[2]) > 0) {
+    const laju = Number(f[1]) / Number(f[2]), p = Number(r.probabilitas);
+    // Selisih wajar bila probabilitas masih 2/3–1,5 kali laju historis; di luar itu perlu alasan tertulis.
+    if (laju > 0 && (p / laju > 1.5 || p / laju < 2 / 3)) {
+      out.push(`Menyebut frekuensi "${f[0]}" (sekitar ${fmtPersen(laju)} per tahun), sedangkan Probabilitas ${fmtPersen(p)}. Sesuaikan probabilitas atau jelaskan alasannya.`);
+    }
+  }
+  return out;
+}
+
 function cekDasarPenilaian(r: RiskRegister): Isu[] {
-  const teks = r.dasar_penilaian ?? "";
+  // Kolom dasar_penilaian baru ada setelah migrasi 0010; sebelum itu tidak diperiksa.
+  if (!("dasar_penilaian" in r)) return [];
+  const teks = r.dasar_penilaian?.trim() ?? "";
+  if (!teks) return [{ kolom: "Dasar Penilaian", pesan: "Kosong. Jelaskan dasar probabilitas dan nilai dampak: data historis, proyeksi RKAP 2027, skenario, dan target residual." }];
   const beda = (t: ReturnType<typeof rupiahTeks>, v: number | null | undefined) => t && v != null && Math.abs(t.nilai - Number(v)) > t.tol * 1.01 + 1;
   const dasar = rupiahTeks(teks, "\\bdasar"), target = rupiahTeks(teks, "Target residual:?");
+  const adaTarget = r.target_nilai_dampak != null || r.target_probabilitas != null;
+  const kurang = UNSUR_DASAR.filter((u) => (!u.perluTarget || adaTarget) && !u.re.test(teks)).map((u) => u.nama);
   return [
+    kurang.length > 0 && `Belum memuat ${kurang.join(", ")}. Susun dengan urutan Historis – Proyeksi RKAP – Skenario – Probabilitas – Target agar setiap angka dapat ditelusuri.`,
     beda(dasar, r.nilai_dampak) && `Menyebut skenario dasar ${dasar!.teks}, sedangkan Nilai Dampak Rp${fmt(Number(r.nilai_dampak), 0)}. Samakan teks dengan angka di kolom.`,
     beda(target, r.target_nilai_dampak) && `Menyebut target residual ${target!.teks}, sedangkan Target Nilai Dampak Rp${fmt(Number(r.target_nilai_dampak), 0)}. Samakan teks dengan angka di kolom.`,
+    ...cekProbabilitasTeks(r, teks),
   ].filter((p): p is string => !!p).map((pesan) => ({ kolom: "Dasar Penilaian", pesan }));
 }
 

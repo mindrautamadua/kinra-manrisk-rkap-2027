@@ -15,6 +15,8 @@ const WAJIB_REGISTER: [keyof RiskRegister, string][] = [
   ["root_cause", "Root Cause"], ["probabilitas", "Probabilitas"], ["deskripsi_dampak", "Deskripsi Dampak"], ["nilai_dampak", "Nilai Dampak"],
   ["kriteria_dampak", "Kriteria Dampak Acuan"], ["kategori_dampak", "Kategori Dampak"], ["existing_control", "Existing Control"],
   ["rencana_mitigasi", "Rencana Mitigasi"], ["kategori_mitigasi", "Kategori Mitigasi"],
+  // Hanya diperiksa bila kolomnya sudah ada (migrasi 0010).
+  ["dasar_penilaian", "Dasar Penilaian"],
 ];
 const kosong = (v: unknown) => v == null || (typeof v === "string" && v.trim() === "");
 const norm = (s?: string | null) => (s ?? "").toLowerCase().replace(/\s+/g, " ").trim();
@@ -97,7 +99,7 @@ export function periksa(d: InputKesiapan): Pemeriksaan[] {
 
   // ---------- Risk Register ----------
   add("reg-wajib", "Risk Register", "Kolom wajib Risk Register terisi",
-    reg.map((r, i) => ({ r, i, miss: WAJIB_REGISTER.filter(([k]) => kosong(r[k])).map(([, l]) => l) })).filter((x) => x.miss.length).map(({ r, i, miss }) => ({
+    reg.map((r, i) => ({ r, i, miss: WAJIB_REGISTER.filter(([k]) => k in r && kosong(r[k])).map(([, l]) => l) })).filter((x) => x.miss.length).map(({ r, i, miss }) => ({
       id: `wajib-${r.id}`, severity: miss.length > 4 ? "kritis" : "perhatian", area: "Risk Register",
       judul: `${nama(r, i)}: ${miss.length} kolom kosong`, detail: miss.join(", "), href: "/risk-register", ref: refR(r, i),
     })));
