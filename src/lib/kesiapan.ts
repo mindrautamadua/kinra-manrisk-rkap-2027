@@ -2,7 +2,7 @@ import { REKAP } from "./static";
 import type { TemuanKewajaran } from "./kewajaran";
 import { cekSikap, isTopRisk, nilaiParam } from "./format";
 import { perluPengendalian, type RamRow } from "./ram";
-import { cariKriteria, ebitdaRkap, saranDampak } from "./kualitas-register";
+import { cariKriteria, ebitdaRkap, elKeliru, saranDampak } from "./kualitas-register";
 import { ringkasTarget } from "./target-risiko";
 import type { CatAksi, KriteriaDampak, MitigasiAksi, ParameterSheet, Ras, RiskDriver, RiskRegister, Sampul } from "./types";
 
@@ -144,11 +144,29 @@ export function periksa(d: InputKesiapan): Pemeriksaan[] {
       href: "/risk-register", ref: refR(r, i),
     })));
 
-  add("reg-el", "Risk Register", "Expected Loss diisi bila probabilitas & nilai dampak tersedia",
-    reg.map((r, i) => ({ r, i })).filter(({ r }) => r.probabilitas != null && r.nilai_dampak != null && !Number(r.expected_loss)).map(({ r, i }) => ({
+  add("reg-el", "Risk Register", "Expected Loss terisi dan sama dengan probabilitas × nilai dampak", [
+    ...reg.map((r, i) => ({ r, i })).filter(({ r }) => r.probabilitas != null && r.nilai_dampak != null && !Number(r.expected_loss)).map(({ r, i }): Temuan => ({
       id: `el-${r.id}`, severity: "info", area: "Risk Register", judul: `${nama(r, i)}: Expected Loss kosong/nol`,
       detail: `Perkiraan: Rp${Math.round(Number(r.probabilitas) * Number(r.nilai_dampak)).toLocaleString("id-ID")} (probabilitas × nilai dampak).`, href: "/risk-register", ref: refR(r, i),
-    })));
+    })),
+    ...reg.map((r, i) => ({ r, i, hitung: elKeliru(r) })).filter((x) => x.hitung != null).map(({ r, i, hitung }): Temuan => ({
+      id: `el-salah-${r.id}`, severity: "kritis", area: "Risk Register", judul: `${nama(r, i)}: Expected Loss salah hitung`,
+      detail: `Tertulis Rp${Number(r.expected_loss).toLocaleString("id-ID")}, seharusnya Rp${Math.round(hitung!).toLocaleString("id-ID")} (probabilitas × nilai dampak).`,
+      href: "/risk-register", ref: refR(r, i),
+    })),
+  ]);
+
+  // Angka tidak bulat yang sama persis di beberapa risiko berbeda menandakan salin-tempel, bukan perhitungan per risiko.
+  add("reg-salin-angka", "Risk Register", "Nilai dampak dan target tidak disalin antar-risiko",
+    (["nilai_dampak", "target_nilai_dampak"] as const).flatMap((kol) => {
+      const per = new Map<number, number[]>();
+      reg.forEach((r, i) => { const v = Number(r[kol]); if (v > 0 && v % 1_000_000 !== 0) per.set(v, [...(per.get(v) ?? []), i]); });
+      return [...per].filter(([, ix]) => ix.length > 1).map(([v, ix]): Temuan => ({
+        id: `salin-${kol}-${v}`, severity: "perhatian", area: "Risk Register",
+        judul: `${ix.map((i) => nama(reg[i], i)).join(" dan ")}: ${kol === "nilai_dampak" ? "Nilai Dampak" : "Target Nilai Dampak"} sama persis`,
+        detail: `Rp${v.toLocaleString("id-ID")}. Hitung dari skenario dan mitigasi masing-masing risiko.`, href: "/risk-register", ref: refR(reg[ix[0]], ix[0]),
+      }));
+    }));
 
   // Kategori RAM bermasalah tetapi tidak ada risk event di kategorinya
   const katMasalah = Array.from(new Set(d.ram.filter((r) => r.diterapkan && r.status === "Merah").map((r) => r.kategori)));

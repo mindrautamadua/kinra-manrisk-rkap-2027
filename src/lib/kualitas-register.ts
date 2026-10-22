@@ -66,9 +66,28 @@ export interface SaranDampak { level: (typeof LEVEL_DAMPAK)[number]; ukuran: str
 
 const fmt = (n: number, d = 2) => new Intl.NumberFormat("id-ID", { maximumFractionDigits: d }).format(n);
 const RE_UKUR: Record<Dimensi, RegExp> = {
-  "%": /(\d+(?:[.,]\d+)?) ?%/i, bps: /(\d+(?:[.,]\d+)?) ?bps/i, berita: /(\d+) ?berita/i,
-  waktu: /(\d+(?:[.,]\d+)?) ?(jam|hari|minggu|bulan)/i,
+  "%": /(\d+(?:[.,]\d+)?) ?%/gi, bps: /(\d+(?:[.,]\d+)?) ?bps/gi, berita: /(\d+) ?berita/gi,
+  waktu: /(\d+(?:[.,]\d+)?) ?(jam|hari|minggu|bulan)/gi,
 };
+const NAMA_DIMENSI: Record<Dimensi, string> = { "%": "persentase (%)", bps: "basis poin (bps)", berita: "jumlah berita", waktu: "durasi (jam/hari)" };
+/** Kata umum pada nama kriteria yang tidak membantu menemukan besaran yang dimaksud di Deskripsi Dampak. */
+const KATA_UMUM = new Set(["dampak", "penurunan", "kenaikan", "perubahan", "jumlah", "nilai"]);
+
+/** Dimensi ukur kriteria kuantitatif dan apakah ukurannya dihitung dari EBITDA; null bila kriteria kualitatif. */
+function ukurKriteria(k: KriteriaDampak) {
+  const dim = KOLOM_LEVEL.map((c) => parseBatas(k[c])).find((b) => b)?.dim;
+  return dim ? { dim, ebitda: dim === "%" && /ebitda/i.test(k.perhitungan ?? "") } : null;
+}
+
+/**
+ * Besaran di Deskripsi Dampak yang mengukur kriteria: diutamakan angka yang didahului kata kunci nama kriteria
+ * (mis. "menekan margin kotor sekitar 4,6%"), bukan angka pertama yang bisa jadi rasio lain ("2% dari beban pengolahan").
+ */
+function besaranDeskripsi(teks: string, dim: Dimensi, k: KriteriaDampak) {
+  const semua = [...teks.matchAll(RE_UKUR[dim])];
+  const kunci = [...kata(k.kriteria)].filter((w) => !KATA_UMUM.has(w));
+  return semua.find((m) => kunci.some((w) => teks.slice(Math.max(0, m.index! - 60), m.index).toLowerCase().includes(w))) ?? semua[0];
+}
 
 /**
  * Saran Kategori Dampak dari kriteria acuan:
@@ -79,16 +98,17 @@ const RE_UKUR: Record<Dimensi, RegExp> = {
 export function saranDampak(r: RiskRegister, k: KriteriaDampak | undefined, ebitda: { nilai: number; sumber: string } | null): SaranDampak | null {
   if (!k) return null;
   const batas = KOLOM_LEVEL.map((c) => parseBatas(k[c]));
-  const dim = batas.find((b) => b)?.dim;
-  if (!dim) return null;
+  const u = ukurKriteria(k);
+  if (!u) return null;
+  const { dim } = u;
 
   let x: number | null = null, ukuran = "", sumber = "";
-  if (dim === "%" && /ebitda/i.test(k.perhitungan ?? "") && r.nilai_dampak != null && ebitda) {
+  if (u.ebitda && r.nilai_dampak != null && ebitda) {
     x = (Number(r.nilai_dampak) / ebitda.nilai) * 100;
     ukuran = `${fmt(x)}% dari EBITDA`;
     sumber = `Nilai Dampak ÷ EBITDA RKAP 2027 Rp${fmt(ebitda.nilai, 0)} (${ebitda.sumber})`;
   } else {
-    const m = (r.deskripsi_dampak ?? "").match(RE_UKUR[dim]);
+    const m = besaranDeskripsi(r.deskripsi_dampak ?? "", dim, k);
     if (m) {
       x = angka(m[1]) * (dim === "waktu" ? SATUAN[m[2].toLowerCase()].f : 1);
       ukuran = m[0];
@@ -118,8 +138,38 @@ const RE_TARGET = /\d|%|\b(seluruh|100|minimal|maksimal|paling sedikit|nol|zero)
 
 export interface Isu { kolom: string; pesan: string }
 
-/** aksiTerstruktur: PIC dan jadwal sudah tercatat di Rencana Aksi, jadwal/PIC tidak perlu lagi tertulis di teks mitigasi. */
-export function cekKualitas(r: RiskRegister, saran: SaranDampak | null, aksiTerstruktur = false): Isu[] {
+/** Expected Loss hasil hitung bila isian menyimpang lebih dari 1% dari probabilitas × nilai dampak (selisih pembulatan diterima); selain itu null. */
+export function elKeliru(r: RiskRegister): number | null {
+  if (r.probabilitas == null || r.nilai_dampak == null || !(Number(r.expected_loss) > 0)) return null;
+  const hitung = Number(r.probabilitas) * Number(r.nilai_dampak);
+  return Math.abs(Number(r.expected_loss) - hitung) > Math.max(1000, hitung * 0.01) ? hitung : null;
+}
+
+/** Nominal rupiah pertama setelah awalan di teks, mis. "Target residual: Rp4,88 M"; tol = setengah satuan digit terakhir yang ditulis. */
+function rupiahTeks(teks: string, awalan: string) {
+  const m = teks.match(new RegExp(`${awalan}\\s*Rp\\s?(\\d[\\d.]*(?:,\\d+)?)\\s?(jt|juta|M|miliar)\\b`, "i"));
+  if (!m) return null;
+  const [bulat, des = ""] = m[1].split(",");
+  const f = /^(jt|juta)$/i.test(m[2]) ? 1e6 : 1e9;
+  return { nilai: Number(`${bulat.replace(/\./g, "")}.${des || "0"}`) * f, tol: 0.5 * 10 ** -des.length * f, teks: `Rp${m[1]} ${m[2]}` };
+}
+
+/** Angka di Dasar Penilaian yang tidak sama dengan kolomnya, biasanya karena kolom diubah tetapi teks tidak ikut diperbarui. */
+function cekDasarPenilaian(r: RiskRegister): Isu[] {
+  const teks = r.dasar_penilaian ?? "";
+  const beda = (t: ReturnType<typeof rupiahTeks>, v: number | null | undefined) => t && v != null && Math.abs(t.nilai - Number(v)) > t.tol * 1.01 + 1;
+  const dasar = rupiahTeks(teks, "\\bdasar"), target = rupiahTeks(teks, "Target residual:?");
+  return [
+    beda(dasar, r.nilai_dampak) && `Menyebut skenario dasar ${dasar!.teks}, sedangkan Nilai Dampak Rp${fmt(Number(r.nilai_dampak), 0)}. Samakan teks dengan angka di kolom.`,
+    beda(target, r.target_nilai_dampak) && `Menyebut target residual ${target!.teks}, sedangkan Target Nilai Dampak Rp${fmt(Number(r.target_nilai_dampak), 0)}. Samakan teks dengan angka di kolom.`,
+  ].filter((p): p is string => !!p).map((pesan) => ({ kolom: "Dasar Penilaian", pesan }));
+}
+
+/**
+ * aksiTerstruktur: PIC dan jadwal sudah tercatat di Rencana Aksi, jadwal/PIC tidak perlu lagi tertulis di teks mitigasi.
+ * kriteria: Kriteria Dampak Acuan baris ini, untuk memeriksa apakah kategori dampaknya bisa diverifikasi.
+ */
+export function cekKualitas(r: RiskRegister, saran: SaranDampak | null, aksiTerstruktur = false, kriteria?: KriteriaDampak): Isu[] {
   const out: Isu[] = [];
   const isi = (s?: string | null) => !!s && s.trim() !== "";
 
@@ -141,8 +191,18 @@ export function cekKualitas(r: RiskRegister, saran: SaranDampak | null, aksiTers
   if ((r.probabilitas != null) !== (r.nilai_dampak != null)) {
     out.push({ kolom: "Besaran Risiko", pesan: r.probabilitas != null ? "Probabilitas terisi tetapi Nilai Dampak kosong." : "Nilai Dampak terisi tetapi Probabilitas kosong." });
   }
+  const hitungEl = elKeliru(r);
+  if (hitungEl != null) {
+    out.push({ kolom: "Expected Loss", pesan: `Rp${fmt(Number(r.expected_loss), 0)} tidak sama dengan probabilitas × nilai dampak = Rp${fmt(hitungEl, 0)}.` });
+  }
   if (saran && r.kategori_dampak && r.kategori_dampak !== saran.level) {
     out.push({ kolom: "Kategori Dampak", pesan: `${r.kategori_dampak} tidak sesuai kriteria acuan: ${saran.ukuran} masuk level ${saran.level}.` });
   }
+  // Kriteria berbasis EBITDA dihitung dari Nilai Dampak; kriteria kuantitatif lain butuh besaran di Deskripsi Dampak agar kategori bisa diuji.
+  const u = kriteria && ukurKriteria(kriteria);
+  if (!saran && u && !u.ebitda && r.kategori_dampak) {
+    out.push({ kolom: "Kategori Dampak", pesan: `${r.kategori_dampak} belum bisa diverifikasi: kriteria "${r.kriteria_dampak}" diukur dengan ${NAMA_DIMENSI[u.dim]}${kriteria.perhitungan ? ` (${kriteria.perhitungan})` : ""}, tetapi Deskripsi Dampak belum menyebut besarannya.` });
+  }
+  out.push(...cekDasarPenilaian(r));
   return out;
 }

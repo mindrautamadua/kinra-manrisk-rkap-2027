@@ -82,7 +82,7 @@ export default function RiskRegisterPage() {
       const saran = saranDampak(r, kriteria, d!.ebitda);
       const aksi = aksiPer.get(r.id) ?? [];
       const target = d!.aksi ? ringkasTarget(r, aksi, d!.ras) : null;
-      m.set(r.id, { saran, target, isu: [...cekKualitas(r, saran, aksi.some((a) => a.pic?.trim() && a.jadwal.length)), ...(target?.isu ?? [])] });
+      m.set(r.id, { saran, target, isu: [...cekKualitas(r, saran, aksi.some((a) => a.pic?.trim() && a.jadwal.length), kriteria), ...(target?.isu ?? [])] });
     }
     return m;
   }, [d, aksiPer]);

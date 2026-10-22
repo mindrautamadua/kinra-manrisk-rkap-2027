@@ -52,6 +52,19 @@ export function ringkasTarget(r: RiskRegister, aksi: MitigasiAksi[], ras: Ras[])
   if (isTopRisk(r.kategori_dampak) && !adaTarget) isu(`Risiko utama wajib punya target residual setelah mitigasi${batas ? ` (sikap ${sikap}: paling tinggi ${batas})` : ""}.`);
   if (adaTarget && (r.target_probabilitas == null || r.target_nilai_dampak == null || !t)) isu("Lengkapi target probabilitas, nilai dampak, dan kategori dampak.");
   if (status === "Di atas selera") isu(`Target ${t} masih di atas selera risiko kategori ini (sikap ${sikap}, paling tinggi ${batas}). Perkuat mitigasi atau beri justifikasi pada challenge session.`);
+  // Satu kategori bisa punya beberapa pernyataan sikap (mis. Operasional: Conservative umum, Zero Tolerance untuk K3LH);
+  // status di atas memakai sikap pertama, jadi ingatkan bila target belum memenuhi sikap yang lebih ketat.
+  const ketat = [...new Set(ras.filter((x) => x.kategori === r.kategori).map((x) => x.sikap || x.sikap_induk).filter((s): s is string => !!s && !!BATAS_SIKAP[s]))]
+    .sort((a, b) => lv(BATAS_SIKAP[a]) - lv(BATAS_SIKAP[b]));
+  if (status === "Dalam selera" && ketat.length > 1 && lv(t) > lv(BATAS_SIKAP[ketat[0]])) {
+    isu(`Kategori ${r.kategori} punya beberapa sikap risiko (${ketat.join(", ")}). Target ${t} memenuhi sikap ${sikap}, tetapi bila risiko ini termasuk cakupan pernyataan sikap ${ketat[0]}, target paling tinggi ${BATAS_SIKAP[ketat[0]]}.`);
+  }
+  if (r.target_nilai_dampak != null && Number(r.target_nilai_dampak) === 0) {
+    isu("Target nilai dampak Rp0 berarti risiko hilang sepenuhnya setelah mitigasi, dan itu tidak realistis. Isi sisa dampak yang masih mungkin terjadi, dalam batas kategori target.");
+  }
+  if (adaTarget && r.probabilitas != null && Number(r.target_probabilitas) === Number(r.probabilitas) && aksi.some((a) => a.kategori === "Preventive")) {
+    isu("Ada aksi Preventive, tetapi probabilitas target sama dengan inheren. Aksi pencegahan biasanya menurunkan kemungkinan terjadi; turunkan probabilitas target atau jelaskan alasannya di Dasar Penilaian.");
+  }
   if (adaTarget) {
     const naik = [
       r.target_probabilitas != null && r.probabilitas != null && Number(r.target_probabilitas) > Number(r.probabilitas) && "probabilitas",
