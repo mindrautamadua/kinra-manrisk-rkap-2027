@@ -17,6 +17,14 @@ const STATUS_CELL: Record<string, string> = {
   "On-track": "!text-emerald-700 font-semibold", "Off-track": "!text-rose-700 font-semibold",
 };
 
+/**
+ * Tabel per-milestone: identitas inisiatif ditulis ulang di setiap baris milestone (aturan template), sehingga cukup
+ * ditampilkan sekali per kelompok. Hanya tampilan; nilai sel tetap tersimpan dan bisa diedit.
+ */
+const KELOMPOK: Record<string, { kunci: string; kolom: string[]; dari: number; sampai: number }> = {
+  "1a": { kunci: "C", kolom: ["C", "D", "E"], dari: 31, sampai: 70 },
+};
+
 export interface GridLayout {
   spans: Map<string, { rs: number; cs: number }>;
   covered: Set<string>;
@@ -75,8 +83,17 @@ export const SheetGrid = memo(function SheetGrid({ t, layout, wb, version, onEdi
     if ((cur ?? null) !== val && !(cur === "" && val === null)) onEdit(addr, val);
   };
 
+  const grup = KELOMPOK[t.code];
+  const kunciGrup = (r: number) => {
+    const v = grup && r >= grup.dari && r <= grup.sampai ? wb.get(t.code, `${grup.kunci}${r}`) : null;
+    return v == null || v === "" ? null : String(v).trim();
+  };
+
   const rows = [];
   for (let r = 1; r <= t.maxRow; r++) {
+    const kini = kunciGrup(r), sebelum = r > (grup?.dari ?? 0) ? kunciGrup(r - 1) : null;
+    const lanjutan = kini != null && kini === sebelum;
+    const awalGrup = kini != null && kini !== sebelum && r > (grup?.dari ?? 0);
     const tds = [];
     if (showHeaders) tds.push(<td key="h" className="xl-rowhead sticky left-0 z-[1] w-9 border-r border-[#d6d8d0]">{r}</td>);
     for (const col of cols) {
@@ -99,12 +116,13 @@ export const SheetGrid = memo(function SheetGrid({ t, layout, wb, version, onEdi
       const align = c?.ha === "center" || c?.ha === "centerContinuous" ? "center" : c?.ha === "right" ? "right" : c?.ha === "left" ? "left" : typeof v === "number" ? "right" : undefined;
       if (align) style.textAlign = align;
       const status = typeof v === "string" ? STATUS_CELL[v] : undefined;
+      const sembunyi = lanjutan && grup!.kolom.includes(col);
 
       tds.push(
         <td key={addr} rowSpan={span?.rs} colSpan={span?.cs} style={style}
-          title={inp ? `${addr} · diisi entitas` : c?.f ? `${addr} · ${c.f}` : undefined}
+          title={sembunyi ? `${addr} · sama dengan baris di atas: ${text}` : inp ? `${addr} · diisi entitas` : c?.f ? `${addr} · ${c.f}` : undefined}
           onClick={inp && !isEditing ? () => start(addr, c!) : undefined}
-          className={clsx(c?.bd && "bd", c?.b && "font-bold", c?.i && "italic", inp && "inp", isEditing && "sel", status,
+          className={clsx(c?.bd && "bd", c?.b && "font-bold", c?.i && "italic", inp && "inp", isEditing && "sel", status, sembunyi && "grp-lanjut", awalGrup && c?.bd && "grp-awal",
             c?.w ? "whitespace-pre-wrap break-words" : "whitespace-nowrap", !c?.w && !c?.bg && !isEditing && "ov", typeof v === "number" && "tabnum")}>
           {isEditing ? (
             list ? (
@@ -122,7 +140,7 @@ export const SheetGrid = memo(function SheetGrid({ t, layout, wb, version, onEdi
                 onKeyDown={(e) => { if (e.key === "Escape") setEditing(null); if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); commit(addr, c!); } }}
                 className="w-full bg-white text-[12px] outline-none" style={{ textAlign: align }} />
             )
-          ) : text}
+          ) : sembunyi ? null : text}
         </td>,
       );
     }

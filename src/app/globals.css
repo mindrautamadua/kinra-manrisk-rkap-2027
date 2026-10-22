@@ -70,6 +70,9 @@ body { font-feature-settings: "ss01", "cv11"; }
 .xl-grid td.inp:hover { outline: 2px solid var(--color-brand-500); outline-offset: -2px; }
 .xl-grid td.sel { outline: 2px solid var(--color-brand-700); outline-offset: -2px; }
 .xl-grid td.dirty { box-shadow: inset 3px 0 0 var(--color-gold); }
+/* Tabel per-milestone: identitas inisiatif tampil sekali per kelompok, kelompok baru diberi garis pemisah tebal. */
+.xl-grid td.grp-lanjut { border-top-style: hidden; }
+.xl-grid td.grp-awal { border-top: 2px solid #8a9185; }
 .xl-rowhead, .xl-colhead { background: #eceee8; color: #7b8077; font-size: 10.5px; text-align: center; user-select: none; }
 
 .scroll-thin::-webkit-scrollbar { width: 10px; height: 10px; }
