@@ -5,7 +5,7 @@ import { Printer } from "lucide-react";
 import { Button, ErrorBox, Loading, SheetPage, useLoad } from "@/components/ui";
 import { api } from "@/lib/data";
 import { cekSikap, isTopRisk, nilaiParam, rupiah, statusStyle } from "@/lib/format";
-import { buildRam, KATEGORI_URUT, type RamRow } from "@/lib/ram";
+import { buildRam, cakupanRas, KATEGORI_URUT, type RamRow } from "@/lib/ram";
 import { PILAR_GRCS, SIKAP, type KategoriRisiko, type ProgramStrategis, type Ras, type RiskRegister } from "@/lib/types";
 
 /** Ukuran logis satu slide (16:9), sama seperti PPT Executive Summary. */
@@ -242,7 +242,7 @@ function RasMatrix({ ras, entitas, kat }: { ras: Ras[]; entitas: string; kat: (n
       <table className="w-full border-collapse text-[11.5px]">
         <thead>
           <tr>
-            <th className={clsx(th, "w-8 text-center")}>No</th><th className={th}>Taksonomi Risiko</th>
+            <th className={clsx(th, "w-8 text-center")}>No</th><th className={th}>Taksonomi Risiko</th><th className={clsx(th, "w-[130px]")}>Cakupan</th>
             {SIKAP.map((s) => <th key={s} className={clsx(th, "w-[105px] text-center")}>{s}</th>)}
             <th className={clsx(th, "w-[80px] text-center")}>Cek</th>
           </tr>
@@ -256,6 +256,7 @@ function RasMatrix({ ras, entitas, kat }: { ras: Ras[]; entitas: string; kat: (n
               <tr key={r.id} className={clsx(i % 2 === 1 && "bg-[#FAFAFA]")}>
                 {first && <td rowSpan={span} className={clsx(td, "text-center font-bold")}>{r.no}</td>}
                 {first && <td rowSpan={span} className={td}><Taks k={kat(r.kategori)} nama={r.kategori} /></td>}
+                <td className={clsx(td, "text-[10px] leading-tight text-[#404040]")}>{cakupanRas(r, ras) ?? "–"}</td>
                 {SIKAP.map((_, si) => {
                   const inInduk = induk && si >= induk[0] && si <= induk[1];
                   const inEnt = ent && si >= ent[0] && si <= ent[1];
@@ -305,6 +306,7 @@ function RasDetail({ groups, ras, entitas, kat }: { groups: { key: string; items
             {i === 0 && <td rowSpan={g.items.length} className={td}><Taks k={kat(g.key)} nama={g.key} />
               {ras.filter((x) => x.kategori === g.key).length > g.items.length && <div className="mt-1 text-[9.5px] text-[#707070]">(lanjutan)</div>}</td>}
             <td className={td}>
+              {cakupanRas(r, ras) && <div className="mb-1.5 text-[9.5px] font-bold leading-tight text-[#600000]">{cakupanRas(r, ras)}</div>}
               <div className="text-[9.5px] text-[#707070]">PTPN III (Persero)</div><SikapPill s={r.sikap_induk} />
               <div className="mt-1.5 text-[9.5px] text-[#707070]">{entitas}</div><SikapPill s={r.sikap} />
             </td>

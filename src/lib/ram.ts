@@ -16,6 +16,19 @@ export const KATEGORI_URUT = [
   "Risiko Investasi dan Proyek", "Risiko Reputasi", "Risiko Peraturan, Hukum dan Kepatuhan",
 ];
 
+/** Cakupan tiap pernyataan RAS pada kategori yang dipecah dua oleh Induk (urut sesuai template PT DAM). */
+const CAKUPAN_RAS: Record<string, string[]> = {
+  "Risiko Strategis": ["Kegiatan usaha berjalan", "Pertumbuhan & transformasi bisnis"],
+  "Risiko Investasi dan Proyek": ["Di luar program strategis RJPP & penugasan", "Program strategis RJPP & penugasan Pemerintah"],
+  "Risiko Operasional": ["Operasional umum & BCM", "K3"],
+};
+
+/** Label cakupan baris RAS; null bila kategori hanya punya satu pernyataan. */
+export function cakupanRas(r: Ras, ras: Ras[]) {
+  const rows = ras.filter((x) => x.kategori === r.kategori);
+  return rows.length > 1 ? CAKUPAN_RAS[r.kategori]?.[rows.indexOf(r)] ?? null : null;
+}
+
 /** Sikap risiko RAM mengikuti RAS: 6b = pernyataan pelaksanaan proyek, 5d = K3 + umum Risiko Operasional. */
 export function sikapUntuk(kode: string, kategori: string, ras: Ras[]) {
   const rows = ras.filter((r) => r.kategori === kategori);
