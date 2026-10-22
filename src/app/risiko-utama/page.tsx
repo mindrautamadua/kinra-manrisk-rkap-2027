@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { Card, DampakBadge, ErrorBox, Loading, Section, SheetPage, StatusBadge, TableWrap, useLoad } from "@/components/ui";
 import { RiskMatrix } from "@/components/RiskMatrix";
@@ -26,6 +26,18 @@ export default function RisikoUtamaPage() {
   const adaTarget = utama.some((r) => "target_kategori_dampak" in r);
   const titik = peta === "target" ? utama.map((r) => ({ ...r, probabilitas: r.target_probabilitas ?? null, kategori_dampak: r.target_kategori_dampak ?? null })) : utama;
   const tanpaTarget = utama.filter((r) => r.target_probabilitas == null || !r.target_kategori_dampak).length;
+
+  // Ukur lebar kolom No agar kolom Risk Event beku tepat di sebelahnya.
+  const tableRef = useRef<HTMLTableElement>(null);
+  useLayoutEffect(() => {
+    const t = tableRef.current;
+    if (!t) return;
+    const ukur = () => t.style.setProperty("--fz-event", `${t.querySelector<HTMLElement>("th.fz-no")?.offsetWidth ?? 0}px`);
+    ukur();
+    const obs = new ResizeObserver(ukur);
+    obs.observe(t);
+    return () => obs.disconnect();
+  }, [d]);
 
   return (
     <SheetPage title="Daftar Risiko Utama RKAP 2027 - PT KINRA" code="Risiko Utama" note={note("Risiko Utama")}>
@@ -71,15 +83,15 @@ export default function RisikoUtamaPage() {
           </div>
           <Section letter="B" title="Daftar Risiko Utama">
             <TableWrap>
-              <table className="kk-table min-w-[1300px]">
-                <thead><tr><th className="w-10">No</th><th className="w-40">Taksonomi Risiko</th><th className="w-56">Risk Event</th><th>Deskripsi Risk Event</th>
+              <table ref={tableRef} className="kk-table min-w-[1700px]">
+                <thead><tr><th className="fz fz-no w-10">No</th><th className="w-40">Taksonomi Risiko</th><th className="fz fz-event fz-edge w-56">Risk Event</th><th>Deskripsi Risk Event</th>
                   <th className="w-24 text-right">Probabilitas Kejadian</th><th className="w-40 text-right">Nilai Dampak Risiko (Rp)</th><th className="w-32">Kategori Dampak Risiko</th><th className="w-72">Rencana Mitigasi</th>
                   {adaTarget && <><th className="w-24 text-right">Target Probabilitas</th><th className="w-32">Target Kategori Dampak</th></>}</tr></thead>
                 <tbody>
                   {utama.map((r) => (
                     <tr key={r.id}>
-                      <td className="calc text-center font-bold">{r.urutan}</td><td className="calc">{r.kategori}</td><td className="calc font-semibold">{r.risk_event}</td>
-                      <td className="calc text-[12px] text-slate-700">{r.deskripsi}</td><td className="calc text-right tabnum">{persen(r.probabilitas, 0)}</td>
+                      <td className="calc fz fz-no text-center font-bold">{r.urutan}</td><td className="calc">{r.kategori}</td><td className="calc fz fz-event fz-edge font-semibold">{r.risk_event}</td>
+                      <td className="calc text-[12px] text-slate-700"><div className="w-[380px]">{r.deskripsi}</div></td><td className="calc text-right tabnum">{persen(r.probabilitas, 0)}</td>
                       <td className="calc text-right tabnum">{rupiah(r.nilai_dampak).replace("Rp ", "")}</td><td className="calc"><DampakBadge k={r.kategori_dampak} /></td>
                       <td className="calc whitespace-pre-line">{r.rencana_mitigasi}</td>
                       {adaTarget && <><td className="calc text-right tabnum">{persen(r.target_probabilitas ?? null, 0)}</td><td className="calc">{r.target_kategori_dampak ? <DampakBadge k={r.target_kategori_dampak} /> : <span className="text-[11px] text-amber-700">Belum diisi</span>}</td></>}
