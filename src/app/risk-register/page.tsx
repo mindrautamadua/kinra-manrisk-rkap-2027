@@ -32,7 +32,7 @@ import { api } from "@/lib/data";
 import { isTopRisk, persen, rupiah } from "@/lib/format";
 import { note } from "@/lib/static";
 import { exportRegister } from "@/lib/export";
-import { cariKriteria, cekKualitas, ebitdaRkap, labelLevel, saranDampak, type Isu, type SaranDampak } from "@/lib/kualitas-register";
+import { cariKriteria, cekKategoriTarget, cekKualitas, ebitdaRkap, labelLevel, saranDampak, type Isu, type SaranDampak } from "@/lib/kualitas-register";
 import { KATEGORI_DAMPAK, KATEGORI_MITIGASI, type MitigasiAksi, type RiskRegister } from "@/lib/types";
 import { konfirmasi } from "@/components/Konfirmasi";
 
@@ -82,7 +82,8 @@ export default function RiskRegisterPage() {
       const saran = saranDampak(r, kriteria, d!.ebitda);
       const aksi = aksiPer.get(r.id) ?? [];
       const target = d!.aksi ? ringkasTarget(r, aksi, d!.ras) : null;
-      m.set(r.id, { saran, target, isu: [...cekKualitas(r, saran, aksi.some((a) => a.pic?.trim() && a.jadwal.length), kriteria), ...(target?.isu ?? [])] });
+      const isuTarget = cekKategoriTarget(r, kriteria, d!.ebitda);
+      m.set(r.id, { saran, target, isu: [...cekKualitas(r, saran, aksi.some((a) => a.pic?.trim() && a.jadwal.length), kriteria), ...(isuTarget ? [isuTarget] : []), ...(target?.isu ?? [])] });
     }
     return m;
   }, [d, aksiPer]);

@@ -2,7 +2,7 @@ import { REKAP } from "./static";
 import type { TemuanKewajaran } from "./kewajaran";
 import { cekSikap, isTopRisk, nilaiParam } from "./format";
 import { perluPengendalian, type RamRow } from "./ram";
-import { cariKriteria, ebitdaRkap, elKeliru, saranDampak } from "./kualitas-register";
+import { cariKriteria, cekKategoriTarget, ebitdaRkap, elKeliru, saranDampak } from "./kualitas-register";
 import { ringkasTarget } from "./target-risiko";
 import type { CatAksi, KriteriaDampak, MitigasiAksi, ParameterSheet, Ras, RiskDriver, RiskRegister, Sampul } from "./types";
 
@@ -204,6 +204,10 @@ export function periksa(d: InputKesiapan): Pemeriksaan[] {
       })));
     add("reg-target", "Risk Register", "Risiko utama punya target residual dalam selera risiko",
       temuan("Target Residual", (r, p) => (/di atas selera|lebih tinggi dari inheren/.test(p) || (isTopRisk(r.kategori_dampak) && /wajib/.test(p)) ? "kritis" : "perhatian")));
+    add("reg-target-kategori", "Risk Register", "Target kategori dampak sesuai Target Nilai Dampak",
+      reg.map((r, i) => ({ r, i, isu: cekKategoriTarget(r, cariKriteria(d.kriteria, r), ebitda) })).filter((x) => x.isu).map(({ r, i, isu }) => ({
+        id: `tkat-${r.id}`, severity: "perhatian", area: "Risk Register", judul: `${nama(r, i)}: ${isu!.pesan}`, href: "/risk-register", ref: refR(r, i),
+      })));
     add("reg-aksi", "Risk Register", "Rencana aksi mitigasi lengkap (PIC, biaya, jadwal, output, bukti dukung)",
       temuan("Rencana Aksi", (r) => (isTopRisk(r.kategori_dampak) ? "perhatian" : "info")));
   } else {

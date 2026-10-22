@@ -104,7 +104,8 @@ export function saranDampak(r: RiskRegister, k: KriteriaDampak | undefined, ebit
 
   let x: number | null = null, ukuran = "", sumber = "";
   if (u.ebitda && r.nilai_dampak != null && ebitda) {
-    x = (Number(r.nilai_dampak) / ebitda.nilai) * 100;
+    // Dibulatkan agar nilai tepat di batas (mis. 3% EBITDA) tidak terbaca 3,0000000000000004% dan naik satu level.
+    x = Math.round((Number(r.nilai_dampak) / ebitda.nilai) * 100 * 1e6) / 1e6;
     ukuran = `${fmt(x)}% dari EBITDA`;
     sumber = `Nilai Dampak ÷ EBITDA RKAP 2027 Rp${fmt(ebitda.nilai, 0)} (${ebitda.sumber})`;
   } else {
@@ -152,6 +153,18 @@ function rupiahTeks(teks: string, awalan: string) {
   const [bulat, des = ""] = m[1].split(",");
   const f = /^(jt|juta)$/i.test(m[2]) ? 1e6 : 1e9;
   return { nilai: Number(`${bulat.replace(/\./g, "")}.${des || "0"}`) * f, tol: 0.5 * 10 ** -des.length * f, teks: `Rp${m[1]} ${m[2]}` };
+}
+
+/**
+ * Target Kategori Dampak dibandingkan kriteria acuan memakai Target Nilai Dampak. Hanya kriteria berbasis EBITDA yang bisa diuji,
+ * karena besaran di Deskripsi Dampak menggambarkan kondisi inheren.
+ */
+export function cekKategoriTarget(r: RiskRegister, k: KriteriaDampak | undefined, ebitda: { nilai: number; sumber: string } | null): Isu | null {
+  if (r.target_nilai_dampak == null || !r.target_kategori_dampak) return null;
+  const s = saranDampak({ ...r, nilai_dampak: r.target_nilai_dampak, deskripsi_dampak: null }, k, ebitda);
+  return s && s.level !== r.target_kategori_dampak
+    ? { kolom: "Target Residual", pesan: `Target ${r.target_kategori_dampak} tidak sesuai kriteria acuan: Target Nilai Dampak Rp${fmt(Number(r.target_nilai_dampak), 0)} = ${s.ukuran}, masuk level ${s.level}. Sesuaikan nilai atau kategori targetnya.` }
+    : null;
 }
 
 /** Angka di Dasar Penilaian yang tidak sama dengan kolomnya, biasanya karena kolom diubah tetapi teks tidak ikut diperbarui. */
